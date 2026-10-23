@@ -197,62 +197,47 @@ export default function Hero() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
 
               {/* Photo Bottom Caption */}
-              <div className="absolute bottom-5 left-5 right-5 p-3.5 rounded-2xl bg-white/90 backdrop-blur-md border border-white/40 shadow-md text-left">
+              <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-white/95 backdrop-blur-md border border-white/60 shadow-md text-left">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-[11px] text-neutral-500 font-semibold uppercase tracking-wider">Hired in Butuan City</div>
-                    <div className="text-xs sm:text-sm font-bold text-neutral-900 mt-0.5">Lead UI/UX Designer • ₱65,000/mo</div>
+                    <div className="text-[10px] text-neutral-500 font-semibold uppercase tracking-wider">Hiring in Butuan City</div>
+                    <div className="text-xs font-bold text-neutral-900 mt-0.5">Montilla &bull; Libertad &bull; Bancasi &bull; Ampayon</div>
                   </div>
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
                 </div>
               </div>
             </motion.div>
 
-            {/* Floating Card Top-Right: 15K+ Active Jobseekers */}
+            {/* Live Indicator: Supabase Database */}
             <motion.div
               initial={{ opacity: 0, x: 20, y: -20 }}
-              animate={{
-                opacity: 1,
-                x: 0,
-                y: [0, 5, 0]
-              }}
-              transition={{
-                opacity: { duration: 0.6, delay: 0.4 },
-                x: { duration: 0.6, delay: 0.4 },
-                y: { repeat: Infinity, duration: 5, ease: "easeInOut", delay: 0.5 }
-              }}
-              className="absolute -top-5 -right-3 sm:-right-6 p-3.5 rounded-2xl bg-white/95 backdrop-blur-xl border border-black/[0.06] shadow-xl flex items-center gap-3 z-20"
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="absolute -top-3 -right-2 sm:-right-4 px-3.5 py-2 rounded-xl bg-white/95 backdrop-blur-md border border-neutral-200 shadow-lg flex items-center gap-2.5 z-20"
             >
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-base">
-                ₱
-              </div>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
+              </span>
               <div className="text-left">
-                <div className="text-base sm:text-lg font-extrabold text-neutral-900 leading-tight">15,000+</div>
-                <div className="text-[11px] text-neutral-500 font-semibold">Active Seekers</div>
+                <div className="text-xs font-bold text-neutral-900 leading-tight">Live Database</div>
+                <div className="text-[10px] text-neutral-500 font-medium">Supabase Connected</div>
               </div>
             </motion.div>
 
-            {/* Floating Card Bottom-Left: 450+ Verified Companies */}
+            {/* Live Indicator: Clerk Secure Auth */}
             <motion.div
               initial={{ opacity: 0, x: -20, y: 20 }}
-              animate={{
-                opacity: 1,
-                x: 0,
-                y: [0, -5, 0]
-              }}
-              transition={{
-                opacity: { duration: 0.6, delay: 0.5 },
-                x: { duration: 0.6, delay: 0.5 },
-                y: { repeat: Infinity, duration: 5.5, ease: "easeInOut", delay: 0.8 }
-              }}
-              className="absolute -bottom-5 -left-3 sm:-left-6 p-3.5 rounded-2xl bg-[#111116] text-white shadow-xl flex items-center gap-3 z-20"
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="absolute -bottom-3 -left-2 sm:-left-4 px-3.5 py-2 rounded-xl bg-[#111116] text-white shadow-lg flex items-center gap-2.5 z-20"
             >
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
-                <Briefcase className="w-4 h-4 text-emerald-400" />
+              <div className="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center text-white">
+                <Briefcase className="w-3.5 h-3.5 text-emerald-400" />
               </div>
               <div className="text-left">
-                <div className="text-base sm:text-lg font-extrabold leading-tight">450+</div>
-                <div className="text-[11px] text-neutral-400 font-semibold">Verified Employers</div>
+                <div className="text-xs font-bold leading-tight">Real-Time Portal</div>
+                <div className="text-[10px] text-neutral-400 font-medium">Clerk Auth Enabled</div>
               </div>
             </motion.div>
 
