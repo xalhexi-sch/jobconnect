@@ -5,6 +5,7 @@ import { AppProvider } from "@/context/AppContext";
 import ToastContainer from "@/components/ToastContainer";
 import SmoothScroll from "@/components/SmoothScroll";
 import AuthProvider from "@/components/AuthProvider";
+import ClerkSync from "@/components/ClerkSync";
 
 const figtree = Figtree({
   subsets: ["latin"],
@@ -14,8 +15,8 @@ const figtree = Figtree({
 });
 
 export const metadata: Metadata = {
-  title: "JobConnect Caraga — Butuan City Job Opportunities & Recruitment",
-  description: "Find local employment opportunities across Butuan City and the Caraga region. Connect directly with hiring businesses, cafes, health clinics, and regional tech teams.",
+  title: "JobConnect Butuan — Local Employment & Hiring Ecosystem",
+  description: "Find verified employment opportunities across Butuan City. Connect directly with hiring businesses, cafes, health clinics, and regional tech teams without agency fees.",
 };
 
 export default function RootLayout({
@@ -25,10 +26,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${figtree.variable} h-full antialiased`}>
-      <body className="min-h-full font-sans bg-[#FBFBFC] text-[#0F1115] selection:bg-black selection:text-white">
+      <body className="min-h-full font-sans bg-[#FBFBFC] text-[#0F1115] selection:bg-emerald-600 selection:text-white">
         <AuthProvider>
           <SmoothScroll>
             <AppProvider>
+              <ClerkSync />
               {children}
               <ToastContainer />
             </AppProvider>

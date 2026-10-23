@@ -63,7 +63,7 @@ export default function JobseekerAppView() {
             onClick={() => setActiveSubTab("find")}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
               activeSubTab === "find"
-                ? "bg-[#111116] text-white shadow-xs"
+                ? "bg-emerald-600 text-white shadow-xs"
                 : "text-neutral-600 hover:text-black hover:bg-neutral-100"
             }`}
           >
@@ -78,7 +78,7 @@ export default function JobseekerAppView() {
             onClick={() => setActiveSubTab("applications")}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
               activeSubTab === "applications"
-                ? "bg-[#111116] text-white shadow-xs"
+                ? "bg-emerald-600 text-white shadow-xs"
                 : "text-neutral-600 hover:text-black hover:bg-neutral-100"
             }`}
           >
@@ -95,7 +95,7 @@ export default function JobseekerAppView() {
             onClick={() => setActiveSubTab("saved")}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
               activeSubTab === "saved"
-                ? "bg-[#111116] text-white shadow-xs"
+                ? "bg-emerald-600 text-white shadow-xs"
                 : "text-neutral-600 hover:text-black hover:bg-neutral-100"
             }`}
           >
@@ -110,7 +110,7 @@ export default function JobseekerAppView() {
             onClick={() => setActiveSubTab("resume")}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
               activeSubTab === "resume"
-                ? "bg-[#111116] text-white shadow-xs"
+                ? "bg-emerald-600 text-white shadow-xs"
                 : "text-neutral-600 hover:text-black hover:bg-neutral-100"
             }`}
           >

@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useApp } from "@/context/AppContext";
 import { X, ArrowRight, Lock, Mail, User, Eye, EyeOff } from "lucide-react";
 import JobgioLogo from "./JobgioLogo";
 import { isClerkConfigured } from "@/lib/clerk";
-import { SignIn, SignUp } from "@clerk/nextjs";
 
 export default function AuthModal() {
   const { isAuthOpen, closeAuthModal, authMode, setAuthMode, loginUser, showToast } = useApp();
@@ -43,10 +43,10 @@ export default function AuthModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-[440px] rounded-[32px] bg-white p-7 sm:p-8 shadow-2xl border border-black/[0.08] animate-in zoom-in-95 duration-200 text-left max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-[420px] rounded-3xl bg-white p-7 sm:p-8 shadow-2xl border border-neutral-200 animate-in zoom-in-95 duration-200 text-left max-h-[90vh] overflow-y-auto"
       >
         {/* Close button */}
         <button
@@ -57,12 +57,28 @@ export default function AuthModal() {
         </button>
 
         {isClerkConfigured ? (
-          <div className="flex flex-col items-center justify-center pt-2">
-            {authMode === "sign-in" ? (
-              <SignIn routing="hash" />
-            ) : (
-              <SignUp routing="hash" />
-            )}
+          <div className="flex flex-col items-center text-center pt-2">
+            <JobgioLogo variant="dark" size="sm" />
+            <h3 className="text-lg font-bold text-neutral-900 mt-4 mb-1">
+              Sign in to JobConnect Butuan
+            </h3>
+            <p className="text-xs text-neutral-500 mb-6 max-w-xs leading-relaxed">
+              Access your verified Butuan job applications, applicant tracker, and local employer portal.
+            </p>
+            <Link
+              href="/sign-in"
+              onClick={closeAuthModal}
+              className="btn-supabase-emerald w-full py-2.5 rounded-xl text-xs font-bold text-center block mb-2.5 shadow-xs cursor-pointer text-white"
+            >
+              Continue to Sign In
+            </Link>
+            <Link
+              href="/sign-up"
+              onClick={closeAuthModal}
+              className="w-full py-2.5 rounded-xl border border-neutral-200 text-neutral-700 hover:bg-neutral-50 text-xs font-semibold text-center block transition-colors cursor-pointer"
+            >
+              Create Free Account
+            </Link>
           </div>
         ) : (
           <>
@@ -81,26 +97,11 @@ export default function AuthModal() {
               </p>
             </div>
 
-            {/* Quick Demo Switcher Tip */}
-            <div className="mb-5 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-900 flex items-center justify-between">
-              <span>Demo mode active. Any email logs in instantly.</span>
-              <button
-                type="button"
-                onClick={() => {
-                  loginUser("demo.butuan@caraga.ph", "Demo Evaluator");
-                  showToast("Signed in as Demo Evaluator", "success");
-                }}
-                className="font-bold underline cursor-pointer text-amber-700 hover:text-amber-900"
-              >
-                1-Click Sign In
-              </button>
-            </div>
-
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-3.5">
               {authMode === "sign-up" && (
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-700 mb-1">
                     Full Name
                   </label>
                   <div className="relative">
@@ -110,15 +111,15 @@ export default function AuthModal() {
                       required
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      placeholder="e.g. Maria Santos"
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-black/10 bg-neutral-50 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all"
+                      placeholder="Juan Dela Cruz"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-neutral-200 text-xs text-neutral-900 bg-neutral-50 focus:bg-white focus:outline-none focus:border-black"
                     />
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
+                <label className="block text-xs font-semibold text-neutral-700 mb-1">
                   Email Address
                 </label>
                 <div className="relative">
@@ -128,14 +129,14 @@ export default function AuthModal() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="maria.santos@caraga.tech"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-black/10 bg-neutral-50 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all"
+                    placeholder="name@email.com"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-neutral-200 text-xs text-neutral-900 bg-neutral-50 focus:bg-white focus:outline-none focus:border-black"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
+                <label className="block text-xs font-semibold text-neutral-700 mb-1">
                   Password
                 </label>
                 <div className="relative">
@@ -145,8 +146,8 @@ export default function AuthModal() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-black/10 bg-neutral-50 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all"
+                    placeholder="••••••••"
+                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-neutral-200 text-xs text-neutral-900 bg-neutral-50 focus:bg-white focus:outline-none focus:border-black"
                   />
                   <button
                     type="button"
@@ -161,7 +162,7 @@ export default function AuthModal() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 rounded-xl bg-black text-white text-xs font-bold tracking-tight hover:bg-neutral-800 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4 shadow-sm"
+                className="w-full py-2.5 rounded-xl btn-supabase-emerald text-white text-xs font-bold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer mt-4 shadow-sm"
               >
                 {isLoading ? (
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -175,12 +176,12 @@ export default function AuthModal() {
             </form>
 
             {/* Social logins */}
-            <div className="mt-5 pt-5 border-t border-black/5">
+            <div className="mt-5 pt-5 border-t border-neutral-100">
               <div className="grid grid-cols-2 gap-2.5">
                 <button
                   type="button"
                   onClick={() => handleSocialLogin("Google")}
-                  className="py-2.5 px-3 rounded-xl border border-black/10 hover:bg-neutral-50 text-xs font-medium text-neutral-700 flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                  className="py-2.5 px-3 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-xs font-medium text-neutral-700 flex items-center justify-center gap-2 cursor-pointer transition-colors"
                 >
                   <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                     <path
@@ -205,7 +206,7 @@ export default function AuthModal() {
                 <button
                   type="button"
                   onClick={() => handleSocialLogin("GitHub")}
-                  className="py-2.5 px-3 rounded-xl border border-black/10 hover:bg-neutral-50 text-xs font-medium text-neutral-700 flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                  className="py-2.5 px-3 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-xs font-medium text-neutral-700 flex items-center justify-center gap-2 cursor-pointer transition-colors"
                 >
                   <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                     <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
@@ -223,7 +224,7 @@ export default function AuthModal() {
                   <button
                     type="button"
                     onClick={() => setAuthMode("sign-up")}
-                    className="font-bold text-black hover:underline cursor-pointer"
+                    className="font-bold text-neutral-900 hover:underline cursor-pointer"
                   >
                     Create one
                   </button>
@@ -234,7 +235,7 @@ export default function AuthModal() {
                   <button
                     type="button"
                     onClick={() => setAuthMode("sign-in")}
-                    className="font-bold text-black hover:underline cursor-pointer"
+                    className="font-bold text-neutral-900 hover:underline cursor-pointer"
                   >
                     Sign in
                   </button>

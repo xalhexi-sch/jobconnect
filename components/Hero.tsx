@@ -7,7 +7,7 @@ import { useApp } from "@/context/AppContext";
 import { motion } from "motion/react";
 
 export default function Hero() {
-  const { searchQuery, setSearchQuery, selectedCity, setSelectedCity, setRole } = useApp();
+  const { searchQuery, setSearchQuery, selectedCity, setSelectedCity, setIsPostJobOpen } = useApp();
 
   return (
     <section className="relative pt-6 pb-16 md:pt-12 md:pb-24 overflow-hidden">
@@ -40,7 +40,7 @@ export default function Hero() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
               </span>
               <span className="text-xs font-semibold tracking-tight text-emerald-950">
-                Live Openings &bull; Butuan City (BXU)
+                Active Openings &bull; Butuan City (BXU)
               </span>
             </motion.div>
 
@@ -48,7 +48,7 @@ export default function Hero() {
             <div className="text-3xl sm:text-4xl lg:text-5xl leading-[1.12] tracking-tight font-extrabold text-[#111116]">
               <span>Find jobs in Butuan City.</span>{" "}
               <span className="text-neutral-500 font-bold block sm:inline">
-                Hire local candidates faster.
+                Hire local talent directly.
               </span>
             </div>
 
@@ -62,7 +62,7 @@ export default function Hero() {
               The dedicated employment portal for Butuan City. Connect directly with local retail shops, cafes, clinics, logistics teams, and tech hubs with transparent compensation.
             </motion.p>
 
-            {/* Direct Action Buttons with Supabase/Clerk gradient */}
+            {/* Direct Action Buttons with gentle contrast */}
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
@@ -72,7 +72,6 @@ export default function Hero() {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Link
                   href="/overview"
-                  onClick={() => setRole("jobseeker")}
                   className="btn-supabase-emerald flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all shadow-md group cursor-pointer text-xs sm:text-sm font-semibold tracking-tight"
                 >
                   <Search className="w-4 h-4 shrink-0" />
@@ -82,14 +81,14 @@ export default function Hero() {
               </motion.div>
 
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Link
-                  href="/overview"
-                  onClick={() => setRole("employer")}
-                  className="btn-supabase-dark flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all shadow-md group cursor-pointer text-xs sm:text-sm font-semibold tracking-tight"
+                <button
+                  type="button"
+                  onClick={() => setIsPostJobOpen(true)}
+                  className="btn-clerk-outline flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all shadow-xs group cursor-pointer text-xs sm:text-sm font-semibold tracking-tight"
                 >
-                  <Briefcase className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <Briefcase className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>Post Vacancy (Hire)</span>
-                </Link>
+                </button>
               </motion.div>
             </motion.div>
 
@@ -100,7 +99,7 @@ export default function Hero() {
               transition={{ duration: 0.6, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
               className="pt-1 max-w-2xl"
             >
-              <div className="bg-white p-2 rounded-xl border border-neutral-200/90 shadow-md shadow-black/[0.03] flex flex-col sm:flex-row items-center gap-2">
+              <div className="bg-white p-2 rounded-xl border border-neutral-200/90 shadow-sm flex flex-col sm:flex-row items-center gap-2">
                 <div className="flex items-center gap-2.5 px-3 w-full sm:flex-1">
                   <Search className="w-4 h-4 text-neutral-400 shrink-0" />
                   <input
@@ -157,13 +156,13 @@ export default function Hero() {
 
           </div>
 
-          {/* Right Column: Clean Photo with Live Database Indicators */}
+          {/* Right Column: Clean Photo with Real-World Value Badges */}
           <div className="lg:col-span-5 relative flex justify-center items-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-full max-w-[380px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-neutral-100 group"
+              className="relative w-full max-w-[380px] aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-neutral-100 group"
             >
               <img
                 src="/hero-applicant.png"
@@ -172,7 +171,7 @@ export default function Hero() {
               />
 
               {/* Photo Bottom Caption */}
-              <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-white/95 backdrop-blur-md border border-white/60 shadow-md text-left">
+              <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-white/95 backdrop-blur-md border border-neutral-200/80 shadow-md text-left">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-[10px] text-neutral-500 font-semibold uppercase tracking-wider">Hiring in Butuan City</div>
@@ -183,36 +182,36 @@ export default function Hero() {
               </div>
             </motion.div>
 
-            {/* Live Indicator: Supabase Database */}
+            {/* Value Badge: Verified Openings */}
             <motion.div
               initial={{ opacity: 0, x: 20, y: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="absolute -top-3 -right-2 sm:-right-4 px-3.5 py-2 rounded-xl bg-white/95 backdrop-blur-md border border-neutral-200 shadow-lg flex items-center gap-2.5 z-20"
+              className="absolute -top-3 -right-2 sm:-right-4 px-3.5 py-2 rounded-xl bg-white/95 backdrop-blur-md border border-neutral-200 shadow-md flex items-center gap-2.5 z-20"
             >
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
               </span>
               <div className="text-left">
-                <div className="text-xs font-bold text-neutral-900 leading-tight">Live Database</div>
-                <div className="text-[10px] text-neutral-500 font-medium">Supabase PostgreSQL</div>
+                <div className="text-xs font-bold text-neutral-900 leading-tight">Verified Openings</div>
+                <div className="text-[10px] text-neutral-500 font-medium">Direct Employer Hiring</div>
               </div>
             </motion.div>
 
-            {/* Live Indicator: Clerk Secure Auth */}
+            {/* Value Badge: Fast Direct Applications */}
             <motion.div
               initial={{ opacity: 0, x: -20, y: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="absolute -bottom-3 -left-2 sm:-left-4 px-3.5 py-2 rounded-xl bg-[#111116] text-white shadow-lg flex items-center gap-2.5 z-20"
+              className="absolute -bottom-3 -left-2 sm:-left-4 px-3.5 py-2 rounded-xl bg-white/95 backdrop-blur-md border border-neutral-200 text-neutral-900 shadow-md flex items-center gap-2.5 z-20"
             >
-              <div className="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center text-white">
-                <Briefcase className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-800">
+                <Briefcase className="w-3.5 h-3.5" />
               </div>
               <div className="text-left">
-                <div className="text-xs font-bold leading-tight">Real-Time Portal</div>
-                <div className="text-[10px] text-neutral-400 font-medium">Clerk Auth Enabled</div>
+                <div className="text-xs font-bold leading-tight">Direct Applications</div>
+                <div className="text-[10px] text-neutral-500 font-medium">No Placement Fees</div>
               </div>
             </motion.div>
 

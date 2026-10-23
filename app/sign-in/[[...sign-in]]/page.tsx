@@ -6,36 +6,44 @@ import { ArrowLeft } from "lucide-react";
 
 export default function SignInPage() {
   return (
-    <div className="min-h-screen bg-[#0D0E12] text-white flex flex-col justify-center items-center p-4 relative overflow-hidden">
-      {/* Ambient gradient glow like Supabase/Clerk */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-emerald-500/10 blur-[120px] pointer-events-none rounded-full" />
-      <div className="absolute bottom-10 right-10 w-[300px] h-[300px] bg-emerald-600/5 blur-[100px] pointer-events-none rounded-full" />
+    <div className="min-h-screen bg-[#FBFBFC] text-[#111116] flex flex-col justify-center items-center p-4 relative overflow-hidden">
+      {/* Soft, calming ambient background glow */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-emerald-500/8 blur-[100px] pointer-events-none rounded-full" />
+      <div className="absolute bottom-10 right-1/4 w-[350px] h-[350px] bg-sky-500/5 blur-[90px] pointer-events-none rounded-full" />
 
       {/* Top Header */}
-      <div className="mb-6 flex flex-col items-center gap-3 z-10">
-        <Link href="/" className="hover:opacity-90 transition-opacity flex items-center gap-2">
-          <JobgioLogo variant="light" size="md" />
+      <div className="mb-6 flex flex-col items-center gap-2 z-10">
+        <Link href="/" className="hover:opacity-85 transition-opacity flex items-center gap-2">
+          <JobgioLogo variant="dark" size="md" />
         </Link>
-        <p className="text-xs text-neutral-400">
+        <p className="text-xs text-neutral-500 font-medium">
           Sign in to your Butuan City JobConnect account
         </p>
       </div>
 
-      {/* Clerk SignIn Component Container */}
-      <div className="z-10 shadow-2xl rounded-2xl border border-white/10 bg-[#16171D]/90 backdrop-blur-xl p-2 sm:p-4">
-        <Suspense fallback={<div className="p-8 text-neutral-400 text-xs text-center">Loading Clerk...</div>}>
+      {/* Clean, Readable Card */}
+      <div className="z-10 shadow-xl rounded-3xl border border-neutral-200/90 bg-white p-4 sm:p-6 max-w-md w-full">
+        <Suspense fallback={<div className="p-8 text-neutral-400 text-xs text-center">Loading Clerk sign-in...</div>}>
           <SignIn
+            path="/sign-in"
+            routing="path"
+            signUpUrl="/sign-up"
+            fallbackRedirectUrl="/overview"
             appearance={{
               elements: {
-                card: "bg-transparent shadow-none border-none",
-                headerTitle: "text-white font-bold",
-                headerSubtitle: "text-neutral-400 text-xs",
-                formButtonPrimary: "btn-supabase-emerald text-xs font-semibold py-2.5",
-                formFieldInput: "bg-neutral-900/80 border-white/10 text-white rounded-xl focus:border-emerald-500",
-                footerActionLink: "text-emerald-400 hover:text-emerald-300 font-semibold",
-                socialButtonsBlockButton: "bg-white/5 border-white/10 text-white hover:bg-white/10",
-                dividerLine: "bg-white/10",
-                dividerText: "text-neutral-500 text-xs",
+                card: "bg-transparent shadow-none border-none p-0 w-full",
+                headerTitle: "text-neutral-900 font-bold text-xl tracking-tight",
+                headerSubtitle: "text-neutral-500 text-xs mt-1",
+                formButtonPrimary: "btn-supabase-emerald text-white text-xs font-semibold py-2.5 rounded-xl cursor-pointer shadow-sm hover:opacity-95 transition-opacity",
+                formFieldLabel: "text-neutral-700 text-xs font-semibold mb-1",
+                formFieldInput: "bg-white border border-neutral-300 text-neutral-900 rounded-xl focus:border-emerald-600 text-xs py-2 px-3 shadow-2xs",
+                footerActionLink: "text-emerald-700 hover:text-emerald-800 font-semibold text-xs",
+                footerActionText: "text-neutral-500 text-xs",
+                socialButtonsBlockButton: "bg-white border border-neutral-200 text-neutral-800 hover:bg-neutral-50 rounded-xl text-xs font-medium py-2 shadow-2xs",
+                dividerLine: "bg-neutral-200",
+                dividerText: "text-neutral-400 text-xs font-medium",
+                identityPreviewText: "text-neutral-900 text-xs font-medium",
+                identityPreviewEditButton: "text-emerald-700 text-xs font-semibold",
               }
             }}
           />
@@ -45,10 +53,10 @@ export default function SignInPage() {
       <div className="mt-6 z-10">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-900 font-medium transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to Butuan JobConnect Home</span>
+          <span>Back to Home</span>
         </Link>
       </div>
     </div>

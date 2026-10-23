@@ -19,6 +19,7 @@ interface AppContextType {
   role: RoleType;
   setRole: (role: RoleType) => void;
   user: MockUser;
+  setUser: React.Dispatch<React.SetStateAction<MockUser>>;
   userProfile: UserProfile;
   updateUserProfile: (profile: Partial<UserProfile>) => void;
   jobs: Job[];
@@ -60,6 +61,7 @@ interface AppContextType {
   openAuthModal: (mode?: "sign-in" | "sign-up") => void;
   closeAuthModal: () => void;
   isSignedIn: boolean;
+  setIsSignedIn: React.Dispatch<React.SetStateAction<boolean>>;
   loginUser: (email: string, name?: string) => void;
   logoutUser: () => void;
   
@@ -393,6 +395,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         openAuthModal,
         closeAuthModal,
         isSignedIn,
+        setIsSignedIn,
+        setUser,
         loginUser,
         logoutUser,
         toasts,

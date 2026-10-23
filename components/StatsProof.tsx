@@ -24,8 +24,8 @@ export default function StatsProof() {
         
         {/* Core Value Pillars - Honest, Real, Practical */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <div className="p-5 rounded-xl bg-neutral-50 border border-neutral-200/80">
-            <div className="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center mb-3">
+          <div className="p-5 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 shadow-xs">
+            <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center mb-3">
               <Building2 className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-bold text-neutral-900 mb-1">Local Business Focus</h3>
@@ -34,8 +34,8 @@ export default function StatsProof() {
             </p>
           </div>
 
-          <div className="p-5 rounded-xl bg-neutral-50 border border-neutral-200/80">
-            <div className="w-9 h-9 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center mb-3">
+          <div className="p-5 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 shadow-xs">
+            <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center mb-3">
               <Users className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-bold text-neutral-900 mb-1">Direct Contact</h3>
@@ -44,13 +44,13 @@ export default function StatsProof() {
             </p>
           </div>
 
-          <div className="p-5 rounded-xl bg-neutral-50 border border-neutral-200/80">
-            <div className="w-9 h-9 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center mb-3">
+          <div className="p-5 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 shadow-xs">
+            <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center mb-3">
               <CheckCircle2 className="w-4 h-4" />
             </div>
-            <h3 className="text-sm font-bold text-neutral-900 mb-1">Live Database ({jobs.length} Active Jobs)</h3>
+            <h3 className="text-sm font-bold text-neutral-900 mb-1">Zero Placement Fees</h3>
             <p className="text-xs text-neutral-600 leading-relaxed">
-              Connected live to Supabase PostgreSQL and Clerk authentication. Clean, transparent, and completely free to use.
+              100% free for applicants. No agency commissions, salary deductions, or hidden charges.
             </p>
           </div>
         </div>
@@ -63,7 +63,7 @@ export default function StatsProof() {
           </span>
           <div className="flex flex-wrap gap-2 text-neutral-600">
             {localDistricts.map((d) => (
-              <span key={d} className="px-2.5 py-1 rounded-md bg-neutral-100 font-medium">
+              <span key={d} className="px-2.5 py-1 rounded-lg bg-neutral-100 font-medium text-neutral-700">
                 {d}
               </span>
             ))}

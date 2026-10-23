@@ -3,14 +3,10 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowRight, UserCheck, Briefcase } from "lucide-react";
-import { useApp } from "@/context/AppContext";
 import { motion } from "motion/react";
-import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
 
 export default function CtaBanner() {
-  const { setRole } = useApp();
-
   return (
     <section className="py-16 md:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 overflow-hidden">
       <motion.div
@@ -57,15 +53,14 @@ export default function CtaBanner() {
             100% web-native app experience. Submit one-click applications, track HR screening stages, and connect with regional employers directly from your browser.
           </p>
 
-          {/* Web App Action Pills with natural geometry */}
+          {/* Action Pills */}
           <div className="pt-3 flex flex-wrap items-center justify-center gap-3">
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link
                 href="/overview"
-                onClick={() => setRole("jobseeker")}
-                className="flex items-center gap-2.5 px-6 py-3 rounded-xl btn-supabase-emerald text-white text-xs sm:text-sm font-semibold cursor-pointer"
+                className="flex items-center gap-2.5 px-6 py-3 rounded-xl btn-supabase-emerald text-white text-xs sm:text-sm font-semibold cursor-pointer shadow-md"
               >
-                <UserCheck className="w-4 h-4 text-emerald-600" />
+                <UserCheck className="w-4 h-4 text-emerald-100" />
                 <span>Launch Jobseeker Hub</span>
               </Link>
             </motion.div>
@@ -73,7 +68,6 @@ export default function CtaBanner() {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link
                 href="/overview"
-                onClick={() => setRole("employer")}
                 className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 transition-colors text-xs sm:text-sm font-semibold cursor-pointer text-white"
               >
                 <Briefcase className="w-4 h-4 text-amber-400" />

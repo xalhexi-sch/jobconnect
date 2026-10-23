@@ -157,7 +157,7 @@ export default function ExploreJobs() {
 
                       <button
                         onClick={() => setApplyModalJob(job)}
-                        className="px-3.5 py-1.5 rounded-lg bg-[#111116] hover:bg-neutral-800 text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+                        className="btn-supabase-emerald px-3.5 py-1.5 rounded-xl text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
                       >
                         Easy Apply
                       </button>
