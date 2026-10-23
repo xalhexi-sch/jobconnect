@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Crosshair from "@/components/Crosshair/Crosshair";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import StatsProof from "@/components/StatsProof";
@@ -19,7 +20,20 @@ import AuthModal from "@/components/AuthModal";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#FBFBFC] text-[#111116] overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-[#FBFBFC] text-[#111116] overflow-x-hidden relative">
+      {/* Precision Crosshair Cursor Tracker (Landing Page Only) */}
+      <Crosshair
+        color="#059669"
+        opacity={0.6}
+        thickness={1}
+        targetEffect="lock"
+        targetSelector="a, button, [data-crosshair-target], input, select"
+        showCoordinates={true}
+        clickPulse={true}
+        hideCursor={false}
+        className="hidden md:block pointer-events-none"
+      />
+
       {/* Dark floating pill navigation bar */}
       <Navbar />
 
