@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useApp } from "@/context/AppContext";
-import { X, Briefcase, Plus, ArrowRight, MapPin } from "lucide-react";
+import { X, Briefcase, ArrowRight } from "lucide-react";
 import { JobType, JobCategory, Job } from "@/lib/types";
 
 const BUTUAN_BARANGAYS = [
@@ -20,7 +20,7 @@ const BUTUAN_BARANGAYS = [
   "Taguibo"
 ];
 
-const CATEGORIES = [
+const CATEGORIES: JobCategory[] = [
   "Developer",
   "Design",
   "Healthcare",
@@ -29,18 +29,18 @@ const CATEGORIES = [
   "Marketing",
   "Security",
   "Admin & Support"
-] as const;
+];
 
 export default function PostJobModal() {
   const { isPostJobOpen, setIsPostJobOpen, postJob } = useApp();
   const [title, setTitle] = useState("");
   const [company, setCompany] = useState("");
-  const [city, setCity] = useState<"Butuan City" | "Cabadbaran City" | "Surigao City" | "Bayugan City" | "Bislig City" | "Caraga Region">("Butuan City");
+  const [city, setCity] = useState<Job["city"]>("Butuan City");
   const [barangay, setBarangay] = useState("Montilla Blvd");
   const [location, setLocation] = useState("Montilla Blvd, Butuan City");
   const [salary, setSalary] = useState("₱25,000 - ₱35,000 / month");
   const [type, setType] = useState<JobType>("On-site");
-  const [category, setCategory] = useState<typeof CATEGORIES[number]>("Developer");
+  const [category, setCategory] = useState<JobCategory>("Developer");
   const [description, setDescription] = useState("");
 
   if (!isPostJobOpen) return null;
@@ -63,11 +63,11 @@ export default function PostJobModal() {
       type,
       category,
       status: "Active",
-      description: description || `Looking for dedicated team members for ${company} in ${city}.`,
+      description: description || `Hiring for ${title} at ${company} in ${city}.`,
       requirements: [
-        "Good communication skills and customer-first mindset",
-        "Punctual and reliable team player",
-        "Relevant certification or practical experience"
+        "Relevant experience or educational background",
+        "Strong teamwork and communication",
+        "Punctual and reliable"
       ]
     });
 
@@ -77,35 +77,34 @@ export default function PostJobModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-[460px] rounded-[32px] bg-white p-7 sm:p-8 shadow-2xl border border-black/[0.08] animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto no-scrollbar text-left"
+        className="relative w-full max-w-lg rounded-2xl bg-white p-6 sm:p-7 shadow-2xl border border-neutral-200 text-left max-h-[92vh] overflow-y-auto"
       >
         {/* Close button */}
         <button
           onClick={() => setIsPostJobOpen(false)}
           className="absolute top-5 right-5 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-500 hover:text-black transition-colors cursor-pointer"
+          aria-label="Close"
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* Header */}
-        <div className="mb-5">
-          <div className="w-10 h-10 rounded-2xl bg-[#111116] text-white flex items-center justify-center mb-2.5">
-            <Briefcase className="w-5 h-5" />
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-1">
+            <Briefcase className="w-4 h-4 text-neutral-700" />
+            <h3 className="text-lg font-bold text-neutral-900">Post a Job Opening</h3>
           </div>
-          <h3 className="text-xl font-bold text-neutral-900 leading-tight">
-            Post an Opening
-          </h3>
-          <p className="text-xs text-neutral-500 mt-0.5">
-            Share a vacancy with students & job seekers across Butuan City & Caraga.
+          <p className="text-xs text-neutral-500">
+            Publish an active hiring vacancy for Butuan City &amp; Caraga job seekers.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3.5">
           <div>
-            <label className="block text-[11px] font-bold text-neutral-700 mb-1">
+            <label className="block text-xs font-semibold text-neutral-700 mb-1">
               Job Title
             </label>
             <input
@@ -113,14 +112,14 @@ export default function PostJobModal() {
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Registered Nurse, Store Clerk, Web Developer"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-xs text-neutral-900 focus:outline-none focus:border-black"
+              placeholder="e.g. Service Crew, Nurse, Junior Developer"
+              className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-black focus:bg-white"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-bold text-neutral-700 mb-1">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1">
                 Company / Store Name
               </label>
               <input
@@ -128,13 +127,13 @@ export default function PostJobModal() {
                 required
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
-                placeholder="e.g. Butuan Artisan Cafe"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-xs text-neutral-900 focus:outline-none focus:border-black"
+                placeholder="e.g. Kape Butuanon"
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-black focus:bg-white"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-neutral-700 mb-1">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1">
                 Monthly Pay (₱)
               </label>
               <input
@@ -142,21 +141,21 @@ export default function PostJobModal() {
                 required
                 value={salary}
                 onChange={(e) => setSalary(e.target.value)}
-                placeholder="e.g. ₱20,000 - ₱30,000"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-xs text-neutral-900 focus:outline-none focus:border-black"
+                placeholder="e.g. ₱18,000 - ₱25,000"
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-black focus:bg-white"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-bold text-neutral-700 mb-1">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1">
                 Category
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as JobCategory)}
-                className="w-full px-3 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-xs font-medium text-neutral-900 focus:outline-none cursor-pointer"
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:border-black focus:bg-white cursor-pointer"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -167,13 +166,13 @@ export default function PostJobModal() {
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-neutral-700 mb-1">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1">
                 Work Setup
               </label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as JobType)}
-                className="w-full px-3 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-xs font-medium text-neutral-900 focus:outline-none cursor-pointer"
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:border-black focus:bg-white cursor-pointer"
               >
                 <option value="On-site">On-site</option>
                 <option value="Hybrid">Hybrid</option>
@@ -184,8 +183,8 @@ export default function PostJobModal() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-bold text-neutral-700 mb-1">
-                City / Region
+              <label className="block text-xs font-semibold text-neutral-700 mb-1">
+                City / Province
               </label>
               <select
                 value={city}
@@ -194,7 +193,7 @@ export default function PostJobModal() {
                   setCity(val);
                   setLocation(val);
                 }}
-                className="w-full px-3 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-xs font-medium text-neutral-900 focus:outline-none cursor-pointer"
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:border-black focus:bg-white cursor-pointer"
               >
                 <option value="Butuan City">Butuan City</option>
                 <option value="Cabadbaran City">Cabadbaran City</option>
@@ -206,13 +205,13 @@ export default function PostJobModal() {
 
             {city === "Butuan City" ? (
               <div>
-                <label className="block text-[11px] font-bold text-neutral-700 mb-1">
+                <label className="block text-xs font-semibold text-neutral-700 mb-1">
                   Butuan Barangay / Area
                 </label>
                 <select
                   value={barangay}
                   onChange={(e) => setBarangay(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-xs font-medium text-neutral-900 focus:outline-none cursor-pointer"
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:border-black focus:bg-white cursor-pointer"
                 >
                   {BUTUAN_BARANGAYS.map((b) => (
                     <option key={b} value={b}>
@@ -223,38 +222,38 @@ export default function PostJobModal() {
               </div>
             ) : (
               <div>
-                <label className="block text-[11px] font-bold text-neutral-700 mb-1">
-                  Specific Location
+                <label className="block text-xs font-semibold text-neutral-700 mb-1">
+                  Area / Street
                 </label>
                 <input
                   type="text"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  placeholder="e.g. City Center"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-xs text-neutral-900 focus:outline-none focus:border-black"
+                  placeholder="e.g. City Proper"
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-black focus:bg-white"
                 />
               </div>
             )}
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-neutral-700 mb-1">
-              Short Description & Requirements
+            <label className="block text-xs font-semibold text-neutral-700 mb-1">
+              Short Description &amp; Duties
             </label>
             <textarea
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="What will this person do? Mention shift hours, key skills, or requirements..."
-              className="w-full p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-xs text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-black resize-none"
+              placeholder="Responsibilities, work schedule, or required skills..."
+              className="w-full p-2.5 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-black focus:bg-white resize-none"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full mt-2 py-3 rounded-full bg-[#111116] text-white hover:bg-black font-bold text-xs transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
+            className="w-full mt-3 py-2.5 rounded-xl bg-[#111116] text-white hover:bg-neutral-800 text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <span>Publish Vacancy to JobConnect</span>
+            <span>Publish Opening</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </form>

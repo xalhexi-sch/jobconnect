@@ -12,9 +12,9 @@ export default function Navbar() {
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
 
   const navLinks = [
-    { href: "#opportunities", label: "Find Jobs" },
+    { href: "#opportunities", label: "Browse Jobs" },
     { href: "#how-it-works", label: "How It Works" },
-    { href: "#reviews", label: "Stories" },
+    { href: "#faq", label: "FAQ" },
   ];
 
   return (

@@ -16,7 +16,7 @@ export default function FaqSection() {
   };
 
   return (
-    <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
+    <section id="faq" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
       {/* Title */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}

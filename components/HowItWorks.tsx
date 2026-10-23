@@ -10,26 +10,26 @@ export default function HowItWorks() {
   const steps = [
     {
       num: "01",
-      title: "Create Your Caraga Profile",
-      desc: "Sign up and build your verified regional profile in under 2 minutes. Add your education (CSU, FSUU, etc.), verified skills, and target monthly compensation in ₱.",
+      title: "Set Up Your Profile",
+      desc: "Add your contact info, location in Butuan or Caraga, and your resume in under 2 minutes.",
       icon: UserCheck
     },
     {
       num: "02",
-      title: "Discover Local & Remote Roles",
-      desc: "Use smart filters to find jobs matching your exact location in Butuan City or across Region XIII, salary expectations, and working setup.",
+      title: "Find Local Openings",
+      desc: "Search by barangay or category across neighborhood shops, healthcare clinics, and tech teams.",
       icon: Search
     },
     {
       num: "03",
-      title: "Apply with 1-Click",
-      desc: "Submit your verified credentials instantly with 1-click Easy Apply without tedious repetitive form-filling.",
+      title: "Submit with 1-Click",
+      desc: "Apply directly with your saved resume and an optional note without repetitive paperwork.",
       icon: Send
     },
     {
       num: "04",
-      title: "Live Interview Updates",
-      desc: "Track real-time hiring stages, schedule interviews directly with verified hiring teams, and secure employment without leaving Mindanao.",
+      title: "Track Interview Updates",
+      desc: "Get clear notifications when employers review your application and schedule interviews.",
       icon: BellRing
     }
   ];
