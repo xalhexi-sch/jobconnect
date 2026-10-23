@@ -20,8 +20,9 @@ export async function createJobAction(jobData: Partial<Job> & { employerId?: str
 
     const job = await insertJobToDb(jobData);
     return { success: true, job };
-  } catch (error: any) {
-    console.error("createJobAction failed:", error);
-    return { success: false, error: error.message || "Failed to create job" };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to create job";
+    console.error("createJobAction failed:", message);
+    return { success: false, error: message };
   }
 }

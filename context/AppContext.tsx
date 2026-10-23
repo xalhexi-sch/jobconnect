@@ -5,8 +5,8 @@ import { Job, Application, PendingApproval, RoleType, UserProfile } from "@/lib/
 import { INITIAL_JOBS, PENDING_APPROVALS, INITIAL_USER_PROFILE } from "@/lib/mock-data";
 import { DEFAULT_MOCK_USER, MockUser } from "@/lib/clerk";
 import { fetchJobsAction, createJobAction } from "@/app/actions/jobs";
-import { submitApplicationAction, updateApplicationStatusAction } from "@/app/actions/applications";
-import { saveUserProfileAction } from "@/app/actions/profile";
+import { submitApplicationAction, updateApplicationStatusAction, fetchUserApplicationsAction } from "@/app/actions/applications";
+import { saveUserProfileAction, fetchUserProfileAction } from "@/app/actions/profile";
 import confetti from "canvas-confetti";
 
 interface Toast {
@@ -139,10 +139,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setJobs(loadedJobs);
       }
     });
+    if (user?.id) {
+      fetchUserApplicationsAction(user.id).then((loadedApps) => {
+        if (mounted && loadedApps && loadedApps.length > 0) {
+          setApplications(loadedApps);
+        }
+      });
+      fetchUserProfileAction(user.id).then((profile) => {
+        if (mounted && profile) {
+          setUserProfile(profile);
+        }
+      });
+    }
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [user?.id]);
 
   const openAuthModal = (mode: "sign-in" | "sign-up" = "sign-in") => {
     setAuthMode(mode);

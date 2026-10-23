@@ -23,8 +23,8 @@ create table if not exists public.profiles (
 
 -- 2. JOBS TABLE (Vacancies in Butuan City & Caraga Region)
 create table if not exists public.jobs (
-  id uuid primary key default gen_random_uuid(),
-  employer_id text not null references public.profiles(id) on delete cascade,
+  id text primary key default gen_random_uuid()::text,
+  employer_id text not null,
   title text not null,
   company text not null,
   company_logo text,
@@ -46,9 +46,9 @@ create table if not exists public.jobs (
 
 -- 3. APPLICATIONS TABLE
 create table if not exists public.applications (
-  id uuid primary key default gen_random_uuid(),
-  job_id uuid not null references public.jobs(id) on delete cascade,
-  applicant_id text not null references public.profiles(id) on delete cascade,
+  id text primary key default gen_random_uuid()::text,
+  job_id text not null references public.jobs(id) on delete cascade,
+  applicant_id text not null,
   applicant_name text not null,
   applicant_email text not null,
   phone text,
@@ -63,9 +63,9 @@ create table if not exists public.applications (
 
 -- 4. SAVED JOBS (BOOKMARKS)
 create table if not exists public.saved_jobs (
-  id uuid primary key default gen_random_uuid(),
-  user_id text not null references public.profiles(id) on delete cascade,
-  job_id uuid not null references public.jobs(id) on delete cascade,
+  id text primary key default gen_random_uuid()::text,
+  user_id text not null,
+  job_id text not null references public.jobs(id) on delete cascade,
   saved_at timestamp with time zone default timezone('utc'::text, now()) not null,
   unique(user_id, job_id)
 );
@@ -120,7 +120,7 @@ insert into public.jobs (
   salary, salary_php, type, category, status, description, requirements, applied_count, featured
 ) values
   (
-    'a1b2c3d4-e5f6-7a8b-9c0d-111111111111',
+    'job-butuan-1',
     'user-demo-employer',
     'Junior Full-Stack Web Developer',
     'Balanghai Tech Solutions',
@@ -139,7 +139,7 @@ insert into public.jobs (
     true
   ),
   (
-    'a1b2c3d4-e5f6-7a8b-9c0d-222222222222',
+    'job-butuan-2',
     'user-demo-employer',
     'Registered Clinic Nurse',
     'Caraga Health Specialist Clinic',
@@ -158,7 +158,7 @@ insert into public.jobs (
     true
   ),
   (
-    'a1b2c3d4-e5f6-7a8b-9c0d-333333333333',
+    'job-butuan-3',
     'user-demo-employer',
     'Barista & Customer Service Lead',
     'Kape Butuanon Artisan Cafe',
@@ -177,7 +177,7 @@ insert into public.jobs (
     false
   ),
   (
-    'a1b2c3d4-e5f6-7a8b-9c0d-444444444444',
+    'job-butuan-4',
     'user-demo-employer',
     'Inventory & Logistics Associate',
     'Agusan Hardware & Supply Corp.',
@@ -196,7 +196,7 @@ insert into public.jobs (
     false
   ),
   (
-    'a1b2c3d4-e5f6-7a8b-9c0d-555555555555',
+    'job-butuan-5',
     'user-demo-employer',
     'Graphic Designer & Brand Associate',
     'Mindanao Digital Creatives',

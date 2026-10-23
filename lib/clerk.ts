@@ -3,8 +3,13 @@
 
 export const isClerkConfigured = Boolean(
   process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && 
-  process.env.CLERK_SECRET_KEY &&
   !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes("placeholder")
+);
+
+export const isClerkServerConfigured = Boolean(
+  isClerkConfigured &&
+  process.env.CLERK_SECRET_KEY &&
+  !process.env.CLERK_SECRET_KEY.includes("placeholder")
 );
 
 export interface MockUser {

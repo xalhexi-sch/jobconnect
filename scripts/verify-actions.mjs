@@ -46,6 +46,12 @@ async function run() {
   }
   console.log(`fetchUserProfileAction returned profile for: ${profile.fullName}`);
 
+  const updateProfileRes = await saveUserProfileAction({ headline: "Updated Headline for Test" });
+  if (!updateProfileRes.success) {
+    throw new Error("saveUserProfileAction failed");
+  }
+  console.log("saveUserProfileAction verified successfully.");
+
   console.log("ACTIONS VERIFICATION PASSED!");
 }
 

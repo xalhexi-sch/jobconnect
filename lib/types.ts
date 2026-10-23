@@ -1,6 +1,15 @@
 export type JobStatus = "Active" | "Pending" | "Expired";
 export type JobType = "On-site" | "Hybrid" | "Remote (Caraga)" | "Remote";
 export type RoleType = "jobseeker" | "employer" | "admin";
+export type JobCategory =
+  | "Design"
+  | "Developer"
+  | "Security"
+  | "Marketing"
+  | "Healthcare"
+  | "Admin & Support"
+  | "Hospitality"
+  | "Trades & Logistics";
 
 export interface Job {
   id: string;
@@ -13,7 +22,7 @@ export interface Job {
   salary: string;
   salaryPhp: number; // numeric for sorting/filtering
   type: JobType;
-  category: "Design" | "Developer" | "Security" | "Marketing" | "Healthcare" | "Admin & Support";
+  category: JobCategory;
   status: JobStatus;
   postedDate: string;
   appliedCount: number;

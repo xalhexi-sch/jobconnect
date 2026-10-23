@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useApp } from "@/context/AppContext";
 import { X, Briefcase, Plus, ArrowRight, MapPin } from "lucide-react";
-import { JobType } from "@/lib/types";
+import { JobType, JobCategory, Job } from "@/lib/types";
 
 const BUTUAN_BARANGAYS = [
   "Montilla Blvd",
@@ -61,7 +61,7 @@ export default function PostJobModal() {
       salary,
       salaryPhp: parseInt(salary.replace(/\D/g, "")) || 25000,
       type,
-      category: category as any,
+      category,
       status: "Active",
       description: description || `Looking for dedicated team members for ${company} in ${city}.`,
       requirements: [
@@ -155,7 +155,7 @@ export default function PostJobModal() {
               </label>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value as any)}
+                onChange={(e) => setCategory(e.target.value as JobCategory)}
                 className="w-full px-3 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-xs font-medium text-neutral-900 focus:outline-none cursor-pointer"
               >
                 {CATEGORIES.map((cat) => (
@@ -172,7 +172,7 @@ export default function PostJobModal() {
               </label>
               <select
                 value={type}
-                onChange={(e) => setType(e.target.value as any)}
+                onChange={(e) => setType(e.target.value as JobType)}
                 className="w-full px-3 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-xs font-medium text-neutral-900 focus:outline-none cursor-pointer"
               >
                 <option value="On-site">On-site</option>
@@ -190,7 +190,7 @@ export default function PostJobModal() {
               <select
                 value={city}
                 onChange={(e) => {
-                  const val = e.target.value as any;
+                  const val = e.target.value as Job["city"];
                   setCity(val);
                   setLocation(val);
                 }}

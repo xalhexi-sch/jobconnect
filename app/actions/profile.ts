@@ -11,8 +11,9 @@ export async function saveUserProfileAction(profileData: Partial<UserProfile>): 
   try {
     const profile = await updateProfileInDb(profileData);
     return { success: true, profile };
-  } catch (error: any) {
-    console.error("saveUserProfileAction error:", error);
-    return { success: false, error: error.message || "Failed to save profile." };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to save profile.";
+    console.error("saveUserProfileAction error:", message);
+    return { success: false, error: message };
   }
 }

@@ -1,6 +1,6 @@
 import { supabase, isSupabaseConfigured, getSupabaseAdmin } from "./supabase";
 import { INITIAL_JOBS, INITIAL_USER_PROFILE } from "./mock-data";
-import { Job, Application, UserProfile, RoleType } from "./types";
+import { Job, Application, UserProfile } from "./types";
 
 // In-memory runtime cache for fallback mode during interactive demos
 let memoryJobs: Job[] = [...INITIAL_JOBS];
@@ -46,6 +46,7 @@ export async function getJobsFromDb(filterCategory?: string): Promise<Job[]> {
     }
     const { data, error } = await query.order("created_at", { ascending: false });
     if (error || !data || data.length === 0) {
+      if (error) console.warn("Supabase fetch jobs warning:", error.message);
       return memoryJobs;
     }
 
@@ -75,8 +76,11 @@ export async function getJobsFromDb(filterCategory?: string): Promise<Job[]> {
 }
 
 export async function insertJobToDb(job: Partial<Job> & { employerId?: string }): Promise<Job> {
+  const generatedId = job.id || `job-${Date.now()}`;
+  const employerId = job.employerId || "user-demo-employer";
+
   const newJob: Job = {
-    id: job.id || `job-${Date.now()}`,
+    id: generatedId,
     title: job.title || "Untitled Opening",
     company: job.company || "Butuan Enterprise",
     companyLogo: job.companyLogo || "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?w=120&auto=format&fit=crop&q=80",
@@ -100,24 +104,47 @@ export async function insertJobToDb(job: Partial<Job> & { employerId?: string })
   if (isSupabaseConfigured) {
     try {
       const admin = getSupabaseAdmin();
-      await admin.from("jobs").insert({
-        id: newJob.id.includes("-") && newJob.id.length > 20 ? newJob.id : undefined,
-        employer_id: job.employerId || "user-demo-employer",
-        title: newJob.title,
-        company: newJob.company,
-        company_logo: newJob.companyLogo,
-        location: newJob.location,
-        barangay: newJob.barangay,
-        city: newJob.city,
-        salary: newJob.salary,
-        salary_php: newJob.salaryPhp,
-        type: newJob.type,
-        category: newJob.category,
-        status: newJob.status,
-        description: newJob.description,
-        requirements: newJob.requirements,
-        featured: newJob.featured,
-      });
+
+      // Ensure employer profile exists in profiles table
+      await admin.from("profiles").upsert(
+        {
+          id: employerId,
+          full_name: job.company || "Local Employer",
+          email: `${employerId}@jobconnect.ph`,
+          role: "employer",
+          location: newJob.location,
+        },
+        { onConflict: "id" }
+      );
+
+      const { data, error } = await admin
+        .from("jobs")
+        .insert({
+          id: newJob.id,
+          employer_id: employerId,
+          title: newJob.title,
+          company: newJob.company,
+          company_logo: newJob.companyLogo,
+          location: newJob.location,
+          barangay: newJob.barangay,
+          city: newJob.city,
+          salary: newJob.salary,
+          salary_php: newJob.salaryPhp,
+          type: newJob.type,
+          category: newJob.category,
+          status: newJob.status,
+          description: newJob.description,
+          requirements: newJob.requirements,
+          featured: newJob.featured,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Supabase insert job error:", error.message);
+      } else if (data) {
+        newJob.id = data.id;
+      }
     } catch (err) {
       console.warn("Failed to persist job to Supabase:", err);
     }
@@ -138,6 +165,7 @@ export async function getApplicationsFromDb(userId: string): Promise<Application
       .eq("applicant_id", userId);
 
     if (error || !data || data.length === 0) {
+      if (error) console.warn("Supabase fetch applications warning:", error.message);
       return memoryApplications;
     }
 
@@ -190,16 +218,41 @@ export async function insertApplicationToDb(application: {
   if (isSupabaseConfigured) {
     try {
       const admin = getSupabaseAdmin();
-      await admin.from("applications").insert({
-        job_id: application.jobId,
-        applicant_id: application.applicantId,
-        applicant_name: application.applicantName,
-        applicant_email: application.applicantEmail,
-        phone: application.phone,
-        cover_letter: application.coverLetter,
-        resume_url: application.resumeUrl,
-        status: "Submitted",
-      });
+
+      // Ensure applicant profile exists
+      await admin.from("profiles").upsert(
+        {
+          id: application.applicantId,
+          full_name: application.applicantName,
+          email: application.applicantEmail,
+          phone: application.phone || "",
+          role: "jobseeker",
+          location: "Butuan City",
+        },
+        { onConflict: "id" }
+      );
+
+      const { data, error } = await admin
+        .from("applications")
+        .insert({
+          id: newApp.id,
+          job_id: application.jobId,
+          applicant_id: application.applicantId,
+          applicant_name: application.applicantName,
+          applicant_email: application.applicantEmail,
+          phone: application.phone,
+          cover_letter: application.coverLetter,
+          resume_url: application.resumeUrl,
+          status: "Submitted",
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Supabase insert application error:", error.message);
+      } else if (data) {
+        newApp.id = data.id;
+      }
     } catch (err) {
       console.warn("Failed to persist application to Supabase:", err);
     }
@@ -222,10 +275,14 @@ export async function updateApplicationStatusInDb(
   if (isSupabaseConfigured) {
     try {
       const admin = getSupabaseAdmin();
-      await admin
+      const { error } = await admin
         .from("applications")
         .update({ status: newStatus, interview_date: interviewDate })
         .eq("id", applicationId);
+
+      if (error) {
+        console.error("Supabase update application error:", error.message);
+      }
     } catch (err) {
       console.warn("Failed to update status in Supabase:", err);
     }
@@ -268,7 +325,7 @@ export async function updateProfileInDb(profile: Partial<UserProfile>): Promise<
   if (isSupabaseConfigured && profile.id) {
     try {
       const admin = getSupabaseAdmin();
-      await admin.from("profiles").upsert({
+      const { error } = await admin.from("profiles").upsert({
         id: profile.id,
         full_name: profile.fullName,
         email: profile.email,
@@ -280,6 +337,9 @@ export async function updateProfileInDb(profile: Partial<UserProfile>): Promise<
         education: profile.education,
         portfolio_url: profile.portfolioUrl,
       });
+      if (error) {
+        console.error("Supabase update profile error:", error.message);
+      }
     } catch (err) {
       console.warn("Failed to update profile in Supabase:", err);
     }

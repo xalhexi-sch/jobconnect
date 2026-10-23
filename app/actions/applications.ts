@@ -28,9 +28,10 @@ export async function submitApplicationAction(data: {
 
     const application = await insertApplicationToDb(data);
     return { success: true, application };
-  } catch (error: any) {
-    console.error("submitApplicationAction error:", error);
-    return { success: false, error: error.message || "Failed to submit application." };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to submit application.";
+    console.error("submitApplicationAction error:", message);
+    return { success: false, error: message };
   }
 }
 
@@ -42,8 +43,9 @@ export async function updateApplicationStatusAction(
   try {
     const success = await updateApplicationStatusInDb(applicationId, newStatus, interviewDate);
     return { success };
-  } catch (error: any) {
-    console.error("updateApplicationStatusAction error:", error);
-    return { success: false, error: error.message || "Failed to update status." };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to update status.";
+    console.error("updateApplicationStatusAction error:", message);
+    return { success: false, error: message };
   }
 }
