@@ -1,14 +1,27 @@
-# JobConnect Caraga 🌲💼
+<div align="center">
+  <img src="./.github/assets/showcase.jpg" alt="JobConnect Caraga Platform Showcase" width="100%" />
+  
+  <br/>
+  <br/>
 
-> **The Premier Employment & Talent Ecosystem for Butuan City & Region XIII**  
-> A high-performance, web-native recruitment portal built with **Next.js 16 (Turbopack)**, **React 19**, **Tailwind CSS v4**, and **Motion**. Designed with an understated Apple/Linear aesthetic, strict role-based access control (Jobseeker, Employer, Admin), and zero AI-slop jargon.
+  # JobConnect Caraga 🌲💼
 
-[![Next.js 16](https://img.shields.io/badge/Next.js-16.4.2-black?style=flat&logo=next.js)](https://nextjs.org/)
-[![React 19](https://img.shields.io/badge/React-19.0.0-blue?style=flat&logo=react)](https://react.dev/)
-[![TypeScript 5](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
-[![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4.0-38B2AC?style=flat&logo=tailwind-css)](https://tailwindcss.com/)
-[![Motion](https://img.shields.io/badge/Motion-React-yellow?style=flat&logo=framer)](https://motion.dev/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
+  <p align="center">
+    <strong>The Premier Employment & Talent Ecosystem for Butuan City & Region XIII</strong>
+  </p>
+  
+  <p align="center">
+    A high-performance, web-native recruitment portal built with <strong>Next.js 16 (Turbopack)</strong>, <strong>React 19</strong>, <strong>Tailwind CSS v4</strong>, and <strong>Motion</strong>.<br/>Designed with an understated Apple/Linear aesthetic, strict role-based access control, and zero AI-slop jargon.
+  </p>
+
+  <p align="center">
+    <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-16.4.2-black?style=for-the-badge&logo=next.js" alt="Next.js 16" /></a>
+    <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-19.0.0-20232A?style=for-the-badge&logo=react" alt="React 19" /></a>
+    <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript" alt="TypeScript Strict" /></a>
+    <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-v4.0-0F172A?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS v4" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-059669?style=for-the-badge" alt="MIT License" /></a>
+  </p>
+</div>
 
 ---
 
