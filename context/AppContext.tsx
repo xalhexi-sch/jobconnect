@@ -1,9 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { Job, Application, PendingApproval, RoleType, UserProfile } from "@/lib/types";
 import { INITIAL_JOBS, PENDING_APPROVALS, INITIAL_USER_PROFILE } from "@/lib/mock-data";
 import { DEFAULT_MOCK_USER, MockUser } from "@/lib/clerk";
+import { fetchJobsAction, createJobAction } from "@/app/actions/jobs";
+import { submitApplicationAction, updateApplicationStatusAction } from "@/app/actions/applications";
+import { saveUserProfileAction } from "@/app/actions/profile";
 import confetti from "canvas-confetti";
 
 interface Toast {
@@ -97,7 +100,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       companyLogo: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=120&auto=format&fit=crop&q=80",
       location: "Ampayon, Butuan City",
       salary: "₱50,000/mo",
-      appliedDate: "Jun 14, 2026",
+      appliedDate: "Oct 21, 2026",
       status: "Under Review"
     },
     {
@@ -108,7 +111,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       companyLogo: "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?w=120&auto=format&fit=crop&q=80",
       location: "J.C. Aquino Ave, Butuan City",
       salary: "₱35,000/mo",
-      appliedDate: "Jun 11, 2026",
+      appliedDate: "Oct 18, 2026",
       status: "Submitted"
     }
   ]);
@@ -116,6 +119,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedCity, setSelectedCity] = useState("All");
+  const [selectedLocation, setSelectedLocation] = useState("All");
   const [selectedJobType, setSelectedJobType] = useState("All");
 
   const [applyModalJob, setApplyModalJob] = useState<Job | null>(null);
@@ -126,6 +130,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [authMode, setAuthMode] = useState<"sign-in" | "sign-up">("sign-in");
   const [isSignedIn, setIsSignedIn] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  // Initial load from backend (Supabase or local DB helper)
+  useEffect(() => {
+    let mounted = true;
+    fetchJobsAction().then((loadedJobs) => {
+      if (mounted && loadedJobs && loadedJobs.length > 0) {
+        setJobs(loadedJobs);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const openAuthModal = (mode: "sign-in" | "sign-up" = "sign-in") => {
     setAuthMode(mode);
@@ -208,6 +225,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateUserProfile = (updatedFields: Partial<UserProfile>) => {
     setUserProfile((prev) => ({ ...prev, ...updatedFields }));
+    saveUserProfileAction(updatedFields);
     showToast("Profile & portfolio updated successfully!", "success");
     setIsResumeModalOpen(false);
   };
@@ -225,7 +243,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const applyToJob = (job: Job, coverNote?: string) => {
+  const applyToJob = async (job: Job, coverNote?: string) => {
     const newApp: Application = {
       id: `app-${Date.now()}`,
       jobId: job.id,
@@ -238,6 +256,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       status: "Submitted"
     };
 
+    // Optimistic UI update
     setApplications((prev) => [newApp, ...prev]);
     setJobs((prev) =>
       prev.map((j) => (j.id === job.id ? { ...j, appliedCount: j.appliedCount + 1 } : j))
@@ -249,24 +268,42 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         spread: 60,
         origin: { y: 0.6 }
       });
-    } catch (e) {
+    } catch {
       // ignore
     }
 
     showToast(`Application successfully sent to ${job.company}! 🎉`, "success");
     setApplyModalJob(null);
+
+    // Persist via Server Action
+    await submitApplicationAction({
+      jobId: job.id,
+      applicantId: user.id || "user-maria",
+      applicantName: user.fullName || "Maria Santos",
+      applicantEmail: user.email || "maria.santos@caraga.tech",
+      coverLetter: coverNote
+    });
   };
 
-  const postJob = (newJobData: Omit<Job, "id" | "postedDate" | "appliedCount">) => {
+  const postJob = async (newJobData: Omit<Job, "id" | "postedDate" | "appliedCount">) => {
+    const tempId = `job-${Date.now()}`;
     const newJob: Job = {
       ...newJobData,
-      id: `job-${Date.now()}`,
+      id: tempId,
       postedDate: "Just now",
       appliedCount: 0
     };
+
+    // Optimistic UI update
     setJobs((prev) => [newJob, ...prev]);
     showToast(`Vacancy "${newJob.title}" posted to JobConnect Caraga!`, "success");
     setIsPostJobOpen(false);
+
+    // Persist via Server Action
+    await createJobAction({
+      ...newJobData,
+      employerId: user.id || "user-demo-employer",
+    });
   };
 
   const approvePending = (id: string) => {
@@ -290,11 +327,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast(`Listing status updated to ${status}`, "info");
   };
 
-  const updateApplicationStage = (appId: string, stage: Application["status"]) => {
+  const updateApplicationStage = async (appId: string, stage: Application["status"]) => {
+    // Optimistic UI update
     setApplications((prev) =>
       prev.map((app) => (app.id === appId ? { ...app, status: stage } : app))
     );
     showToast(`Candidate stage updated to: ${stage}`, "success");
+
+    // Persist via Server Action
+    await updateApplicationStatusAction(appId, stage);
   };
 
   return (
@@ -315,8 +356,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setSelectedCategory,
         selectedCity,
         setSelectedCity,
-        selectedLocation: selectedCity,
-        setSelectedLocation: setSelectedCity,
+        selectedLocation,
+        setSelectedLocation,
         selectedJobType,
         setSelectedJobType,
         toggleBookmark,
