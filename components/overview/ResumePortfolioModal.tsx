@@ -201,7 +201,7 @@ export default function ResumePortfolioModal() {
 
           <button
             type="submit"
-            className="w-full mt-3 py-2.5 rounded-xl bg-[#111116] text-white hover:bg-neutral-800 text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full mt-3 py-2.5 rounded-xl btn-supabase-emerald text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <Check className="w-3.5 h-3.5" />
             <span>Save Profile</span>

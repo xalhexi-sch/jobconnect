@@ -279,7 +279,7 @@ export default function JobseekerAppView() {
                       ) : (
                         <button
                           onClick={() => setApplyModalJob(job)}
-                          className="px-4 py-1.5 rounded-lg bg-[#111116] hover:bg-neutral-800 text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
+                          className="px-4 py-1.5 rounded-lg btn-supabase-emerald text-xs font-bold transition-all cursor-pointer"
                         >
                           Easy Apply
                         </button>

@@ -70,7 +70,7 @@ export default function EmployerAppView() {
         <div className="flex items-center gap-2">
           <button
             onClick={handleExport}
-            className="px-3.5 py-2 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-3.5 py-2 rounded-xl btn-clerk-outline text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-neutral-500" />
             <span>Export CSV</span>
@@ -78,7 +78,7 @@ export default function EmployerAppView() {
 
           <button
             onClick={() => setIsPostJobOpen(true)}
-            className="px-4 py-2 rounded-xl bg-[#111116] hover:bg-neutral-800 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 rounded-xl btn-supabase-emerald text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Post a Vacancy</span>

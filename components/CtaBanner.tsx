@@ -63,7 +63,7 @@ export default function CtaBanner() {
               <Link
                 href="/overview"
                 onClick={() => setRole("jobseeker")}
-                className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-white text-[#111116] hover:bg-neutral-100 transition-colors text-xs sm:text-sm font-semibold cursor-pointer shadow-md"
+                className="flex items-center gap-2.5 px-6 py-3 rounded-xl btn-supabase-emerald text-white text-xs sm:text-sm font-semibold cursor-pointer"
               >
                 <UserCheck className="w-4 h-4 text-emerald-600" />
                 <span>Launch Jobseeker Hub</span>

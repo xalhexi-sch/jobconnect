@@ -152,7 +152,7 @@ export default function ApplyModal() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full mt-3 py-2.5 rounded-xl bg-[#111116] text-white hover:bg-neutral-800 text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+            className="w-full mt-3 py-2.5 rounded-xl btn-supabase-emerald text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? (
               <span>Submitting Application...</span>
