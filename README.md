@@ -316,21 +316,24 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🔐 Environment Variables
+## 🔐 Environment Variables & Production Deployment
 
-Create a `.env.local` file in the root directory to connect live services:
+For step-by-step setup and Vercel production deployment instructions, see [`docs/deployment/VERCEL_SETUP.md`](docs/deployment/VERCEL_SETUP.md).
+
+Create a `.env.local` file in the root directory:
 
 ```env
-# Optional: Live Clerk Authentication
+# Clerk Authentication (https://clerk.com)
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
 CLERK_SECRET_KEY=sk_test_...
 
-# Optional: Supabase Database (if persisting live PostgreSQL records)
+# Supabase PostgreSQL (https://supabase.com)
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbG...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbG...
 ```
 
-> **Note**: JobConnect includes an in-memory client state fallback. The application runs with 100% full interactive functionality out of the box even without API keys!
+> **Note**: JobConnect includes an automatic fallback mode. The application runs with 100% full interactive functionality out of the box even without external API keys, ensuring flawless school presentations and defense demos!
 
 ---
 
