@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Job, Application, PendingApproval, RoleType, UserProfile } from "@/lib/types";
 import { INITIAL_JOBS, PENDING_APPROVALS, INITIAL_USER_PROFILE } from "@/lib/mock-data";
-import { DEFAULT_MOCK_USER, MockUser } from "@/lib/clerk";
+import { DEFAULT_MOCK_USER, MockUser, isClerkConfigured } from "@/lib/clerk";
 import { fetchJobsAction, createJobAction } from "@/app/actions/jobs";
 import { submitApplicationAction, updateApplicationStatusAction, fetchUserApplicationsAction } from "@/app/actions/applications";
 import { saveUserProfileAction, fetchUserProfileAction } from "@/app/actions/profile";
@@ -13,6 +13,13 @@ interface Toast {
   id: string;
   message: string;
   type?: "success" | "info" | "warning";
+}
+
+export interface ApplyOptions {
+  applicantName?: string;
+  applicantEmail?: string;
+  phone?: string;
+  coverNote?: string;
 }
 
 interface AppContextType {
@@ -39,7 +46,7 @@ interface AppContextType {
   
   // Actions
   toggleBookmark: (jobId: string) => void;
-  applyToJob: (job: Job, coverNote?: string) => void;
+  applyToJob: (job: Job, options?: ApplyOptions | string) => void;
   postJob: (newJob: Omit<Job, "id" | "postedDate" | "appliedCount">) => void;
   approvePending: (id: string) => void;
   rejectPending: (id: string) => void;
@@ -79,44 +86,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile>(INITIAL_USER_PROFILE);
   const [jobs, setJobs] = useState<Job[]>(INITIAL_JOBS);
   const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>(PENDING_APPROVALS);
-  const [bookmarkedJobIds, setBookmarkedJobIds] = useState<string[]>(["job-1", "job-2", "job-3"]);
   
-  const [applications, setApplications] = useState<Application[]>([
-    {
-      id: "app-1",
-      jobId: "job-1",
-      jobTitle: "Lead UI/UX Designer",
-      company: "TechVenture Caraga",
-      companyLogo: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&auto=format&fit=crop&q=80",
-      location: "Montilla Blvd, Butuan City",
-      salary: "₱65,000/mo",
-      appliedDate: "Yesterday, 10:45 AM",
-      status: "Interview Scheduled",
-      interviewDate: "Tomorrow at 2:00 PM (Google Meet / In-person Bancasi)"
-    },
-    {
-      id: "app-2",
-      jobId: "job-2",
-      jobTitle: "Full-Stack Web Developer",
-      company: "CSU Innovation Hub",
-      companyLogo: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=120&auto=format&fit=crop&q=80",
-      location: "Ampayon, Butuan City",
-      salary: "₱50,000/mo",
-      appliedDate: "Oct 21, 2026",
-      status: "Under Review"
-    },
-    {
-      id: "app-3",
-      jobId: "job-3",
-      jobTitle: "IT Systems Administrator",
-      company: "Father Saturnino Urios University",
-      companyLogo: "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?w=120&auto=format&fit=crop&q=80",
-      location: "J.C. Aquino Ave, Butuan City",
-      salary: "₱35,000/mo",
-      appliedDate: "Oct 18, 2026",
-      status: "Submitted"
-    }
-  ]);
+  // Start with 0 bookmarks - fresh and clean for new users
+  const [bookmarkedJobIds, setBookmarkedJobIds] = useState<string[]>([]);
+  
+  // Start with 0 applications - new users have NOT applied to anything
+  const [applications, setApplications] = useState<Application[]>([]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -130,10 +105,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isMobileMockupOpen, setIsMobileMockupOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"sign-in" | "sign-up">("sign-in");
-  const [isSignedIn, setIsSignedIn] = useState(true);
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  // Initial load from backend (Supabase or local DB helper)
+  // Load saved bookmarks from localStorage on client mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("jobconnect_saved_jobs");
+      if (stored) {
+        setBookmarkedJobIds(JSON.parse(stored));
+      }
+    } catch {}
+  }, []);
+
+  // Initial load from backend (Supabase database)
   useEffect(() => {
     let mounted = true;
     fetchJobsAction().then((loadedJobs) => {
@@ -141,14 +126,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setJobs(loadedJobs);
       }
     });
+
     if (user?.id) {
       fetchUserApplicationsAction(user.id).then((loadedApps) => {
         if (mounted) {
-          if (user.id !== "user-maria") {
-            setApplications(loadedApps || []);
-          } else if (loadedApps && loadedApps.length > 0) {
-            setApplications(loadedApps);
-          }
+          setApplications(loadedApps || []);
         }
       });
       fetchUserProfileAction(user.id).then((profile) => {
@@ -156,7 +138,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           setUserProfile(profile);
         }
       });
+    } else {
+      setApplications([]);
     }
+
     return () => {
       mounted = false;
     };
@@ -173,17 +158,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const loginUser = (email: string, name?: string) => {
     setIsSignedIn(true);
+    const resolvedName = name || email.split("@")[0] || "User";
     setUser((prev) => ({
       ...prev,
+      id: prev.id || `user-${Date.now()}`,
       email,
-      fullName: name || prev.fullName
+      fullName: resolvedName
+    }));
+    setUserProfile((prev) => ({
+      ...prev,
+      email,
+      fullName: resolvedName
     }));
     setIsAuthOpen(false);
-    showToast(`Signed in as ${name || email}!`, "success");
+    showToast(`Signed in as ${resolvedName}!`, "success");
   };
 
   const logoutUser = () => {
     setIsSignedIn(false);
+    setUser(DEFAULT_MOCK_USER);
+    setApplications([]);
     showToast("Signed out", "info");
   };
 
@@ -204,38 +198,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setUser((prev) => ({
       ...prev,
       role: newRole,
-      fullName:
-        newRole === "admin"
-          ? "Admin Moderator"
-          : newRole === "employer"
-          ? "George Martinez (HR)"
-          : "Juan Dela Cruz",
-      email:
-        newRole === "admin"
-          ? "admin@jobconnect.butuan"
-          : newRole === "employer"
-          ? "george@techventure.ph"
-          : "juan.delacruz@caraga.tech",
-      location:
-        newRole === "admin"
-          ? "JobConnect HQ, Butuan"
-          : newRole === "employer"
-          ? "Bancasi, Butuan City"
-          : "Doongan, Butuan City",
-      avatar:
-        newRole === "admin"
-          ? "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80"
-          : newRole === "employer"
-          ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
-          : "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80"
+      fullName: prev.fullName || (newRole === "employer" ? "Verified Employer" : "Jobseeker"),
+      email: prev.email || (newRole === "employer" ? "employer@butuan.tech" : "")
     }));
     showToast(
       `Switched to ${
         newRole === "admin"
           ? "Admin Dashboard 🛡️"
           : newRole === "employer"
-          ? "Employer Portal 👔"
-          : "Jobseeker Hub 🎯"
+          ? "Employer Hiring Portal 🏢"
+          : "Jobseeker Portal 🎯"
       }`,
       "info"
     );
@@ -243,25 +215,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateUserProfile = (updatedFields: Partial<UserProfile>) => {
     setUserProfile((prev) => ({ ...prev, ...updatedFields }));
-    saveUserProfileAction(updatedFields);
-    showToast("Profile & portfolio updated successfully!", "success");
+    if (user?.id) {
+      saveUserProfileAction(updatedFields);
+    }
+    showToast("Profile updated successfully!", "success");
     setIsResumeModalOpen(false);
   };
 
   const toggleBookmark = (jobId: string) => {
     setBookmarkedJobIds((prev) => {
       const exists = prev.includes(jobId);
-      if (exists) {
-        showToast("Removed from saved jobs", "info");
-        return prev.filter((id) => id !== jobId);
-      } else {
-        showToast("Saved to your JobConnect bookmarks!", "success");
-        return [...prev, jobId];
-      }
+      const next = exists ? prev.filter((id) => id !== jobId) : [...prev, jobId];
+      try {
+        localStorage.setItem("jobconnect_saved_jobs", JSON.stringify(next));
+      } catch {}
+      showToast(exists ? "Removed from saved jobs" : "Saved to your bookmarks!", "info");
+      return next;
     });
   };
 
-  const applyToJob = async (job: Job, coverNote?: string) => {
+  const applyToJob = async (job: Job, options?: ApplyOptions | string) => {
+    const coverNote = typeof options === "string" ? options : options?.coverNote;
+    const optName = typeof options === "object" ? options?.applicantName : undefined;
+    const optEmail = typeof options === "object" ? options?.applicantEmail : undefined;
+    const optPhone = typeof options === "object" ? options?.phone : undefined;
+
+    const applicantName = optName || user.fullName || userProfile.fullName || "Applicant";
+    const applicantEmail = optEmail || user.email || userProfile.email || "applicant@jobconnect.bxu";
+    const phone = optPhone || userProfile.phone;
+
     const newApp: Application = {
       id: `app-${Date.now()}`,
       jobId: job.id,
@@ -271,7 +253,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       location: job.location,
       salary: job.salary,
       appliedDate: "Just now",
-      status: "Submitted"
+      status: "Submitted",
+      applicantName,
+      applicantEmail,
+      coverLetter: coverNote
     };
 
     // Optimistic UI update
@@ -279,6 +264,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setJobs((prev) =>
       prev.map((j) => (j.id === job.id ? { ...j, appliedCount: j.appliedCount + 1 } : j))
     );
+
+    // Save user profile details so future applications are faster
+    if (optName || optEmail || optPhone) {
+      setUserProfile((prev) => ({
+        ...prev,
+        fullName: applicantName,
+        email: applicantEmail,
+        phone: phone || prev.phone
+      }));
+    }
 
     try {
       confetti({
@@ -293,12 +288,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast(`Application successfully sent to ${job.company}! 🎉`, "success");
     setApplyModalJob(null);
 
-    // Persist via Server Action
+    // Persist via Server Action to Supabase
     await submitApplicationAction({
       jobId: job.id,
-      applicantId: user.id || "user-maria",
-      applicantName: user.fullName || "Maria Santos",
-      applicantEmail: user.email || "maria.santos@caraga.tech",
+      applicantId: user.id || `guest-${Date.now()}`,
+      applicantName,
+      applicantEmail,
+      phone,
       coverLetter: coverNote
     });
   };
@@ -318,39 +314,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setIsPostJobOpen(false);
 
     // Persist via Server Action
-    await createJobAction({
-      ...newJobData,
-      employerId: user.id || "user-demo-employer",
-    });
+    await createJobAction(newJobData);
   };
 
   const approvePending = (id: string) => {
-    setPendingApprovals((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: "Approved" } : item))
-    );
-    showToast("Employer verified and listing published to live Caraga directory!", "success");
+    const item = pendingApprovals.find((p) => p.id === id);
+    if (!item) return;
+
+    showToast(`Verified business account: ${item.company}`, "success");
+    setPendingApprovals((prev) => prev.filter((p) => p.id !== id));
   };
 
   const rejectPending = (id: string) => {
-    setPendingApprovals((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: "Rejected" } : item))
-    );
-    showToast("Employer verification rejected.", "warning");
+    const item = pendingApprovals.find((p) => p.id === id);
+    if (item) {
+      showToast(`Rejected submission: ${item.company}`, "info");
+    }
+    setPendingApprovals((prev) => prev.filter((p) => p.id !== id));
   };
 
   const updateJobStatus = (id: string, status: "Active" | "Pending" | "Expired") => {
     setJobs((prev) =>
       prev.map((j) => (j.id === id ? { ...j, status } : j))
     );
-    showToast(`Listing status updated to ${status}`, "info");
+    showToast(`Job listing marked as ${status}`, "info");
   };
 
   const updateApplicationStage = async (appId: string, stage: Application["status"]) => {
-    // Optimistic UI update
     setApplications((prev) =>
-      prev.map((app) => (app.id === appId ? { ...app, status: stage } : app))
+      prev.map((a) => (a.id === appId ? { ...a, status: stage } : a))
     );
-    showToast(`Candidate stage updated to: ${stage}`, "success");
+    showToast(`Candidate stage moved to: ${stage}`, "success");
 
     // Persist via Server Action
     await updateApplicationStatusAction(appId, stage);

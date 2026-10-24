@@ -1,5 +1,4 @@
-// Seamless Clerk authentication configuration & mock provider
-// Works seamlessly out of the box, and switches to live Clerk once API keys are provided.
+// Seamless Clerk authentication configuration & user types
 
 export const isClerkConfigured = Boolean(
   process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && 
@@ -22,12 +21,14 @@ export interface MockUser {
   notificationsCount: number;
 }
 
-export const DEFAULT_MOCK_USER: MockUser = {
-  id: "user-maria",
-  fullName: "Maria Santos",
-  email: "maria.santos@caraga.tech",
+export const EMPTY_USER: MockUser = {
+  id: "",
+  fullName: "",
+  email: "",
   role: "jobseeker",
-  location: "Bancasi, Butuan City",
-  avatar: "/hero-applicant.png",
-  notificationsCount: 3
+  location: "Butuan City",
+  avatar: "",
+  notificationsCount: 0
 };
+
+export const DEFAULT_MOCK_USER: MockUser = EMPTY_USER;

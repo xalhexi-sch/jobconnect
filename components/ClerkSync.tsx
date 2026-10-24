@@ -51,6 +51,8 @@ function ClerkSyncInner() {
           console.warn("Clerk to Supabase sync warning:", err);
         });
       }
+    } else if (isLoaded && !isSignedIn) {
+      setIsSignedIn(false);
     }
   }, [isLoaded, isSignedIn, user, setUser, setIsSignedIn]);
 

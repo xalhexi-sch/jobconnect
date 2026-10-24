@@ -95,7 +95,7 @@ export default function Hero() {
               transition={{ duration: 0.6, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
               className="pt-1 max-w-2xl"
             >
-              <div className="bg-white p-2 rounded-2xl border border-neutral-200/90 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <div className="bg-white p-2 rounded-xl border border-neutral-200/90 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <div className="flex items-center gap-2.5 px-3 py-2 sm:py-1 w-full sm:flex-1 rounded-xl bg-neutral-50 sm:bg-transparent">
                   <Search className="w-4 h-4 text-neutral-400 shrink-0" />
                   <input
@@ -158,7 +158,7 @@ export default function Hero() {
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-full max-w-[340px] sm:max-w-[380px] aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-neutral-100 group"
+              className="relative w-full max-w-[340px] sm:max-w-[380px] aspect-[4/5] rounded-2xl overflow-hidden shadow-xl border-4 border-white bg-neutral-100 group"
             >
               <img
                 src="/hero-applicant.png"

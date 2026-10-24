@@ -22,7 +22,7 @@ export default function Footer() {
 
   return (
     <footer className="mt-14 pb-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
-      <div className="rounded-3xl bg-[#111116] text-white p-8 sm:p-12 lg:p-14 border border-white/10 shadow-2xl">
+      <div className="rounded-2xl bg-[#111116] text-white p-8 sm:p-12 lg:p-14 border border-white/10 shadow-2xl">
         
         {/* Top: Logo & Newsletter */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-12 border-b border-white/10">

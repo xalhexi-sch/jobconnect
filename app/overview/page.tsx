@@ -199,7 +199,7 @@ export default function OverviewPage() {
             <EmployerAppView />
           ) : (
             /* Protected Employer Workspace & Candidate Privacy Gate */
-            <div className="max-w-xl mx-auto my-6 sm:my-8 p-5 sm:p-8 rounded-3xl bg-white border border-neutral-200/90 shadow-sm text-center">
+            <div className="max-w-xl mx-auto my-6 sm:my-8 p-5 sm:p-7 rounded-2xl bg-white border border-neutral-200/90 shadow-sm text-center">
               <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3.5 sm:mb-4 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shadow-xs">
                 <Lock className="w-6 h-6 sm:w-7 sm:h-7" />
               </div>
@@ -270,7 +270,7 @@ export default function OverviewPage() {
             baseItemSize={isMobile ? 38 : 46}
             magnification={isMobile ? 48 : 66}
             panelHeight={isMobile ? 52 : 62}
-            roundness={0.7}
+            roundness={0.4}
             showLabels={!isMobile}
             showBadges={true}
             showIndicators={true}

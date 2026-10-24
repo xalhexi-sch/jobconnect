@@ -1,7 +1,23 @@
 import { Job, PendingApproval, UserProfile } from "./types";
 
 export const INITIAL_USER_PROFILE: UserProfile = {
-  id: "user-maria",
+  id: "",
+  fullName: "",
+  email: "",
+  phone: "",
+  location: "Butuan City",
+  headline: "",
+  bio: "",
+  skills: [],
+  education: "",
+  portfolioUrl: "",
+  resumeFileName: "",
+  resumeUpdated: "",
+  expectedSalary: ""
+};
+
+export const DEMO_USER_PROFILE: UserProfile = {
+  id: "demo-user",
   fullName: "Maria Santos",
   email: "maria.santos@caraga.tech",
   phone: "+63 917 842 9011",

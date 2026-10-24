@@ -38,59 +38,22 @@ export default function EmployerAppView() {
     fetchEmployerApplicationsAction(user.id)
       .then((apps) => {
         if (mounted) {
-          // If in demo mode and user is employer, provide fallback if DB has 0 applications
-          if (apps && apps.length > 0) {
-            setEmployerApps(apps);
-          } else if (user.role === "employer") {
-            // Sample candidate application for employer review
-            setEmployerApps([
-              {
-                id: "emp-app-1",
-                jobId: "job-1",
-                jobTitle: "Senior Full-Stack Engineer",
-                company: "TechVenture Caraga",
-                companyLogo: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&auto=format&fit=crop&q=80",
-                applicantName: "Alexis Morales",
-                applicantEmail: "alexis.morales@caraga.tech",
-                location: "Bancasi, Butuan City",
-                salary: "₱75,000/mo",
-                appliedDate: "Today, 9:30 AM",
-                status: "Under Review",
-                coverLetter: "10+ years experience in TypeScript, React, and PostgreSQL. Excited to build local Caraga infrastructure.",
-                resumeUrl: "https://jobconnect.caraga.ph/resumes/alexis-cv.pdf"
-              },
-              {
-                id: "emp-app-2",
-                jobId: "job-2",
-                jobTitle: "Lead UI/UX Product Designer",
-                company: "TechVenture Caraga",
-                companyLogo: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=120&auto=format&fit=crop&q=80",
-                applicantName: "Danielle Cruz",
-                applicantEmail: "danielle.cruz@csu.edu.ph",
-                location: "Ampayon, Butuan City",
-                salary: "₱60,000/mo",
-                appliedDate: "Yesterday, 3:15 PM",
-                status: "Interview Scheduled",
-                interviewDate: "Tomorrow at 10:00 AM (CSU Innovation Lab / Online)",
-                coverLetter: "Product designer specializing in clean fintech & job ecosystem interfaces.",
-                resumeUrl: "https://jobconnect.caraga.ph/resumes/danielle-cv.pdf"
-              }
-            ]);
-          } else {
-            setEmployerApps([]);
-          }
+          setEmployerApps(apps || []);
           setIsLoading(false);
         }
       })
       .catch((err) => {
         console.error("fetchEmployerApplications error:", err);
-        if (mounted) setIsLoading(false);
+        if (mounted) {
+          setEmployerApps([]);
+          setIsLoading(false);
+        }
       });
 
     return () => {
       mounted = false;
     };
-  }, [user.id, user.role]);
+  }, [user.id]);
 
   const filteredApplications = employerApps.filter((app) => {
     if (selectedStatusFilter !== "All" && app.status !== selectedStatusFilter) return false;
