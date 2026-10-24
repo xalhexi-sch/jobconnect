@@ -30,7 +30,6 @@ export default function JobDetailModal({
       open={Boolean(job)}
       onClose={onClose}
       title={job?.title ?? "Job details"}
-      description={job ? `${job.company} · ${job.location}` : undefined}
       size="lg"
       footer={
         job && (
@@ -90,8 +89,8 @@ export default function JobDetailModal({
             </div>
           </div>
 
-          <dl className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-            <div className="p-3.5 rounded-xl bg-blue-50 col-span-2 sm:col-span-1">
+          <dl className="grid grid-cols-2 gap-2.5">
+            <div className="p-3.5 rounded-xl bg-blue-50 col-span-2">
               <dt className="text-xs font-medium text-fg-muted">Salary</dt>
               <dd className="font-bold text-blue-700 mt-0.5">{job.salary}</dd>
             </div>

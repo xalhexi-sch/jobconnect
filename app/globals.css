@@ -267,3 +267,5 @@ body:has(dialog.dlg[open]) { overflow: hidden; }
     transition-duration: 0.01ms !important;
   }
 }
+
+dialog.dlg:focus, dialog.dlg:focus-visible { outline: none; }

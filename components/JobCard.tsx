@@ -29,7 +29,7 @@ export default function JobCard({
   const pending = job.status === "Pending";
 
   return (
-    <article className="group relative p-4 sm:p-5 rounded-2xl bg-surface border border-line shadow-card hover:shadow-card-hover hover:border-brand/40 transition-all">
+    <article className="group relative p-4 sm:p-5 rounded-2xl bg-surface border border-line shadow-card hover:shadow-card-hover hover:border-brand/40 hover:-translate-y-0.5 transition-all duration-200">
       <div className="flex gap-3.5 sm:gap-4">
         <CompanyLogo name={job.company} src={job.companyLogo} size={52} />
 

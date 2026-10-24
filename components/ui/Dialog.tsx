@@ -37,7 +37,11 @@ export default function Dialog({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (open && !el.open) el.showModal();
+    if (open && !el.open) {
+      el.showModal();
+      // Land focus on the dialog itself so no control looks pre-selected; Tab moves into it.
+      el.focus({ preventScroll: true });
+    }
     if (!open && el.open) el.close();
   }, [open]);
 
@@ -45,6 +49,7 @@ export default function Dialog({
     <dialog
       ref={ref}
       className="dlg"
+      tabIndex={-1}
       style={{ "--dlg-w": WIDTH[size] } as React.CSSProperties}
       aria-labelledby={titleId}
       aria-describedby={description ? descId : undefined}

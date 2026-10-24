@@ -11,6 +11,7 @@ const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
 export function timeAgo(iso: string | undefined, locale = "en"): string {
   if (!iso) return "";
   const seconds = Math.round((new Date(iso).getTime() - Date.now()) / 1000);
+  if (Math.abs(seconds) < 60) return locale.startsWith("fil") ? "ngayon lang" : "just now";
   const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
   for (const [unit, size] of UNITS) {
     if (Math.abs(seconds) >= size) return rtf.format(Math.round(seconds / size), unit);
