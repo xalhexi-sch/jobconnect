@@ -50,6 +50,9 @@ interface AppContextType {
   setUser: React.Dispatch<React.SetStateAction<MockUser>>;
   userProfile: UserProfile;
   profileLoaded: boolean;
+  /** Set when the signed-in user's profile could not be loaded; show a retry, not onboarding. */
+  profileError: string | null;
+  retryProfile: () => void;
   updateUserProfile: (profile: Partial<UserProfile>) => void;
   completeOnboarding: (input: OnboardingInput) => Promise<boolean>;
   uploadResume: (file: File) => Promise<boolean>;
@@ -108,6 +111,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<MockUser>(DEFAULT_MOCK_USER);
   const [userProfile, setUserProfile] = useState<UserProfile>(INITIAL_USER_PROFILE);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
   const [bookmarkedJobIds, setBookmarkedJobIds] = useState<string[]>([]);
@@ -158,6 +163,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         await Promise.resolve();
         if (!mounted) return;
         setProfileLoaded(false);
+        setProfileError(null);
         setApplications([]);
         setBookmarkedJobIds([]);
         setUserProfile(INITIAL_USER_PROFILE);
@@ -167,12 +173,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const profile = await fetchUserProfileAction();
+      const res = await fetchUserProfileAction();
       if (!mounted) return;
-      if (!profile) {
+      if (!res.ok || !res.profile) {
+        // Lookup failed (or session not ready): never treat this as a brand-new user. Offer retry, keep browsing working.
+        setProfileError(res.ok ? "We couldn’t find your account yet." : res.error);
         setProfileLoaded(true);
+        await reloadJobs("jobseeker", false);
+        if (mounted) setJobsLoading(false);
         return;
       }
+      const profile = res.profile;
+      setProfileError(null);
       const serverRole = profile.role ?? "jobseeker";
       setUserProfile(profile);
       setRole(serverRole);
@@ -190,7 +202,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => {
       mounted = false;
     };
-  }, [user.id, reloadJobs]);
+  }, [user.id, reloadJobs, retryNonce]);
 
   const openAuthModal = (mode: "sign-in" | "sign-up" = "sign-in") => {
     setAuthMode(mode);
@@ -343,6 +355,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setUser,
         userProfile,
         profileLoaded,
+        profileError,
+        retryProfile: () => setRetryNonce((n) => n + 1),
         updateUserProfile,
         completeOnboarding,
         uploadResume,

@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import { AuthError } from "@/lib/auth";
 import { RateLimitError } from "@/lib/rate-limit";
 import { firstIssue } from "@/lib/validation";
+import { ConfigError } from "@/lib/supabase";
 
 export type ActionResult<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 
@@ -18,6 +19,10 @@ export async function run<T extends object>(fn: () => Promise<T>): Promise<Actio
       return { ok: false, error: e.message };
     }
     if (e instanceof ZodError) return { ok: false, error: firstIssue(e) };
+    if (e instanceof ConfigError) {
+      console.error("[config]", e.message);
+      return { ok: false, error: "JobConnect is temporarily unavailable. Please try again in a few minutes." };
+    }
     console.error("[action] unexpected error:", e instanceof Error ? e.message : e);
     return { ok: false, error: "Something went wrong. Please try again." };
   }

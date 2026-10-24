@@ -7,15 +7,16 @@ import { run, UserError, type ActionResult } from "@/lib/action";
 import { onboardingSchema, profileUpdateSchema } from "@/lib/validation";
 import type { UserProfile } from "@/lib/types";
 
-/** Called on sign-in: ensures the profile exists and returns the server-trusted profile (incl. role). */
-export async function fetchUserProfileAction(): Promise<UserProfile | null> {
-  try {
+/**
+ * Called on sign-in: ensures the profile exists and returns the server-trusted profile (incl. role).
+ * ok + profile:null means "not signed in"; ok:false means the lookup itself failed, so the UI can offer a retry
+ * instead of wrongly treating the user as brand new.
+ */
+export async function fetchUserProfileAction(): Promise<ActionResult<{ profile: UserProfile | null }>> {
+  return run(async () => {
     const user = await getSessionUser();
-    return user ? await getProfile(user.id) : null;
-  } catch (error) {
-    console.error("fetchUserProfileAction failed:", error);
-    return null;
-  }
+    return { profile: user ? await getProfile(user.id) : null };
+  });
 }
 
 /** One-time role selection. Only jobseeker/employer can be chosen; admin is never self-assignable. */

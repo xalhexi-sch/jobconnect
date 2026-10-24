@@ -38,6 +38,9 @@ export default function OverviewPage() {
     openAuthModal,
     isSignedIn,
     userProfile,
+    profileLoaded,
+    profileError,
+    retryProfile,
     jobs,
     applications,
     bookmarkedJobIds,
@@ -98,7 +101,7 @@ export default function OverviewPage() {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {isSignedIn && (
+            {isSignedIn && userProfile.onboarded && (
               <span className="hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-surface-2 border border-line text-xs font-semibold text-fg-muted capitalize">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
                 {role === "jobseeker" ? "Job seeker" : role}
@@ -128,7 +131,15 @@ export default function OverviewPage() {
             <EmployerAppView />
           ) : (
             <>
-              {isSignedIn && !userProfile.onboarded && (
+              {isSignedIn && profileError && (
+                <div role="alert" className="max-w-4xl mx-auto mb-5 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-sm font-medium">{profileError}</p>
+                  <button onClick={retryProfile} className="h-10 px-5 rounded-xl border border-amber-200 bg-surface text-sm font-semibold cursor-pointer">
+                    Try again
+                  </button>
+                </div>
+              )}
+              {isSignedIn && profileLoaded && !profileError && !userProfile.onboarded && (
                 <div className="max-w-4xl mx-auto mb-5 p-4 rounded-2xl bg-blue-50 border border-blue-200 flex flex-wrap items-center justify-between gap-3">
                   <p className="text-sm font-medium">Finish setting up your account to apply or post jobs.</p>
                   <button onClick={() => setIsOnboardingOpen(true)} className="btn-brand-primary h-10 px-5 rounded-xl text-sm font-semibold cursor-pointer">
