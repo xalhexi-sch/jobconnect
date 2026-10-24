@@ -60,7 +60,8 @@ export default function OnboardingModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { user, userProfile, updateUserProfile, setRole, showToast } = useApp();
+  const { user, userProfile, completeOnboarding, showToast } = useApp();
+  const [submitting, setSubmitting] = useState(false);
 
   const [step, setStep] = useState<"role-select" | "profile-details">("role-select");
   const [selectedRole, setSelectedRole] = useState<"jobseeker" | "employer">("jobseeker");
@@ -94,47 +95,42 @@ export default function OnboardingModal({
     setStep("profile-details");
   };
 
-  const handleCompleteOnboarding = (e: React.FormEvent) => {
+  const handleCompleteOnboarding = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
 
-    if (selectedRole === "jobseeker") {
-      updateUserProfile({
-        fullName: fullName || "Jobseeker",
-        email,
-        phone,
-        role: "jobseeker",
-        headline: `${category} Specialist`,
-        location: `${barangay}, Butuan City`,
-        onboarded: true,
-      });
-      setRole("jobseeker");
-      showToast("Welcome to JobConnect Butuan! Your profile is ready.", "success");
-    } else {
-      const resolvedCompany = companyName || "Local Enterprise";
-      updateUserProfile({
-        fullName: employerContactName || "Hiring Manager",
-        email,
-        phone,
-        role: "employer",
-        companyName: resolvedCompany,
-        companyIndustry,
-        location: `${barangay}, Butuan City`,
-        headline: `Hiring Manager at ${resolvedCompany}`,
-        onboarded: true,
-      });
-      setRole("employer");
-      showToast(`Employer workspace verified for ${resolvedCompany}!`, "success");
-    }
+    const ok =
+      selectedRole === "jobseeker"
+        ? await completeOnboarding({
+            role: "jobseeker",
+            fullName: fullName || "Jobseeker",
+            phone,
+            headline: `${category} Specialist`,
+            location: `${barangay}, Butuan City`,
+          })
+        : await completeOnboarding({
+            role: "employer",
+            fullName: employerContactName || "Hiring Manager",
+            phone,
+            companyName: companyName.trim(),
+            companyIndustry,
+            location: `${barangay}, Butuan City`,
+            headline: `Hiring Manager at ${companyName.trim()}`,
+          });
 
+    setSubmitting(false);
+    if (!ok) return;
+
+    showToast(
+      selectedRole === "jobseeker"
+        ? "Welcome to JobConnect Butuan! Your profile is ready."
+        : "Employer workspace created. Listings go live once your business is verified.",
+      "success"
+    );
     try {
-      localStorage.setItem("jobconnect_onboarded", "true");
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-      });
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     } catch {}
-
     onClose();
   };
 

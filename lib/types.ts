@@ -25,6 +25,8 @@ export interface Job {
   category: JobCategory;
   status: JobStatus;
   postedDate: string;
+  createdAt?: string;
+  employerId?: string;
   appliedCount: number;
   featured?: boolean;
   description: string;
@@ -40,7 +42,7 @@ export interface Application {
   location: string;
   salary: string;
   appliedDate: string;
-  status: "Submitted" | "Under Review" | "Interview Scheduled" | "Offer Extended" | "Rejected";
+  status: "Submitted" | "Under Review" | "Interview Scheduled" | "Offer Extended" | "Rejected" | "Withdrawn";
   interviewDate?: string;
   applicantId?: string;
   applicantName?: string;
@@ -74,6 +76,7 @@ export interface UserProfile {
   skills: string[];
   education: string;
   experience?: string;
+  companyVerified?: boolean;
   portfolioUrl: string;
   resumeFileName: string;
   resumeUpdated: string;

@@ -1,33 +1,20 @@
-import { createClient } from "@supabase/supabase-js";
+import "server-only";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-jobgio.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+let cached: SupabaseClient | null = null;
 
-export const isSupabaseConfigured = Boolean(
-  process.env.NEXT_PUBLIC_SUPABASE_URL && 
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
-  !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("placeholder") &&
-  !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.includes("placeholder")
-);
-
-// Standard Supabase client for client-side or anon operations
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: typeof window !== "undefined",
-    autoRefreshToken: true,
-  },
-});
-
-// Admin / Server-side Supabase client with elevated service role if provided
-export const getSupabaseAdmin = () => {
-  if (supabaseServiceKey && !supabaseServiceKey.includes("placeholder")) {
-    return createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    });
+/**
+ * Server-only Supabase client using the service role key.
+ * RLS denies the anon key entirely, so ALL data access goes through server
+ * code that has already authenticated and authorized the caller.
+ */
+export function getSupabaseAdmin(): SupabaseClient {
+  if (cached) return cached;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error("Supabase is not configured: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.");
   }
-  return supabase;
-};
+  cached = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  return cached;
+}

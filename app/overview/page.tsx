@@ -35,7 +35,8 @@ export default function OverviewPage() {
     openAuthModal,
     isSignedIn,
     user,
-    setRole,
+    userProfile,
+    showToast,
     jobs,
     applications,
     bookmarkedJobIds,
@@ -247,11 +248,15 @@ export default function OverviewPage() {
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
                 <button
-                  onClick={() => setRole("employer")}
+                  onClick={() => {
+                    if (!isSignedIn) openAuthModal("sign-in");
+                    else if (!userProfile.onboarded) setIsOnboardingOpen(true);
+                    else showToast("This account is registered as a job seeker. Employer accounts are created during sign-up.", "info");
+                  }}
                   className="w-full sm:w-auto px-5 py-2.5 rounded-xl btn-brand-primary text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                 >
                   <Building2 className="w-4 h-4" />
-                  <span>Switch to Employer Profile</span>
+                  <span>Become an Employer</span>
                 </button>
 
                 <button
@@ -264,10 +269,6 @@ export default function OverviewPage() {
                   Return to Job Search
                 </button>
               </div>
-
-              <p className="text-[11px] text-neutral-400 mt-3.5">
-                Tip for evaluators: Click &ldquo;Switch to Employer Profile&rdquo; for instant simulated employer portal access.
-              </p>
             </div>
           )}
         </div>

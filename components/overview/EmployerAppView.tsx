@@ -22,7 +22,6 @@ export default function EmployerAppView() {
     jobs,
     user,
     userProfile,
-    setRole,
     updateApplicationStage,
     setIsPostJobOpen,
     showToast
@@ -36,10 +35,10 @@ export default function EmployerAppView() {
   useEffect(() => {
     let mounted = true;
     setIsLoading(true);
-    fetchEmployerApplicationsAction(user.id)
-      .then((apps) => {
+    fetchEmployerApplicationsAction()
+      .then((res) => {
         if (mounted) {
-          setEmployerApps(apps || []);
+          setEmployerApps(res.ok ? res.applications : []);
           setIsLoading(false);
         }
       })
@@ -54,7 +53,7 @@ export default function EmployerAppView() {
     return () => {
       mounted = false;
     };
-  }, [user.id]);
+  }, []);
 
   const filteredApplications = employerApps.filter((app) => {
     if (selectedStatusFilter !== "All" && app.status !== selectedStatusFilter) return false;

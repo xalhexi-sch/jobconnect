@@ -51,13 +51,13 @@ export default function PostJobModal() {
 
   if (!isPostJobOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !company) return;
 
     const formattedLocation = city === "Butuan City" ? `${barangay}, Butuan City` : `${location}, ${city}`;
 
-    postJob({
+    const ok = await postJob({
       title,
       company,
       companyLogo: "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?w=120&auto=format&fit=crop&q=80",
@@ -65,10 +65,9 @@ export default function PostJobModal() {
       barangay: city === "Butuan City" ? barangay : undefined,
       city,
       salary,
-      salaryPhp: parseInt(salary.replace(/\D/g, "")) || 25000,
+      salaryPhp: parseInt((salary.replace(/,/g, "").match(/\d+/) ?? ["25000"])[0], 10) || 25000,
       type,
       category,
-      status: "Active",
       description: description || `Hiring for ${title} at ${company} in ${city}.`,
       requirements: [
         "Relevant experience or educational background",
@@ -77,6 +76,7 @@ export default function PostJobModal() {
       ]
     });
 
+    if (!ok) return;
     setTitle("");
     setCompany("");
     setDescription("");
