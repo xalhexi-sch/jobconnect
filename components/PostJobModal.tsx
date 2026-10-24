@@ -77,32 +77,35 @@ export default function PostJobModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-lg rounded-2xl bg-white p-6 sm:p-7 shadow-2xl border border-neutral-200 text-left max-h-[92vh] overflow-y-auto"
+        className="relative w-full max-w-lg rounded-t-3xl sm:rounded-2xl bg-white p-5 sm:p-7 shadow-2xl border border-neutral-200 text-left max-h-[90vh] overflow-y-auto"
       >
+        {/* Mobile Pull Handle Indicator */}
+        <div className="w-12 h-1.5 bg-neutral-300 rounded-full mx-auto mb-3 sm:hidden" />
+
         {/* Close button */}
         <button
           onClick={() => setIsPostJobOpen(false)}
-          className="absolute top-5 right-5 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-500 hover:text-black transition-colors cursor-pointer"
+          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-500 hover:text-black transition-colors cursor-pointer"
           aria-label="Close"
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* Header */}
-        <div className="mb-4">
+        <div className="mb-4 pr-8">
           <div className="flex items-center gap-2 mb-1">
-            <Briefcase className="w-4 h-4 text-neutral-700" />
-            <h3 className="text-lg font-bold text-neutral-900">Post a Job Opening</h3>
+            <Briefcase className="w-4 h-4 text-blue-600" />
+            <h3 className="text-base sm:text-lg font-bold text-neutral-900">Post a Job Opening</h3>
           </div>
           <p className="text-xs text-neutral-500">
             Publish an active hiring vacancy for Butuan City &amp; Caraga job seekers.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3.5">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-3.5">
           <div>
             <label className="block text-xs font-semibold text-neutral-700 mb-1">
               Job Title
@@ -113,11 +116,11 @@ export default function PostJobModal() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Service Crew, Nurse, Junior Developer"
-              className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-black focus:bg-white"
+              className="w-full px-3 py-2.5 sm:py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-blue-600 focus:bg-white"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-neutral-700 mb-1">
                 Company / Store Name
@@ -128,7 +131,7 @@ export default function PostJobModal() {
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
                 placeholder="e.g. Kape Butuanon"
-                className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-black focus:bg-white"
+                className="w-full px-3 py-2.5 sm:py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-blue-600 focus:bg-white"
               />
             </div>
 
@@ -142,7 +145,7 @@ export default function PostJobModal() {
                 value={salary}
                 onChange={(e) => setSalary(e.target.value)}
                 placeholder="e.g. ₱18,000 - ₱25,000"
-                className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-black focus:bg-white"
+                className="w-full px-3 py-2.5 sm:py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-blue-600 focus:bg-white"
               />
             </div>
           </div>
@@ -155,7 +158,7 @@ export default function PostJobModal() {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as JobCategory)}
-                className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:border-black focus:bg-white cursor-pointer"
+                className="w-full px-3 py-2.5 sm:py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:border-blue-600 focus:bg-white cursor-pointer"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -172,7 +175,7 @@ export default function PostJobModal() {
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as JobType)}
-                className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:border-black focus:bg-white cursor-pointer"
+                className="w-full px-3 py-2.5 sm:py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:border-blue-600 focus:bg-white cursor-pointer"
               >
                 <option value="On-site">On-site</option>
                 <option value="Hybrid">Hybrid</option>
@@ -181,7 +184,7 @@ export default function PostJobModal() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-neutral-700 mb-1">
                 City / Province
@@ -193,7 +196,7 @@ export default function PostJobModal() {
                   setCity(val);
                   setLocation(val);
                 }}
-                className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:border-black focus:bg-white cursor-pointer"
+                className="w-full px-3 py-2.5 sm:py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:border-blue-600 focus:bg-white cursor-pointer"
               >
                 <option value="Butuan City">Butuan City</option>
                 <option value="Cabadbaran City">Cabadbaran City</option>
@@ -211,7 +214,7 @@ export default function PostJobModal() {
                 <select
                   value={barangay}
                   onChange={(e) => setBarangay(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:border-black focus:bg-white cursor-pointer"
+                  className="w-full px-3 py-2.5 sm:py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-medium text-neutral-900 focus:outline-none focus:border-blue-600 focus:bg-white cursor-pointer"
                 >
                   {BUTUAN_BARANGAYS.map((b) => (
                     <option key={b} value={b}>
@@ -230,7 +233,7 @@ export default function PostJobModal() {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="e.g. City Proper"
-                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-black focus:bg-white"
+                  className="w-full px-3 py-2.5 sm:py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-blue-600 focus:bg-white"
                 />
               </div>
             )}
@@ -245,13 +248,13 @@ export default function PostJobModal() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Responsibilities, work schedule, or required skills..."
-              className="w-full p-2.5 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-black focus:bg-white resize-none"
+              className="w-full p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-blue-600 focus:bg-white resize-none"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full mt-3 py-2.5 rounded-xl btn-supabase-emerald text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full mt-3 py-3 sm:py-2.5 rounded-xl btn-brand-primary text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
           >
             <span>Publish Opening</span>
             <ArrowRight className="w-3.5 h-3.5" />

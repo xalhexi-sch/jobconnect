@@ -43,11 +43,13 @@ export default function AuthModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-[420px] rounded-3xl bg-white p-7 sm:p-8 shadow-2xl border border-neutral-200 animate-in zoom-in-95 duration-200 text-left max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-[420px] rounded-t-3xl sm:rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-neutral-200 animate-in zoom-in-95 duration-200 text-left max-h-[90vh] overflow-y-auto"
       >
+        {/* Mobile Pull Handle */}
+        <div className="w-12 h-1.5 bg-neutral-300 rounded-full mx-auto mb-3 sm:hidden" />
         {/* Close button */}
         <button
           onClick={closeAuthModal}
@@ -68,7 +70,7 @@ export default function AuthModal() {
             <Link
               href="/sign-in"
               onClick={closeAuthModal}
-              className="btn-supabase-emerald w-full py-2.5 rounded-xl text-xs font-bold text-center block mb-2.5 shadow-xs cursor-pointer text-white"
+              className="btn-brand-primary w-full py-2.5 rounded-xl text-xs font-bold text-center block mb-2.5 shadow-xs cursor-pointer text-white"
             >
               Continue to Sign In
             </Link>
@@ -162,7 +164,7 @@ export default function AuthModal() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-2.5 rounded-xl btn-supabase-emerald text-white text-xs font-bold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer mt-4 shadow-sm"
+                className="w-full py-2.5 rounded-xl btn-brand-primary text-white text-xs font-bold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer mt-4 shadow-xs"
               >
                 {isLoading ? (
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

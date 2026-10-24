@@ -54,21 +54,21 @@ export default function CtaBanner() {
           </p>
 
           {/* Action Pills */}
-          <div className="pt-3 flex flex-wrap items-center justify-center gap-3">
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <div className="pt-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
               <Link
                 href="/overview"
-                className="flex items-center gap-2.5 px-6 py-3 rounded-xl btn-supabase-emerald text-white text-xs sm:text-sm font-semibold cursor-pointer shadow-md"
+                className="flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl btn-brand-primary text-white text-xs sm:text-sm font-semibold cursor-pointer shadow-md w-full"
               >
                 <UserCheck className="w-4 h-4 text-blue-100" />
                 <span>Launch Jobseeker Hub</span>
               </Link>
             </motion.div>
 
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
               <Link
                 href="/overview"
-                className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 transition-colors text-xs sm:text-sm font-semibold cursor-pointer text-white"
+                className="flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 transition-colors text-xs sm:text-sm font-semibold cursor-pointer text-white w-full"
               >
                 <Briefcase className="w-4 h-4 text-amber-400" />
                 <span>Employer Recruitment Portal</span>

@@ -37,7 +37,7 @@ export default function Footer() {
             <div className="text-sm font-semibold text-neutral-300 mb-3">
               Get Weekly Caraga Job Alerts &amp; Hiring Trends
             </div>
-            <form onSubmit={handleSubscribe} className="flex items-center gap-2 max-w-md">
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 max-w-md">
               <input
                 type="email"
                 value={email}
@@ -50,7 +50,7 @@ export default function Footer() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                className="px-5 py-2.5 rounded-xl bg-white text-[#111116] text-sm font-semibold hover:bg-neutral-100 transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs"
+                className="px-5 py-2.5 rounded-xl bg-white text-[#111116] text-sm font-semibold hover:bg-neutral-100 transition-colors flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-xs"
               >
                 {subscribed ? (
                   <>

@@ -25,23 +25,26 @@ export default function ApplyModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md rounded-2xl bg-white p-6 sm:p-7 shadow-2xl border border-neutral-200 text-left max-h-[92vh] overflow-y-auto"
+        className="relative w-full max-w-md rounded-t-3xl sm:rounded-2xl bg-white p-5 sm:p-7 shadow-2xl border border-neutral-200 text-left max-h-[90vh] overflow-y-auto"
       >
+        {/* Mobile Pull Handle Indicator */}
+        <div className="w-12 h-1.5 bg-neutral-300 rounded-full mx-auto mb-3 sm:hidden" />
+
         {/* Close button */}
         <button
           onClick={() => setApplyModalJob(null)}
-          className="absolute top-5 right-5 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-500 hover:text-black transition-colors cursor-pointer"
+          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-500 hover:text-black transition-colors cursor-pointer"
           aria-label="Close"
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* Job Header */}
-        <div className="flex items-center gap-3.5 mb-5 pr-8">
-          <div className="w-12 h-12 rounded-xl bg-neutral-50 border border-neutral-200 p-1 flex items-center justify-center shrink-0 overflow-hidden">
+        <div className="flex items-center gap-3.5 mb-4 sm:mb-5 pr-8">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-neutral-50 border border-neutral-200 p-1 flex items-center justify-center shrink-0 overflow-hidden">
             <img
               src={applyModalJob.companyLogo}
               alt={applyModalJob.company}
@@ -49,20 +52,20 @@ export default function ApplyModal() {
             />
           </div>
           <div className="min-w-0">
-            <h3 className="text-base sm:text-lg font-bold text-neutral-900 leading-snug truncate">
+            <h3 className="text-sm sm:text-base font-bold text-neutral-900 leading-snug truncate">
               {applyModalJob.title}
             </h3>
             <p className="text-xs text-neutral-500 truncate mt-0.5">
               {applyModalJob.company} &bull; {applyModalJob.location}
             </p>
-            <span className="inline-block text-xs font-bold text-blue-700 mt-1">
+            <span className="inline-block text-xs font-bold text-blue-700 mt-0.5">
               {applyModalJob.salary}
             </span>
           </div>
         </div>
 
         {/* Clean Application Form */}
-        <form onSubmit={handleSubmit} className="space-y-3.5">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div>
             <label className="block text-xs font-semibold text-neutral-700 mb-1">
               Full Name
@@ -75,15 +78,15 @@ export default function ApplyModal() {
                 value={applicantName}
                 onChange={(e) => setApplicantName(e.target.value)}
                 placeholder="Your full name"
-                className="w-full pl-9 pr-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-black focus:bg-white"
+                className="w-full pl-9 pr-3 py-2.5 sm:py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-blue-600 focus:bg-white"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-neutral-700 mb-1">
-                Email
+                Email Address
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
@@ -93,14 +96,14 @@ export default function ApplyModal() {
                   value={applicantEmail}
                   onChange={(e) => setApplicantEmail(e.target.value)}
                   placeholder="name@email.com"
-                  className="w-full pl-8 pr-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-black focus:bg-white"
+                  className="w-full pl-8 pr-3 py-2.5 sm:py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-blue-600 focus:bg-white"
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-neutral-700 mb-1">
-                Phone
+                Contact Phone
               </label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
@@ -109,7 +112,7 @@ export default function ApplyModal() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="0917..."
-                  className="w-full pl-8 pr-3 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-black focus:bg-white"
+                  className="w-full pl-8 pr-3 py-2.5 sm:py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-blue-600 focus:bg-white"
                 />
               </div>
             </div>
@@ -120,7 +123,7 @@ export default function ApplyModal() {
             <label className="block text-xs font-semibold text-neutral-700 mb-1">
               Resume Document
             </label>
-            <div className="p-3 rounded-lg border border-neutral-200 bg-neutral-50 flex items-center justify-between">
+            <div className="p-3 rounded-xl border border-neutral-200 bg-neutral-50 flex items-center justify-between">
               <div className="flex items-center gap-2.5 truncate">
                 <FileText className="w-4 h-4 text-blue-600 shrink-0" />
                 <span className="text-xs font-medium text-neutral-800 truncate">
@@ -144,7 +147,7 @@ export default function ApplyModal() {
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Why are you a good fit for this role?"
-              className="w-full p-2.5 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-black focus:bg-white resize-none"
+              className="w-full p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-xs text-neutral-900 focus:outline-none focus:border-blue-600 focus:bg-white resize-none"
             />
           </div>
 
@@ -152,7 +155,7 @@ export default function ApplyModal() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full mt-3 py-2.5 rounded-xl btn-supabase-emerald text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+            className="w-full mt-3 py-3 sm:py-2.5 rounded-xl btn-brand-primary text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
           >
             {isSubmitting ? (
               <span>Submitting Application...</span>

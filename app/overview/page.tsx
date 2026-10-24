@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import JobgioLogo from "@/components/JobgioLogo";
 import { useApp } from "@/context/AppContext";
@@ -44,13 +44,21 @@ export default function OverviewPage() {
 
   const [viewMode, setViewMode] = useState<"jobseeker" | "employer">("jobseeker");
   const [jobseekerSubTab, setJobseekerSubTab] = useState<"find" | "applications" | "saved" | "resume">("find");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const isEmployerAuthorized = user.role === "employer" || user.role === "admin";
 
   // Build items for the macOS-style React Bits Dock
   const dockItems: DockItemData[] = [
     {
-      icon: <Search className="w-5 h-5 text-blue-600" />,
+      icon: <Search className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
       label: "Find Jobs",
       active: viewMode === "jobseeker" && jobseekerSubTab === "find",
       badge: jobs.length > 0 ? jobs.length : undefined,
@@ -60,7 +68,7 @@ export default function OverviewPage() {
       },
     },
     {
-      icon: <Send className="w-5 h-5 text-blue-600" />,
+      icon: <Send className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
       label: "My Applications",
       active: viewMode === "jobseeker" && jobseekerSubTab === "applications",
       badge: applications.length > 0 ? applications.length : undefined,
@@ -70,7 +78,7 @@ export default function OverviewPage() {
       },
     },
     {
-      icon: <Bookmark className="w-5 h-5 text-amber-500" />,
+      icon: <Bookmark className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />,
       label: "Saved Jobs",
       active: viewMode === "jobseeker" && jobseekerSubTab === "saved",
       badge: bookmarkedJobIds.length > 0 ? bookmarkedJobIds.length : undefined,
@@ -80,7 +88,7 @@ export default function OverviewPage() {
       },
     },
     {
-      icon: <FileText className="w-5 h-5 text-indigo-600" />,
+      icon: <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />,
       label: "My Resume",
       active: viewMode === "jobseeker" && jobseekerSubTab === "resume",
       onClick: () => {
@@ -92,7 +100,7 @@ export default function OverviewPage() {
       separator: true,
     },
     {
-      icon: <Briefcase className="w-5 h-5 text-blue-700" />,
+      icon: <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700" />,
       label: "Employer Portal",
       active: viewMode === "employer",
       onClick: () => {
@@ -100,7 +108,7 @@ export default function OverviewPage() {
       },
     },
     {
-      icon: <Plus className="w-5 h-5 text-blue-600" />,
+      icon: <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
       label: "Post Vacancy",
       onClick: () => {
         setIsPostJobOpen(true);
@@ -112,32 +120,32 @@ export default function OverviewPage() {
     <div className="min-h-screen bg-[#F8F9FA] text-[#111116] flex flex-col antialiased font-sans">
       
       {/* Top Application Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-neutral-200/80 px-4 sm:px-6 lg:px-8 py-3.5">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-neutral-200/80 px-3 sm:px-6 lg:px-8 py-3">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
           
           {/* Logo & Back to Home */}
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2 hover:opacity-85 transition-opacity">
+          <div className="flex items-center gap-2.5 sm:gap-4">
+            <Link href="/" className="flex items-center gap-2 hover:opacity-85 transition-opacity shrink-0">
               <JobgioLogo variant="dark" size="sm" />
             </Link>
             <Link
               href="/"
-              className="hidden md:inline-flex items-center gap-1 text-xs font-semibold text-neutral-500 hover:text-black transition-colors pl-3 border-l border-neutral-200"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-neutral-500 hover:text-black transition-colors pl-2.5 sm:pl-3 border-l border-neutral-200"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Home</span>
+              <span className="hidden xs:inline">Home</span>
             </Link>
           </div>
 
           {/* Active Mode Badge & Actions */}
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-100/90 border border-neutral-200/80 text-xs font-semibold text-neutral-700">
-              <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-100/90 border border-neutral-200/80 text-[11px] sm:text-xs font-semibold text-neutral-700">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
               <span>
-                {viewMode === "employer" ? "Employer Mode" : "Jobseeker Mode"}
+                {viewMode === "employer" ? "Employer" : "Seeker"}
               </span>
-              <span className="text-neutral-400">&bull;</span>
-              <span className="text-neutral-500 font-medium">Butuan City (BXU)</span>
+              <span className="text-neutral-400 hidden sm:inline">&bull;</span>
+              <span className="text-neutral-500 font-medium hidden sm:inline">BXU</span>
             </div>
 
             {/* Authentication Control */}
@@ -147,7 +155,7 @@ export default function OverviewPage() {
                   <UserButton
                     appearance={{
                       elements: {
-                        avatarBox: "w-8 h-8 border border-neutral-300 shadow-xs",
+                        avatarBox: "w-7 h-7 sm:w-8 sm:h-8 border border-neutral-300 shadow-xs",
                       }
                     }}
                   />
@@ -156,7 +164,7 @@ export default function OverviewPage() {
                 <Show when="signed-out">
                   <Link
                     href="/sign-in"
-                    className="btn-brand-primary px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    className="btn-brand-primary px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 cursor-pointer shadow-xs"
                   >
                     <LogIn className="w-3.5 h-3.5" />
                     <span>Sign In</span>
@@ -167,7 +175,7 @@ export default function OverviewPage() {
               !isSignedIn ? (
                 <button
                   onClick={() => openAuthModal("sign-in")}
-                  className="btn-brand-primary px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="btn-brand-primary px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 cursor-pointer shadow-xs"
                 >
                   <LogIn className="w-3.5 h-3.5" />
                   <span>Sign In</span>
@@ -179,7 +187,7 @@ export default function OverviewPage() {
       </header>
 
       {/* Main Workspace */}
-      <main className="flex-1 p-4 sm:p-6 lg:p-8">
+      <main className="flex-1 p-3 sm:p-6 lg:p-8">
         <div className="max-w-6xl mx-auto">
           {viewMode === "jobseeker" ? (
             <JobseekerAppView
@@ -191,9 +199,9 @@ export default function OverviewPage() {
             <EmployerAppView />
           ) : (
             /* Protected Employer Workspace & Candidate Privacy Gate */
-            <div className="max-w-xl mx-auto my-8 p-6 sm:p-8 rounded-3xl bg-white border border-neutral-200/90 shadow-sm text-center">
-              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shadow-xs">
-                <Lock className="w-7 h-7" />
+            <div className="max-w-xl mx-auto my-6 sm:my-8 p-5 sm:p-8 rounded-3xl bg-white border border-neutral-200/90 shadow-sm text-center">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3.5 sm:mb-4 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shadow-xs">
+                <Lock className="w-6 h-6 sm:w-7 sm:h-7" />
               </div>
 
               <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 mb-3">
@@ -201,30 +209,30 @@ export default function OverviewPage() {
                 <span>Protected Employer Workspace</span>
               </span>
 
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 mb-2">
+              <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-neutral-900 mb-2">
                 Candidate Privacy &amp; Organization Access
               </h2>
 
-              <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed max-w-md mx-auto mb-6">
+              <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed max-w-md mx-auto mb-5 sm:mb-6">
                 Candidate resumes, contact details, and hiring pipelines are strictly confidential under JobConnect BXU security standards. Access to review candidate CVs and publish vacancies is restricted to verified employers.
               </p>
 
-              <div className="text-left bg-neutral-50/80 rounded-2xl p-4 border border-neutral-200/80 mb-6 space-y-2.5 text-xs text-neutral-600">
-                <div className="flex items-start gap-2.5">
+              <div className="text-left bg-neutral-50/80 rounded-2xl p-3.5 sm:p-4 border border-neutral-200/80 mb-5 sm:mb-6 space-y-2 text-xs text-neutral-600">
+                <div className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
-                  <span><strong>Applicant Privacy:</strong> Full resumes and contact information are isolated from unverified accounts.</span>
+                  <span><strong>Applicant Privacy:</strong> Full resumes and contact details are isolated from unverified accounts.</span>
                 </div>
-                <div className="flex items-start gap-2.5">
+                <div className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
                   <span><strong>Local Business Verification:</strong> Free onboarding for Butuan DTI/SEC registered entities and CSU/FSUU partners.</span>
                 </div>
-                <div className="flex items-start gap-2.5">
+                <div className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
                   <span><strong>Zero Agency Markups:</strong> Direct hiring without intermediary fees.</span>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
                 <button
                   onClick={() => setRole("employer")}
                   className="w-full sm:w-auto px-5 py-2.5 rounded-xl btn-brand-primary text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs"
@@ -244,7 +252,7 @@ export default function OverviewPage() {
                 </button>
               </div>
 
-              <p className="text-[11px] text-neutral-400 mt-4">
+              <p className="text-[11px] text-neutral-400 mt-3.5">
                 Tip for evaluators: Click &ldquo;Switch to Employer Profile&rdquo; for instant simulated employer portal access.
               </p>
             </div>
@@ -252,18 +260,18 @@ export default function OverviewPage() {
         </div>
       </main>
 
-      {/* React Bits Floating Bottom Dock */}
-      <div className="fixed bottom-4 left-0 right-0 z-50 flex justify-center pointer-events-none px-4">
+      {/* React Bits Floating Bottom Dock (Adaptive Sizing for Mobile & Desktop) */}
+      <div className="fixed bottom-2.5 sm:bottom-4 left-0 right-0 z-50 flex justify-center pointer-events-none px-2 sm:px-4">
         <div className="pointer-events-auto">
           <Dock
             items={dockItems}
             position="bottom"
             theme="light"
-            baseItemSize={48}
-            magnification={68}
-            panelHeight={64}
+            baseItemSize={isMobile ? 38 : 46}
+            magnification={isMobile ? 48 : 66}
+            panelHeight={isMobile ? 52 : 62}
             roundness={0.7}
-            showLabels={true}
+            showLabels={!isMobile}
             showBadges={true}
             showIndicators={true}
             badgeColor="#2563EB"

@@ -13,7 +13,8 @@
     var(--dock-panel-shadow);
   -webkit-backdrop-filter: blur(20px) saturate(1.6);
   backdrop-filter: blur(20px) saturate(1.6);
-  touch-action: none;
+  touch-action: manipulation;
+  max-width: calc(100vw - 16px);
   transition:
     translate 0.5s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.2s ease;
@@ -54,7 +55,7 @@
 }
 
 .dock--bottom {
-  bottom: 12px;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   align-items: flex-end;
 }
 
