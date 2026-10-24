@@ -7,8 +7,17 @@ import { useApp } from "@/context/AppContext";
 import {
   Briefcase,
   ArrowLeft,
-  UserCheck,
-  LogIn
+  LogIn,
+  Search,
+  Send,
+  Bookmark,
+  FileText,
+  Plus,
+  ShieldAlert,
+  Building2,
+  Lock,
+  ArrowRight,
+  Sparkles
 } from "lucide-react";
 import JobseekerAppView from "@/components/overview/JobseekerAppView";
 import EmployerAppView from "@/components/overview/EmployerAppView";
@@ -18,14 +27,86 @@ import ResumePortfolioModal from "@/components/overview/ResumePortfolioModal";
 import AuthModal from "@/components/AuthModal";
 import { isClerkConfigured } from "@/lib/clerk";
 import { Show, UserButton } from "@clerk/nextjs";
+import Dock, { DockItemData } from "@/components/Dock/Dock";
 
 export default function OverviewPage() {
   const {
     openAuthModal,
     isSignedIn,
+    user,
+    setRole,
+    jobs,
+    applications,
+    bookmarkedJobIds,
+    setIsPostJobOpen,
+    setIsResumeModalOpen,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<"jobseeker" | "employer">("jobseeker");
+  const [viewMode, setViewMode] = useState<"jobseeker" | "employer">("jobseeker");
+  const [jobseekerSubTab, setJobseekerSubTab] = useState<"find" | "applications" | "saved" | "resume">("find");
+
+  const isEmployerAuthorized = user.role === "employer" || user.role === "admin";
+
+  // Build items for the macOS-style React Bits Dock
+  const dockItems: DockItemData[] = [
+    {
+      icon: <Search className="w-5 h-5 text-blue-600" />,
+      label: "Find Jobs",
+      active: viewMode === "jobseeker" && jobseekerSubTab === "find",
+      badge: jobs.length > 0 ? jobs.length : undefined,
+      onClick: () => {
+        setViewMode("jobseeker");
+        setJobseekerSubTab("find");
+      },
+    },
+    {
+      icon: <Send className="w-5 h-5 text-blue-600" />,
+      label: "My Applications",
+      active: viewMode === "jobseeker" && jobseekerSubTab === "applications",
+      badge: applications.length > 0 ? applications.length : undefined,
+      onClick: () => {
+        setViewMode("jobseeker");
+        setJobseekerSubTab("applications");
+      },
+    },
+    {
+      icon: <Bookmark className="w-5 h-5 text-amber-500" />,
+      label: "Saved Jobs",
+      active: viewMode === "jobseeker" && jobseekerSubTab === "saved",
+      badge: bookmarkedJobIds.length > 0 ? bookmarkedJobIds.length : undefined,
+      onClick: () => {
+        setViewMode("jobseeker");
+        setJobseekerSubTab("saved");
+      },
+    },
+    {
+      icon: <FileText className="w-5 h-5 text-indigo-600" />,
+      label: "My Resume",
+      active: viewMode === "jobseeker" && jobseekerSubTab === "resume",
+      onClick: () => {
+        setViewMode("jobseeker");
+        setJobseekerSubTab("resume");
+      },
+    },
+    {
+      separator: true,
+    },
+    {
+      icon: <Briefcase className="w-5 h-5 text-blue-700" />,
+      label: "Employer Portal",
+      active: viewMode === "employer",
+      onClick: () => {
+        setViewMode("employer");
+      },
+    },
+    {
+      icon: <Plus className="w-5 h-5 text-blue-600" />,
+      label: "Post Vacancy",
+      onClick: () => {
+        setIsPostJobOpen(true);
+      },
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-[#111116] flex flex-col antialiased font-sans">
@@ -48,42 +129,25 @@ export default function OverviewPage() {
             </Link>
           </div>
 
-          {/* Clean Functional Workspace Tabs */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center p-1 rounded-xl bg-neutral-100 border border-neutral-200/80 text-xs font-semibold">
-              <button
-                onClick={() => setActiveTab("jobseeker")}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === "jobseeker"
-                    ? "bg-white text-neutral-900 shadow-xs"
-                    : "text-neutral-600 hover:text-black"
-                }`}
-              >
-                <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Job Seeker</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("employer")}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === "employer"
-                    ? "bg-white text-neutral-900 shadow-xs"
-                    : "text-neutral-600 hover:text-black"
-                }`}
-              >
-                <Briefcase className="w-3.5 h-3.5 text-amber-600" />
-                <span>Employer Portal</span>
-              </button>
+          {/* Active Mode Badge & Actions */}
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-100/90 border border-neutral-200/80 text-xs font-semibold text-neutral-700">
+              <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+              <span>
+                {viewMode === "employer" ? "Employer Mode" : "Jobseeker Mode"}
+              </span>
+              <span className="text-neutral-400">&bull;</span>
+              <span className="text-neutral-500 font-medium">Butuan City (BXU)</span>
             </div>
 
             {/* Authentication Control */}
             {isClerkConfigured ? (
-              <div className="flex items-center ml-1">
+              <div className="flex items-center">
                 <Show when="signed-in">
                   <UserButton
                     appearance={{
                       elements: {
-                        avatarBox: "w-7 h-7 border border-neutral-300",
+                        avatarBox: "w-8 h-8 border border-neutral-300 shadow-xs",
                       }
                     }}
                   />
@@ -92,7 +156,7 @@ export default function OverviewPage() {
                 <Show when="signed-out">
                   <Link
                     href="/sign-in"
-                    className="btn-supabase-emerald px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    className="btn-brand-primary px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
                   >
                     <LogIn className="w-3.5 h-3.5" />
                     <span>Sign In</span>
@@ -103,7 +167,7 @@ export default function OverviewPage() {
               !isSignedIn ? (
                 <button
                   onClick={() => openAuthModal("sign-in")}
-                  className="btn-supabase-emerald px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="btn-brand-primary px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   <LogIn className="w-3.5 h-3.5" />
                   <span>Sign In</span>
@@ -117,9 +181,96 @@ export default function OverviewPage() {
       {/* Main Workspace */}
       <main className="flex-1 p-4 sm:p-6 lg:p-8">
         <div className="max-w-6xl mx-auto">
-          {activeTab === "jobseeker" ? <JobseekerAppView /> : <EmployerAppView />}
+          {viewMode === "jobseeker" ? (
+            <JobseekerAppView
+              activeSubTab={jobseekerSubTab}
+              onSubTabChange={setJobseekerSubTab}
+              hideTopTabs={true}
+            />
+          ) : isEmployerAuthorized ? (
+            <EmployerAppView />
+          ) : (
+            /* Protected Employer Workspace & Candidate Privacy Gate */
+            <div className="max-w-xl mx-auto my-8 p-6 sm:p-8 rounded-3xl bg-white border border-neutral-200/90 shadow-sm text-center">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shadow-xs">
+                <Lock className="w-7 h-7" />
+              </div>
+
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 mb-3">
+                <ShieldAlert className="w-3.5 h-3.5 text-blue-600" />
+                <span>Protected Employer Workspace</span>
+              </span>
+
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 mb-2">
+                Candidate Privacy &amp; Organization Access
+              </h2>
+
+              <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed max-w-md mx-auto mb-6">
+                Candidate resumes, contact details, and hiring pipelines are strictly confidential under JobConnect BXU security standards. Access to review candidate CVs and publish vacancies is restricted to verified employers.
+              </p>
+
+              <div className="text-left bg-neutral-50/80 rounded-2xl p-4 border border-neutral-200/80 mb-6 space-y-2.5 text-xs text-neutral-600">
+                <div className="flex items-start gap-2.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
+                  <span><strong>Applicant Privacy:</strong> Full resumes and contact information are isolated from unverified accounts.</span>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
+                  <span><strong>Local Business Verification:</strong> Free onboarding for Butuan DTI/SEC registered entities and CSU/FSUU partners.</span>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
+                  <span><strong>Zero Agency Markups:</strong> Direct hiring without intermediary fees.</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button
+                  onClick={() => setRole("employer")}
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl btn-brand-primary text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                >
+                  <Building2 className="w-4 h-4" />
+                  <span>Switch to Employer Profile</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setViewMode("jobseeker");
+                    setJobseekerSubTab("find");
+                  }}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl btn-clerk-outline text-xs font-semibold cursor-pointer"
+                >
+                  Return to Job Search
+                </button>
+              </div>
+
+              <p className="text-[11px] text-neutral-400 mt-4">
+                Tip for evaluators: Click &ldquo;Switch to Employer Profile&rdquo; for instant simulated employer portal access.
+              </p>
+            </div>
+          )}
         </div>
       </main>
+
+      {/* React Bits Floating Bottom Dock */}
+      <div className="fixed bottom-4 left-0 right-0 z-50 flex justify-center pointer-events-none px-4">
+        <div className="pointer-events-auto">
+          <Dock
+            items={dockItems}
+            position="bottom"
+            theme="light"
+            baseItemSize={48}
+            magnification={68}
+            panelHeight={64}
+            roundness={0.7}
+            showLabels={true}
+            showBadges={true}
+            showIndicators={true}
+            badgeColor="#2563EB"
+            accentColor="#2563EB"
+          />
+        </div>
+      </div>
 
       {/* Global Interactive Modals */}
       <ApplyModal />

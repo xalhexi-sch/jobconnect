@@ -14,7 +14,15 @@ import {
   Briefcase
 } from "lucide-react";
 
-export default function JobseekerAppView() {
+export default function JobseekerAppView({
+  activeSubTab: externalSubTab,
+  onSubTabChange,
+  hideTopTabs = false,
+}: {
+  activeSubTab?: "find" | "applications" | "saved" | "resume";
+  onSubTabChange?: (tab: "find" | "applications" | "saved" | "resume") => void;
+  hideTopTabs?: boolean;
+} = {}) {
   const {
     jobs,
     applications,
@@ -31,7 +39,13 @@ export default function JobseekerAppView() {
     setSelectedCategory
   } = useApp();
 
-  const [activeSubTab, setActiveSubTab] = useState<"find" | "applications" | "saved" | "resume">("find");
+  const [internalSubTab, setInternalSubTab] = useState<"find" | "applications" | "saved" | "resume">("find");
+  const activeSubTab = externalSubTab ?? internalSubTab;
+  const setActiveSubTab = (tab: "find" | "applications" | "saved" | "resume") => {
+    if (onSubTabChange) onSubTabChange(tab);
+    setInternalSubTab(tab);
+  };
+
   const [selectedBarangay, setSelectedBarangay] = useState("All");
 
   // Filter jobs for the "Find Work" stream
@@ -54,80 +68,81 @@ export default function JobseekerAppView() {
   const savedJobs = jobs.filter((job) => bookmarkedJobIds.includes(job.id));
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto pb-24">
       
-      {/* Top App Tab Pills */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-xs">
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto">
-          <button
-            onClick={() => setActiveSubTab("find")}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-              activeSubTab === "find"
-                ? "bg-emerald-600 text-white shadow-xs"
-                : "text-neutral-600 hover:text-black hover:bg-neutral-100"
-            }`}
-          >
-            <Search className="w-3.5 h-3.5" />
-            <span>Find Jobs</span>
-            <span className="text-[11px] bg-white/20 px-1.5 py-0.2 rounded-md">
-              {filteredJobs.length}
-            </span>
-          </button>
+      {/* Top App Tab Pills (hidden when Dock is active) */}
+      {!hideTopTabs && (
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-xs">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto">
+            <button
+              onClick={() => setActiveSubTab("find")}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                activeSubTab === "find"
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "text-neutral-600 hover:text-black hover:bg-neutral-100"
+              }`}
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span>Find Jobs</span>
+              <span className="text-[11px] bg-white/20 px-1.5 py-0.2 rounded-md">
+                {filteredJobs.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveSubTab("applications")}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                activeSubTab === "applications"
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "text-neutral-600 hover:text-black hover:bg-neutral-100"
+              }`}
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>My Applications</span>
+              <span className={`text-[11px] px-1.5 py-0.2 rounded-md ${
+                activeSubTab === "applications" ? "bg-white/20 text-white" : "bg-blue-100 text-blue-800 font-bold"
+              }`}>
+                {applications.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveSubTab("saved")}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                activeSubTab === "saved"
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "text-neutral-600 hover:text-black hover:bg-neutral-100"
+              }`}
+            >
+              <Bookmark className="w-3.5 h-3.5" />
+              <span>Saved</span>
+              <span className="text-[11px] bg-neutral-200 text-neutral-800 px-1.5 py-0.2 rounded-md">
+                {savedJobs.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveSubTab("resume")}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                activeSubTab === "resume"
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "text-neutral-600 hover:text-black hover:bg-neutral-100"
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Profile</span>
+            </button>
+          </div>
 
           <button
-            onClick={() => setActiveSubTab("applications")}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-              activeSubTab === "applications"
-                ? "bg-emerald-600 text-white shadow-xs"
-                : "text-neutral-600 hover:text-black hover:bg-neutral-100"
-            }`}
+            onClick={() => setIsResumeModalOpen(true)}
+            className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition-colors cursor-pointer"
           >
-            <Send className="w-3.5 h-3.5" />
-            <span>My Applications</span>
-            <span className={`text-[11px] px-1.5 py-0.2 rounded-md ${
-              activeSubTab === "applications" ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-800 font-bold"
-            }`}>
-              {applications.length}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setActiveSubTab("saved")}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-              activeSubTab === "saved"
-                ? "bg-emerald-600 text-white shadow-xs"
-                : "text-neutral-600 hover:text-black hover:bg-neutral-100"
-            }`}
-          >
-            <Bookmark className="w-3.5 h-3.5" />
-            <span>Saved</span>
-            <span className="text-[11px] bg-neutral-200 text-neutral-800 px-1.5 py-0.2 rounded-md">
-              {savedJobs.length}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setActiveSubTab("resume")}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-              activeSubTab === "resume"
-                ? "bg-emerald-600 text-white shadow-xs"
-                : "text-neutral-600 hover:text-black hover:bg-neutral-100"
-            }`}
-          >
-            <FileText className="w-3.5 h-3.5" />
-            <span>Profile</span>
+            <Edit3 className="w-3.5 h-3.5" />
+            <span>Edit Profile</span>
           </button>
         </div>
-
-        {/* Quick action: Edit Profile button */}
-        <button
-          onClick={() => setIsResumeModalOpen(true)}
-          className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition-colors cursor-pointer"
-        >
-          <Edit3 className="w-3.5 h-3.5" />
-          <span>Edit Profile</span>
-        </button>
-      </div>
+      )}
 
       {/* ========================================================= */}
       {/* SUB-VIEW 1: FIND WORK NOW */}
@@ -143,31 +158,27 @@ export default function JobseekerAppView() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search job title, company, or keyword..."
-                className="w-full text-xs sm:text-sm text-neutral-900 placeholder-neutral-400 bg-transparent focus:outline-none"
+                placeholder="Search job title, skills, or business in Butuan..."
+                className="w-full text-xs sm:text-sm font-medium text-neutral-800 placeholder-neutral-400 bg-transparent focus:outline-none"
               />
             </div>
 
-            <div className="hidden sm:block w-px h-6 bg-neutral-200" />
-
-            {/* City / Province Filter */}
-            <div className="flex items-center gap-2 px-2 w-full sm:w-auto">
-              <MapPin className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
-              <select
-                value={selectedCity}
-                onChange={(e) => {
-                  setSelectedCity(e.target.value);
-                  setSelectedBarangay("All");
-                }}
-                className="text-xs font-semibold text-neutral-700 bg-transparent focus:outline-none cursor-pointer py-1"
-              >
-                <option value="All">All Caraga</option>
-                <option value="Butuan City">Butuan City</option>
-                <option value="Cabadbaran City">Cabadbaran</option>
-                <option value="Surigao City">Surigao</option>
-                <option value="Bayugan City">Bayugan</option>
-              </select>
-            </div>
+            {/* Barangay selector */}
+            <select
+              value={selectedBarangay}
+              onChange={(e) => setSelectedBarangay(e.target.value)}
+              className="text-xs font-semibold text-neutral-700 bg-transparent focus:outline-none cursor-pointer py-1 px-2 border-l border-neutral-200"
+            >
+              <option value="All">All Barangays</option>
+              <option value="Montilla Blvd">Montilla Blvd</option>
+              <option value="Libertad">Libertad</option>
+              <option value="Ampayon">Ampayon</option>
+              <option value="Bancasi">Bancasi</option>
+              <option value="JC Aquino">JC Aquino</option>
+              <option value="Doongan">Doongan</option>
+              <option value="Villa Kananga">Villa Kananga</option>
+              <option value="Holy Redeemer">Holy Redeemer</option>
+            </select>
 
             {/* Category Filter */}
             <select
@@ -229,7 +240,7 @@ export default function JobseekerAppView() {
                             {job.title}
                           </h4>
                           {job.featured && (
-                            <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-1.5 py-0.2 rounded-md">
+                            <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 px-1.5 py-0.2 rounded-md">
                               Featured
                             </span>
                           )}
@@ -245,7 +256,7 @@ export default function JobseekerAppView() {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2 mt-2">
-                          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md">
+                          <span className="text-xs font-bold text-blue-700 bg-blue-50/90 border border-blue-200/50 px-2.5 py-0.5 rounded-md">
                             {job.salary}
                           </span>
                           <span className="text-[11px] font-medium text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-md">
@@ -272,8 +283,8 @@ export default function JobseekerAppView() {
                       </button>
 
                       {hasApplied ? (
-                        <span className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200 flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
                           <span>Applied</span>
                         </span>
                       ) : (
@@ -311,55 +322,71 @@ export default function JobseekerAppView() {
               </span>
             </div>
 
-            <div className="space-y-3">
-              {applications.map((app) => {
-                const getStatusStyle = (status: string) => {
-                  switch (status) {
-                    case "Submitted":
-                      return "bg-neutral-100 text-neutral-700 border-neutral-200";
-                    case "Under Review":
-                      return "bg-blue-50 text-blue-700 border-blue-200";
-                    case "Interview Scheduled":
-                      return "bg-amber-50 text-amber-800 border-amber-200";
-                    case "Offer Extended":
-                      return "bg-emerald-50 text-emerald-800 border-emerald-200";
-                    case "Rejected":
-                      return "bg-rose-50 text-rose-700 border-rose-200";
-                    default:
-                      return "bg-neutral-100 text-neutral-700 border-neutral-200";
-                  }
-                };
+            {applications.length === 0 ? (
+              <div className="py-12 text-center">
+                <Send className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
+                <h4 className="text-sm font-bold text-neutral-800">No applications submitted yet</h4>
+                <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">
+                  Browse open positions in Butuan City and tap &ldquo;Easy Apply&rdquo; to send your resume directly to employers.
+                </p>
+                <button
+                  onClick={() => setActiveSubTab("find")}
+                  className="mt-3.5 px-4 py-1.5 rounded-lg btn-supabase-emerald text-xs font-bold text-white cursor-pointer"
+                >
+                  Browse Open Vacancies
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {applications.map((app) => {
+                  const getStatusStyle = (status: string) => {
+                    switch (status) {
+                      case "Submitted":
+                        return "bg-neutral-100 text-neutral-700 border-neutral-200";
+                      case "Under Review":
+                        return "bg-blue-50 text-blue-700 border-blue-200";
+                      case "Interview Scheduled":
+                        return "bg-amber-50 text-amber-800 border-amber-200";
+                      case "Offer Extended":
+                        return "bg-blue-50 text-blue-800 border-blue-200";
+                      case "Rejected":
+                        return "bg-rose-50 text-rose-700 border-rose-200";
+                      default:
+                        return "bg-neutral-100 text-neutral-700 border-neutral-200";
+                    }
+                  };
 
-                return (
-                  <div
-                    key={app.id}
-                    className="p-4 rounded-xl bg-neutral-50 border border-neutral-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                  >
-                    <div>
-                      <div className="text-sm font-bold text-neutral-900">{app.jobTitle}</div>
-                      <div className="text-xs text-neutral-600 mt-0.5">
-                        {app.company} &bull; {app.location} &bull; {app.salary}
-                      </div>
-                      {app.interviewDate && (
-                        <div className="text-xs text-amber-800 font-medium mt-1 flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          <span>Interview: {app.interviewDate}</span>
+                  return (
+                    <div
+                      key={app.id}
+                      className="p-4 rounded-xl bg-neutral-50 border border-neutral-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    >
+                      <div>
+                        <div className="text-sm font-bold text-neutral-900">{app.jobTitle}</div>
+                        <div className="text-xs text-neutral-600 mt-0.5">
+                          {app.company} &bull; {app.location} &bull; {app.salary}
                         </div>
-                      )}
-                    </div>
+                        {app.interviewDate && (
+                          <div className="text-xs text-amber-800 font-medium mt-1 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            <span>Interview: {app.interviewDate}</span>
+                          </div>
+                        )}
+                      </div>
 
-                    <div className="flex items-center gap-3">
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded-md border ${getStatusStyle(app.status)}`}>
-                        {app.status}
-                      </span>
-                      <span className="text-[11px] text-neutral-400">
-                        {app.appliedDate}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <span className={`text-xs font-bold px-2.5 py-1 rounded-md border ${getStatusStyle(app.status)}`}>
+                          {app.status}
+                        </span>
+                        <span className="text-[11px] text-neutral-400">
+                          {app.appliedDate}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -368,80 +395,112 @@ export default function JobseekerAppView() {
       {/* SUB-VIEW 3: SAVED JOBS */}
       {/* ========================================================= */}
       {activeSubTab === "saved" && (
-        <div className="space-y-3 animate-in fade-in duration-150">
-          {savedJobs.length === 0 ? (
-            <div className="p-8 rounded-2xl bg-white border border-neutral-200 text-center">
-              <p className="text-xs text-neutral-500">No saved jobs yet. Click the bookmark icon on any job to save it.</p>
-            </div>
-          ) : (
-            savedJobs.map((job) => (
-              <div
-                key={job.id}
-                className="p-4 rounded-xl bg-white border border-neutral-200 flex items-center justify-between gap-3"
-              >
-                <div>
-                  <div className="text-sm font-bold text-neutral-900">{job.title}</div>
-                  <div className="text-xs text-neutral-500 mt-0.5">{job.company} &bull; {job.location} &bull; {job.salary}</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => toggleBookmark(job.id)}
-                    className="p-1.5 text-amber-500 hover:text-neutral-400"
-                    title="Remove from bookmarks"
-                  >
-                    <Bookmark className="w-4 h-4 fill-current" />
-                  </button>
-                  <button
-                    onClick={() => setApplyModalJob(job)}
-                    className="px-3.5 py-1.5 rounded-lg bg-[#111116] text-white text-xs font-bold"
-                  >
-                    Apply
-                  </button>
-                </div>
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <div className="p-6 rounded-2xl bg-white border border-neutral-200/80 shadow-xs">
+            <h3 className="text-base font-bold text-neutral-900 mb-1">Saved Job Bookmarks</h3>
+            <p className="text-xs text-neutral-500 mb-5">Openings you bookmarked for later application.</p>
+
+            {savedJobs.length === 0 ? (
+              <div className="py-12 text-center">
+                <Bookmark className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
+                <h4 className="text-sm font-bold text-neutral-800">No saved jobs yet</h4>
+                <p className="text-xs text-neutral-500 mt-1">Tap the bookmark icon on any job card to save it here.</p>
               </div>
-            ))
-          )}
+            ) : (
+              <div className="space-y-3">
+                {savedJobs.map((job) => (
+                  <div
+                    key={job.id}
+                    className="p-4 rounded-xl bg-neutral-50 border border-neutral-200/80 flex items-center justify-between gap-3"
+                  >
+                    <div>
+                      <div className="text-sm font-bold text-neutral-900">{job.title}</div>
+                      <div className="text-xs text-neutral-500 mt-0.5">
+                        {job.company} &bull; {job.location} &bull; {job.salary}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => toggleBookmark(job.id)}
+                        className="text-xs text-neutral-400 hover:text-red-600 px-2 py-1 rounded cursor-pointer"
+                      >
+                        Remove
+                      </button>
+                      <button
+                        onClick={() => setApplyModalJob(job)}
+                        className="px-3.5 py-1.5 rounded-lg btn-supabase-emerald text-white text-xs font-bold cursor-pointer"
+                      >
+                        Apply Now
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {/* ========================================================= */}
-      {/* SUB-VIEW 4: RESUME & PROFILE */}
+      {/* SUB-VIEW 4: CANDIDATE PROFILE & CREDENTIALS */}
       {/* ========================================================= */}
       {activeSubTab === "resume" && (
-        <div className="p-6 rounded-2xl bg-white border border-neutral-200 shadow-xs space-y-4 animate-in fade-in duration-150">
-          <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
-            <div>
-              <h3 className="text-base font-bold text-neutral-900">{userProfile.fullName}</h3>
-              <p className="text-xs text-neutral-500 mt-0.5">{userProfile.headline} &bull; {userProfile.location}</p>
-            </div>
-            <button
-              onClick={() => setIsResumeModalOpen(true)}
-              className="px-3.5 py-1.5 rounded-lg bg-[#111116] text-white text-xs font-bold cursor-pointer"
-            >
-              Edit Details
-            </button>
-          </div>
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <div className="p-6 sm:p-7 rounded-2xl bg-white border border-neutral-200/80 shadow-xs space-y-6">
+            
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-neutral-100">
+              <div>
+                <h3 className="text-lg font-bold text-neutral-900">{userProfile.fullName}</h3>
+                <p className="text-xs text-neutral-500 mt-0.5">{userProfile.headline || "Jobseeker in Butuan City"}</p>
+                <p className="text-xs text-neutral-400 mt-0.5">{userProfile.location}</p>
+              </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div>
-              <div className="font-semibold text-neutral-400 mb-0.5">Education</div>
-              <div className="text-neutral-900 font-medium">{userProfile.education || "None listed"}</div>
+              <button
+                onClick={() => setIsResumeModalOpen(true)}
+                className="btn-supabase-emerald px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Edit Profile Details</span>
+              </button>
             </div>
-            <div>
-              <div className="font-semibold text-neutral-400 mb-0.5">Expected Pay</div>
-              <div className="text-neutral-900 font-medium">{userProfile.expectedSalary || "Negotiable"}</div>
-            </div>
-          </div>
 
-          <div>
-            <div className="font-semibold text-neutral-400 text-xs mb-1.5">Skills</div>
-            <div className="flex flex-wrap gap-1.5">
-              {userProfile.skills.map((skill) => (
-                <span key={skill} className="px-2.5 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-xs font-medium">
-                  {skill}
-                </span>
-              ))}
+            {/* Quick Overview Blocks */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200/80">
+                <div className="text-xs font-semibold text-neutral-500 mb-1">Education &amp; Degree</div>
+                <div className="text-xs font-bold text-neutral-800">{userProfile.education || "Not specified"}</div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200/80">
+                <div className="text-xs font-semibold text-neutral-500 mb-1">Expected Monthly Pay</div>
+                <div className="text-xs font-bold text-blue-700">{userProfile.expectedSalary || "Negotiable"}</div>
+              </div>
             </div>
+
+            {/* Skills */}
+            <div>
+              <div className="text-xs font-semibold text-neutral-700 mb-2">Verified Skills</div>
+              <div className="flex flex-wrap gap-1.5">
+                {userProfile.skills.map((skill) => (
+                  <span
+                    key={skill}
+                    className="px-2.5 py-1 rounded-md bg-neutral-100 text-neutral-800 text-xs font-medium"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Bio */}
+            <div>
+              <div className="text-xs font-semibold text-neutral-700 mb-1">Professional Summary</div>
+              <p className="text-xs text-neutral-600 leading-relaxed bg-neutral-50 p-4 rounded-xl border border-neutral-200/80">
+                {userProfile.bio || "No summary provided."}
+              </p>
+            </div>
+
           </div>
         </div>
       )}

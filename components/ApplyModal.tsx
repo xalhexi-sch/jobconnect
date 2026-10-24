@@ -55,7 +55,7 @@ export default function ApplyModal() {
             <p className="text-xs text-neutral-500 truncate mt-0.5">
               {applyModalJob.company} &bull; {applyModalJob.location}
             </p>
-            <span className="inline-block text-xs font-bold text-emerald-700 mt-1">
+            <span className="inline-block text-xs font-bold text-blue-700 mt-1">
               {applyModalJob.salary}
             </span>
           </div>
@@ -122,12 +122,12 @@ export default function ApplyModal() {
             </label>
             <div className="p-3 rounded-lg border border-neutral-200 bg-neutral-50 flex items-center justify-between">
               <div className="flex items-center gap-2.5 truncate">
-                <FileText className="w-4 h-4 text-emerald-600 shrink-0" />
+                <FileText className="w-4 h-4 text-blue-600 shrink-0" />
                 <span className="text-xs font-medium text-neutral-800 truncate">
                   {userProfile?.resumeFileName || "Candidate_Resume_Caraga.pdf"}
                 </span>
               </div>
-              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
+              <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
                 <CheckCircle2 className="w-3 h-3" />
                 Attached
               </span>

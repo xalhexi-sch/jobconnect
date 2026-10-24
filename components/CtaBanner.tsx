@@ -31,12 +31,12 @@ export default function CtaBanner() {
             opacity: [0.3, 0.6, 0.3]
           }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute bottom-0 right-10 w-[450px] h-44 bg-emerald-500/15 blur-3xl pointer-events-none rounded-full"
+          className="absolute bottom-0 right-10 w-[450px] h-44 bg-blue-500/15 blur-3xl pointer-events-none rounded-full"
         />
 
         <div className="relative z-10 max-w-2xl mx-auto space-y-5">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
             <span className="text-xs font-semibold tracking-tight text-white/90">
               JobConnect Butuan &bull; Web Application
             </span>
@@ -44,7 +44,7 @@ export default function CtaBanner() {
 
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-[1.15]">
             Start Your Career in<br />
-            <AnimatedGradientText colorFrom="#FFFFFF" colorTo="#34D399" speed={1.2}>
+            <AnimatedGradientText colorFrom="#FFFFFF" colorTo="#60A5FA" speed={1.2}>
               Butuan &amp; Caraga Today
             </AnimatedGradientText>
           </h2>
@@ -60,7 +60,7 @@ export default function CtaBanner() {
                 href="/overview"
                 className="flex items-center gap-2.5 px-6 py-3 rounded-xl btn-supabase-emerald text-white text-xs sm:text-sm font-semibold cursor-pointer shadow-md"
               >
-                <UserCheck className="w-4 h-4 text-emerald-100" />
+                <UserCheck className="w-4 h-4 text-blue-100" />
                 <span>Launch Jobseeker Hub</span>
               </Link>
             </motion.div>

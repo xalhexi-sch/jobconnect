@@ -18,9 +18,9 @@ export default function Hero() {
           opacity: [0.35, 0.55, 0.35]
         }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[600px] bg-gradient-to-tr from-neutral-200/50 via-neutral-100/30 to-transparent blur-3xl -z-10 pointer-events-none rounded-full"
+        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[600px] bg-gradient-to-tr from-blue-100/40 via-indigo-50/20 to-transparent blur-3xl -z-10 pointer-events-none rounded-full"
       />
-      <div className="absolute top-10 right-10 w-[450px] h-[450px] bg-emerald-500/5 blur-3xl -z-10 pointer-events-none rounded-full" />
+      <div className="absolute top-10 right-10 w-[450px] h-[450px] bg-blue-500/5 blur-3xl -z-10 pointer-events-none rounded-full" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
@@ -33,13 +33,13 @@ export default function Hero() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="inline-flex items-center gap-2 self-start px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/90 shadow-xs"
+              className="inline-flex items-center gap-2 self-start px-3 py-1 rounded-full bg-blue-50 border border-blue-200/90 shadow-xs"
             >
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600" />
               </span>
-              <span className="text-xs font-semibold tracking-tight text-emerald-950">
+              <span className="text-xs font-semibold tracking-tight text-blue-950">
                 Active Openings &bull; Butuan City (BXU)
               </span>
             </motion.div>
@@ -62,7 +62,7 @@ export default function Hero() {
               The dedicated employment portal for Butuan City. Connect directly with local retail shops, cafes, clinics, logistics teams, and tech hubs with transparent compensation.
             </motion.p>
 
-            {/* Direct Action Buttons with gentle contrast */}
+            {/* Direct Action Buttons with Royal Blue gradient */}
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
@@ -86,7 +86,7 @@ export default function Hero() {
                   onClick={() => setIsPostJobOpen(true)}
                   className="btn-clerk-outline flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all shadow-xs group cursor-pointer text-xs sm:text-sm font-semibold tracking-tight"
                 >
-                  <Briefcase className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <Briefcase className="w-4 h-4 text-blue-600 shrink-0" />
                   <span>Post Vacancy (Hire)</span>
                 </button>
               </motion.div>
@@ -141,15 +141,15 @@ export default function Hero() {
             {/* Quick Real Proof */}
             <div className="pt-1 flex flex-wrap items-center gap-5 text-xs font-medium text-neutral-500">
               <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
                 <span>Verified Local Businesses</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
                 <span>Transparent Pay (₱)</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
                 <span>100% Free to Use</span>
               </div>
             </div>
@@ -177,7 +177,7 @@ export default function Hero() {
                     <div className="text-[10px] text-neutral-500 font-semibold uppercase tracking-wider">Hiring in Butuan City</div>
                     <div className="text-xs font-bold text-neutral-900 mt-0.5">Montilla &bull; Libertad &bull; Bancasi &bull; Ampayon</div>
                   </div>
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span className="w-2 h-2 rounded-full bg-blue-500" />
                 </div>
               </div>
             </motion.div>
@@ -190,8 +190,8 @@ export default function Hero() {
               className="absolute -top-3 -right-2 sm:-right-4 px-3.5 py-2 rounded-xl bg-white/95 backdrop-blur-md border border-neutral-200 shadow-md flex items-center gap-2.5 z-20"
             >
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600" />
               </span>
               <div className="text-left">
                 <div className="text-xs font-bold text-neutral-900 leading-tight">Verified Openings</div>
@@ -206,7 +206,7 @@ export default function Hero() {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="absolute -bottom-3 -left-2 sm:-left-4 px-3.5 py-2 rounded-xl bg-white/95 backdrop-blur-md border border-neutral-200 text-neutral-900 shadow-md flex items-center gap-2.5 z-20"
             >
-              <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-800">
+              <div className="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center text-blue-800">
                 <Briefcase className="w-3.5 h-3.5" />
               </div>
               <div className="text-left">

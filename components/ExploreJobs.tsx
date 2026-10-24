@@ -66,7 +66,7 @@ export default function ExploreJobs() {
                   onClick={() => setSelectedJobType(tab)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                     isSelected
-                      ? "bg-[#111116] text-white shadow-xs"
+                      ? "bg-blue-600 text-white shadow-xs"
                       : "text-neutral-600 hover:text-black hover:bg-neutral-100"
                   }`}
                 >
@@ -116,7 +116,7 @@ export default function ExploreJobs() {
                       </div>
 
                       <div className="text-right shrink-0">
-                        <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md block">
+                        <span className="text-xs font-bold text-blue-800 bg-blue-50/90 border border-blue-200/60 px-2 py-0.5 rounded-md block">
                           {job.salary}
                         </span>
                       </div>

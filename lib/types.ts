@@ -15,7 +15,7 @@ export interface Job {
   id: string;
   title: string;
   company: string;
-  companyLogo: string;
+  companyLogo?: string;
   location: string;
   barangay?: string;
   city: "Butuan City" | "Cabadbaran City" | "Surigao City" | "Bayugan City" | "Bislig City" | "Caraga Region";
@@ -36,12 +36,18 @@ export interface Application {
   jobId: string;
   jobTitle: string;
   company: string;
-  companyLogo: string;
+  companyLogo?: string;
   location: string;
   salary: string;
   appliedDate: string;
   status: "Submitted" | "Under Review" | "Interview Scheduled" | "Offer Extended" | "Rejected";
   interviewDate?: string;
+  applicantId?: string;
+  applicantName?: string;
+  applicantEmail?: string;
+  employerId?: string;
+  coverLetter?: string;
+  resumeUrl?: string;
 }
 
 export interface PendingApproval {

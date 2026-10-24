@@ -143,8 +143,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
     if (user?.id) {
       fetchUserApplicationsAction(user.id).then((loadedApps) => {
-        if (mounted && loadedApps && loadedApps.length > 0) {
-          setApplications(loadedApps);
+        if (mounted) {
+          if (user.id !== "user-maria") {
+            setApplications(loadedApps || []);
+          } else if (loadedApps && loadedApps.length > 0) {
+            setApplications(loadedApps);
+          }
         }
       });
       fetchUserProfileAction(user.id).then((profile) => {

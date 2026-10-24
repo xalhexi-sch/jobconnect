@@ -8,8 +8,8 @@ export default function SignUpPage() {
   return (
     <div className="min-h-screen bg-[#FBFBFC] text-[#111116] flex flex-col justify-center items-center p-4 relative overflow-hidden">
       {/* Soft, calming ambient background glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-emerald-500/8 blur-[100px] pointer-events-none rounded-full" />
-      <div className="absolute bottom-10 right-1/4 w-[350px] h-[350px] bg-sky-500/5 blur-[90px] pointer-events-none rounded-full" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-blue-500/8 blur-[100px] pointer-events-none rounded-full" />
+      <div className="absolute bottom-10 right-1/4 w-[350px] h-[350px] bg-indigo-500/5 blur-[90px] pointer-events-none rounded-full" />
 
       {/* Top Header */}
       <div className="mb-6 flex flex-col items-center gap-2 z-10">
@@ -36,14 +36,14 @@ export default function SignUpPage() {
                 headerSubtitle: "text-neutral-500 text-xs mt-1",
                 formButtonPrimary: "btn-supabase-emerald text-white text-xs font-semibold py-2.5 rounded-xl cursor-pointer shadow-sm hover:opacity-95 transition-opacity",
                 formFieldLabel: "text-neutral-700 text-xs font-semibold mb-1",
-                formFieldInput: "bg-white border border-neutral-300 text-neutral-900 rounded-xl focus:border-emerald-600 text-xs py-2 px-3 shadow-2xs",
-                footerActionLink: "text-emerald-700 hover:text-emerald-800 font-semibold text-xs",
+                formFieldInput: "bg-white border border-neutral-300 text-neutral-900 rounded-xl focus:border-blue-600 text-xs py-2 px-3 shadow-2xs",
+                footerActionLink: "text-blue-700 hover:text-blue-800 font-semibold text-xs",
                 footerActionText: "text-neutral-500 text-xs",
                 socialButtonsBlockButton: "bg-white border border-neutral-200 text-neutral-800 hover:bg-neutral-50 rounded-xl text-xs font-medium py-2 shadow-2xs",
                 dividerLine: "bg-neutral-200",
                 dividerText: "text-neutral-400 text-xs font-medium",
                 identityPreviewText: "text-neutral-900 text-xs font-medium",
-                identityPreviewEditButton: "text-emerald-700 text-xs font-semibold",
+                identityPreviewEditButton: "text-blue-700 text-xs font-semibold",
               }
             }}
           />

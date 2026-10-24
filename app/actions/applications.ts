@@ -1,6 +1,11 @@
 "use server";
 
-import { getApplicationsFromDb, insertApplicationToDb, updateApplicationStatusInDb } from "@/lib/db";
+import {
+  getApplicationsFromDb,
+  getEmployerApplicationsFromDb,
+  insertApplicationToDb,
+  updateApplicationStatusInDb
+} from "@/lib/db";
 import { Application } from "@/lib/types";
 
 export async function fetchUserApplicationsAction(userId: string): Promise<Application[]> {
@@ -8,6 +13,15 @@ export async function fetchUserApplicationsAction(userId: string): Promise<Appli
     return await getApplicationsFromDb(userId);
   } catch (error) {
     console.error("fetchUserApplicationsAction error:", error);
+    return [];
+  }
+}
+
+export async function fetchEmployerApplicationsAction(employerId: string): Promise<Application[]> {
+  try {
+    return await getEmployerApplicationsFromDb(employerId);
+  } catch (error) {
+    console.error("fetchEmployerApplicationsAction error:", error);
     return [];
   }
 }

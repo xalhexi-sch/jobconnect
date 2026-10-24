@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${figtree.variable} h-full antialiased`}>
-      <body className="min-h-full font-sans bg-[#FBFBFC] text-[#0F1115] selection:bg-emerald-600 selection:text-white">
+      <body className="min-h-full font-sans bg-[#FBFBFC] text-[#0F1115] selection:bg-blue-600 selection:text-white">
         <AuthProvider>
           <SmoothScroll>
             <AppProvider>

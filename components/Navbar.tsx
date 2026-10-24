@@ -70,7 +70,7 @@ export default function Navbar() {
                 />
               )}
               <span>App Portal</span>
-              <span className="text-[10px] uppercase tracking-wider bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-bold">
+              <span className="text-[10px] uppercase tracking-wider bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded font-bold">
                 BXU
               </span>
             </Link>

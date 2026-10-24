@@ -54,7 +54,7 @@ export default function Footer() {
               >
                 {subscribed ? (
                   <>
-                    <Check className="w-4 h-4 text-emerald-600" />
+                    <Check className="w-4 h-4 text-blue-600" />
                     <span>Active</span>
                   </>
                 ) : (

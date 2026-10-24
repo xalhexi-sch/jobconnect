@@ -18,7 +18,7 @@ export default function ToastContainer() {
         >
           <div className="flex items-center gap-3">
             {toast.type === "success" && (
-              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+              <CheckCircle2 className="w-5 h-5 text-blue-400 shrink-0" />
             )}
             {toast.type === "warning" && (
               <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />

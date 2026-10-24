@@ -25,7 +25,7 @@ export default function StatsProof() {
         {/* Core Value Pillars - Honest, Real, Practical */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <div className="p-5 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 shadow-xs">
-            <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center mb-3">
+            <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center mb-3">
               <Building2 className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-bold text-neutral-900 mb-1">Local Business Focus</h3>
@@ -35,7 +35,7 @@ export default function StatsProof() {
           </div>
 
           <div className="p-5 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 shadow-xs">
-            <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center mb-3">
+            <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-800 flex items-center justify-center mb-3">
               <Users className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-bold text-neutral-900 mb-1">Direct Contact</h3>
@@ -45,7 +45,7 @@ export default function StatsProof() {
           </div>
 
           <div className="p-5 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 shadow-xs">
-            <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center mb-3">
+            <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center mb-3">
               <CheckCircle2 className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-bold text-neutral-900 mb-1">Zero Placement Fees</h3>
@@ -58,7 +58,7 @@ export default function StatsProof() {
         {/* Local Areas Covered Banner */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-6 border-t border-neutral-100 text-xs text-neutral-500">
           <span className="font-semibold text-neutral-700 flex items-center gap-1.5 shrink-0">
-            <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+            <MapPin className="w-3.5 h-3.5 text-blue-600" />
             <span>Serving Butuan City Areas:</span>
           </span>
           <div className="flex flex-wrap gap-2 text-neutral-600">
