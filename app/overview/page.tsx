@@ -267,6 +267,7 @@ export default function OverviewPage() {
             items={dockItems}
             position="bottom"
             theme="light"
+            autoHide={!isMobile}
             baseItemSize={isMobile ? 38 : 46}
             magnification={isMobile ? 48 : 66}
             panelHeight={isMobile ? 52 : 62}

@@ -853,21 +853,17 @@ export default function Dock({
     const onWindowMove = (event: PointerEvent) => {
       const s = settingsRef.current;
       if (!s.autoHide || pointer.inside) return;
-      const host = root.offsetParent;
-      const rect = host
-        ? host.getBoundingClientRect()
-        : { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight };
-      const zone = EDGE + s.thickness * 0.6;
-      const x = event.clientX;
+      const zone = Math.max(75, s.thickness + 20);
       const y = event.clientY;
-      const within = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
-      const near = {
-        bottom: y >= rect.bottom - zone,
-        top: y <= rect.top + zone,
-        left: x <= rect.left + zone,
-        right: x >= rect.right - zone
-      }[s.side];
-      if (within && near) show();
+      const near = s.side === 'bottom'
+        ? y >= window.innerHeight - zone
+        : s.side === 'top'
+        ? y <= zone
+        : s.side === 'left'
+        ? event.clientX <= zone
+        : event.clientX >= window.innerWidth - zone;
+
+      if (near) show();
       else hideLater();
     };
 
