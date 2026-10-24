@@ -1,14 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { Bookmark, MapPin, ArrowRight } from "lucide-react";
+import { Bookmark, MapPin, ArrowRight, Send } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { motion, AnimatePresence } from "motion/react";
+import JobDetailModal from "@/components/JobDetailModal";
+import { Job } from "@/lib/types";
 
 export default function ExploreJobs() {
   const {
     jobs,
+    applications,
     searchQuery,
     selectedCategory,
     selectedCity,
@@ -18,6 +21,8 @@ export default function ExploreJobs() {
     toggleBookmark,
     setApplyModalJob
   } = useApp();
+
+  const [inspectingJob, setInspectingJob] = useState<Job | null>(null);
 
   const filteredJobs = jobs.filter((job) => {
     if (selectedCategory !== "All" && job.category !== selectedCategory) return false;
@@ -52,7 +57,7 @@ export default function ExploreJobs() {
               Featured Opportunities
             </h2>
             <p className="text-xs sm:text-sm text-neutral-600 mt-1 max-w-lg">
-              Verified local jobs in Butuan City &amp; Caraga with direct 1-click application.
+              Verified local jobs in Butuan City &amp; Caraga with direct employer review.
             </p>
           </div>
 
@@ -82,6 +87,7 @@ export default function ExploreJobs() {
           <AnimatePresence mode="popLayout">
             {filteredJobs.slice(0, 6).map((job, idx) => {
               const isBookmarked = bookmarkedJobIds.includes(job.id);
+              const hasApplied = applications.some((a) => a.jobId === job.id);
 
               return (
                 <motion.div
@@ -91,13 +97,14 @@ export default function ExploreJobs() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.98 }}
                   transition={{ duration: 0.35, delay: idx * 0.04 }}
-                  className="rounded-2xl p-5 bg-white border border-neutral-200/90 shadow-xs hover:border-neutral-300 hover:shadow-md transition-all flex flex-col justify-between"
+                  onClick={() => setInspectingJob(job)}
+                  className="rounded-2xl p-5 bg-white border border-neutral-200/90 shadow-xs hover:border-blue-400 hover:shadow-md transition-all flex flex-col justify-between cursor-pointer group"
                 >
                   {/* Card Top: Company info & salary */}
                   <div>
                     <div className="flex items-start justify-between gap-3 mb-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-neutral-50 border border-neutral-200 p-1 flex items-center justify-center overflow-hidden shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-neutral-50 border border-neutral-200 p-1 flex items-center justify-center overflow-hidden shrink-0 group-hover:border-blue-200 transition-colors">
                           <img
                             src={job.companyLogo}
                             alt={job.company}
@@ -122,7 +129,7 @@ export default function ExploreJobs() {
                       </div>
                     </div>
 
-                    <h3 className="text-sm sm:text-base font-bold text-neutral-900 mb-1.5 leading-snug">
+                    <h3 className="text-sm sm:text-base font-bold text-neutral-900 mb-1.5 leading-snug group-hover:text-blue-600 transition-colors">
                       {job.title}
                     </h3>
 
@@ -144,7 +151,10 @@ export default function ExploreJobs() {
 
                     <div className="flex items-center gap-1.5">
                       <button
-                        onClick={() => toggleBookmark(job.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBookmark(job.id);
+                        }}
                         className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
                           isBookmarked
                             ? "text-amber-500 bg-amber-50 border-amber-200"
@@ -156,10 +166,14 @@ export default function ExploreJobs() {
                       </button>
 
                       <button
-                        onClick={() => setApplyModalJob(job)}
-                        className="btn-brand-primary px-3.5 py-1.5 rounded-xl text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setApplyModalJob(job);
+                        }}
+                        className="btn-brand-primary px-3.5 py-1.5 rounded-xl text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
                       >
-                        Easy Apply
+                        <Send className="w-3 h-3" />
+                        <span>Direct Apply</span>
                       </button>
                     </div>
                   </div>
@@ -179,6 +193,19 @@ export default function ExploreJobs() {
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
+
+        {/* Full Interactive Role Details Inspector */}
+        <JobDetailModal
+          job={inspectingJob}
+          onClose={() => setInspectingJob(null)}
+          onApply={(job) => {
+            setInspectingJob(null);
+            setApplyModalJob(job);
+          }}
+          isSaved={inspectingJob ? bookmarkedJobIds.includes(inspectingJob.id) : false}
+          hasApplied={inspectingJob ? applications.some((a) => a.jobId === inspectingJob.id) : false}
+          onToggleBookmark={toggleBookmark}
+        />
 
       </div>
     </section>

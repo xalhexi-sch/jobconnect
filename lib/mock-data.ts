@@ -244,7 +244,7 @@ export const FAQS = [
       { q: "Is JobConnect free for applicants in Butuan & Caraga?", a: "Yes, 100% free! Jobseekers can browse, search, build their interactive portfolio, and apply to unlimited local and remote listings at no charge." },
       { q: "Are the companies and jobs verified?", a: "Yes, every job listing is reviewed so applicants know they are applying to real local businesses with clear salaries." },
       { q: "Can fresh graduates from CSU, FSUU, and SJIT apply?", a: "Definitely. We have a dedicated 'Entry Level / Fresh Grad' filter specifically welcoming graduates from Caraga universities and vocational centers." },
-      { q: "Can I apply using my mobile phone browser?", a: "Yes, JobConnect is engineered as a responsive web app. You don't need to download anything from app stores; just open the browser and tap Easy Apply." }
+      { q: "Can I apply using my mobile phone browser?", a: "Yes, JobConnect is engineered as a responsive web app. You don't need to download anything from app stores; just open the browser and tap Direct Apply." }
     ]
   },
   {

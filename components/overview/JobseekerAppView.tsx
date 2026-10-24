@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { useApp } from "@/context/AppContext";
+import JobDetailModal from "@/components/JobDetailModal";
+import { Job } from "@/lib/types";
 import {
   Search,
   MapPin,
@@ -40,6 +42,8 @@ export default function JobseekerAppView({
   } = useApp();
 
   const [internalSubTab, setInternalSubTab] = useState<"find" | "applications" | "saved" | "resume">("find");
+  const [inspectingJob, setInspectingJob] = useState<Job | null>(null);
+
   const activeSubTab = externalSubTab ?? internalSubTab;
   const setActiveSubTab = (tab: "find" | "applications" | "saved" | "resume") => {
     if (onSubTabChange) onSubTabChange(tab);
@@ -226,10 +230,11 @@ export default function JobseekerAppView({
                 return (
                   <div
                     key={job.id}
-                    className="p-4 sm:p-5 rounded-2xl bg-white border border-neutral-200/80 shadow-xs hover:border-neutral-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3.5"
+                    onClick={() => setInspectingJob(job)}
+                    className="p-4 sm:p-5 rounded-2xl bg-white border border-neutral-200/80 shadow-xs hover:border-blue-400 hover:shadow-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 cursor-pointer group"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-neutral-50 border border-neutral-200 p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-neutral-50 border border-neutral-200 p-1 flex items-center justify-center shrink-0 overflow-hidden group-hover:border-blue-200 transition-colors">
                         <img
                           src={job.companyLogo}
                           alt={job.company}
@@ -238,7 +243,7 @@ export default function JobseekerAppView({
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="text-sm sm:text-base font-bold text-neutral-900 leading-tight">
+                          <h4 className="text-sm sm:text-base font-bold text-neutral-900 leading-tight group-hover:text-blue-600 transition-colors">
                             {job.title}
                           </h4>
                           {job.featured && (
@@ -274,7 +279,10 @@ export default function JobseekerAppView({
                     {/* Touch Friendly Action Buttons */}
                     <div className="flex items-center gap-2 self-stretch sm:self-center shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-100">
                       <button
-                        onClick={() => toggleBookmark(job.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBookmark(job.id);
+                        }}
                         className={`p-2.5 sm:p-2 rounded-xl border transition-colors cursor-pointer shrink-0 ${
                           isSaved
                             ? "text-amber-500 bg-amber-50 border-amber-200"
@@ -292,10 +300,14 @@ export default function JobseekerAppView({
                         </span>
                       ) : (
                         <button
-                          onClick={() => setApplyModalJob(job)}
-                          className="flex-1 sm:flex-initial justify-center px-4 py-2 sm:py-1.5 rounded-xl btn-brand-primary text-xs font-bold transition-all cursor-pointer shadow-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setApplyModalJob(job);
+                          }}
+                          className="flex-1 sm:flex-initial justify-center px-4 py-2 sm:py-1.5 rounded-xl btn-brand-primary text-xs font-bold transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
                         >
-                          Easy Apply
+                          <Send className="w-3 h-3" />
+                          <span>Direct Apply</span>
                         </button>
                       )}
                     </div>
@@ -330,7 +342,7 @@ export default function JobseekerAppView({
                 <Send className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
                 <h4 className="text-sm font-bold text-neutral-800">No applications submitted yet</h4>
                 <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">
-                  Browse open positions in Butuan City and tap &ldquo;Easy Apply&rdquo; to send your resume directly to employers.
+                  Browse open positions in Butuan City and tap &ldquo;Direct Apply&rdquo; to send your credentials directly to employers.
                 </p>
                 <button
                   onClick={() => setActiveSubTab("find")}
@@ -349,11 +361,11 @@ export default function JobseekerAppView({
                       case "Under Review":
                         return "bg-blue-50 text-blue-700 border-blue-200";
                       case "Interview Scheduled":
-                        return "bg-amber-50 text-amber-800 border-amber-200";
-                      case "Offer Extended":
-                        return "bg-blue-50 text-blue-800 border-blue-200";
+                        return "bg-purple-50 text-purple-700 border-purple-200";
+                      case "Offered":
+                        return "bg-blue-100 text-blue-800 border-blue-300";
                       case "Rejected":
-                        return "bg-rose-50 text-rose-700 border-rose-200";
+                        return "bg-neutral-100 text-neutral-500 border-neutral-200";
                       default:
                         return "bg-neutral-100 text-neutral-700 border-neutral-200";
                     }
@@ -362,27 +374,33 @@ export default function JobseekerAppView({
                   return (
                     <div
                       key={app.id}
-                      className="p-3.5 sm:p-4 rounded-xl bg-neutral-50 border border-neutral-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3"
+                      className="p-3.5 sm:p-4 rounded-xl bg-neutral-50 border border-neutral-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                     >
-                      <div>
-                        <div className="text-xs sm:text-sm font-bold text-neutral-900">{app.jobTitle}</div>
-                        <div className="text-xs text-neutral-600 mt-0.5">
-                          {app.company} &bull; {app.location} &bull; {app.salary}
+                      <div className="flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-white border border-neutral-200 flex items-center justify-center shrink-0 text-blue-600 font-bold text-xs shadow-xs">
+                          {app.company[0]}
                         </div>
-                        {app.interviewDate && (
-                          <div className="text-xs text-amber-800 font-medium mt-1 flex items-center gap-1">
-                            <Clock className="w-3 h-3 shrink-0" />
-                            <span>Interview: {app.interviewDate}</span>
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold text-neutral-900">{app.jobTitle}</div>
+                          <div className="text-xs text-neutral-500 mt-0.5">
+                            {app.company} &bull; Applied on {app.appliedDate}
                           </div>
-                        )}
+                          {app.coverLetter && (
+                            <div className="text-[11px] text-neutral-600 mt-1 italic line-clamp-1">
+                              &ldquo;{app.coverLetter}&rdquo;
+                            </div>
+                          )}
+                        </div>
                       </div>
 
-                      <div className="flex items-center justify-between sm:justify-end gap-2.5 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-200/60">
-                        <span className={`text-xs font-bold px-2.5 py-1 rounded-md border ${getStatusStyle(app.status)}`}>
-                          {app.status}
-                        </span>
-                        <span className="text-[11px] text-neutral-400">
-                          {app.appliedDate}
+                      <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-200/60">
+                        <span
+                          className={`text-xs font-semibold px-2.5 py-1 rounded-md border flex items-center gap-1.5 ${getStatusStyle(
+                            app.status
+                          )}`}
+                        >
+                          <Clock className="w-3 h-3" />
+                          <span>{app.status}</span>
                         </span>
                       </div>
                     </div>
@@ -401,7 +419,7 @@ export default function JobseekerAppView({
         <div className="space-y-4 animate-in fade-in duration-150">
           <div className="p-4 sm:p-6 rounded-2xl bg-white border border-neutral-200/80 shadow-xs">
             <h3 className="text-sm sm:text-base font-bold text-neutral-900 mb-1">Saved Job Bookmarks</h3>
-            <p className="text-xs text-neutral-500 mb-4 sm:mb-5">Openings you bookmarked for later application.</p>
+            <p className="text-xs text-neutral-500 mb-4 sm:mb-5">Openings you bookmarked for review and application.</p>
 
             {savedJobs.length === 0 ? (
               <div className="py-10 sm:py-12 text-center">
@@ -414,10 +432,11 @@ export default function JobseekerAppView({
                 {savedJobs.map((job) => (
                   <div
                     key={job.id}
-                    className="p-3.5 sm:p-4 rounded-xl bg-neutral-50 border border-neutral-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    onClick={() => setInspectingJob(job)}
+                    className="p-3.5 sm:p-4 rounded-xl bg-neutral-50 hover:bg-neutral-100/70 border border-neutral-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer transition-colors group"
                   >
                     <div>
-                      <div className="text-xs sm:text-sm font-bold text-neutral-900">{job.title}</div>
+                      <div className="text-xs sm:text-sm font-bold text-neutral-900 group-hover:text-blue-600 transition-colors">{job.title}</div>
                       <div className="text-xs text-neutral-500 mt-0.5">
                         {job.company} &bull; {job.location} &bull; {job.salary}
                       </div>
@@ -425,16 +444,23 @@ export default function JobseekerAppView({
 
                     <div className="flex items-center justify-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-200/60">
                       <button
-                        onClick={() => toggleBookmark(job.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBookmark(job.id);
+                        }}
                         className="text-xs text-neutral-500 hover:text-red-600 px-2.5 py-1.5 rounded-lg cursor-pointer"
                       >
                         Remove
                       </button>
                       <button
-                        onClick={() => setApplyModalJob(job)}
-                        className="px-3.5 py-1.5 rounded-xl btn-brand-primary text-xs font-bold cursor-pointer shadow-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setApplyModalJob(job);
+                        }}
+                        className="px-3.5 py-1.5 rounded-xl btn-brand-primary text-xs font-bold cursor-pointer shadow-xs flex items-center gap-1.5"
                       >
-                        Apply Now
+                        <Send className="w-3 h-3" />
+                        <span>Direct Apply</span>
                       </button>
                     </div>
                   </div>
@@ -468,29 +494,45 @@ export default function JobseekerAppView({
               </button>
             </div>
 
-            {/* Quick Overview Blocks */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div className="p-3.5 sm:p-4 rounded-xl bg-neutral-50 border border-neutral-200/80">
-                <div className="text-xs font-semibold text-neutral-500 mb-1">Education &amp; Degree</div>
-                <div className="text-xs font-bold text-neutral-800">{userProfile.education || "Not specified"}</div>
+            {/* Contact details */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200/80">
+                <span className="text-neutral-500 block mb-0.5">Email Address</span>
+                <span className="font-semibold text-neutral-800">{userProfile.email || "No email on file"}</span>
               </div>
-
-              <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200/80">
-                <div className="text-xs font-semibold text-neutral-500 mb-1">Expected Monthly Pay</div>
-                <div className="text-xs font-bold text-blue-700">{userProfile.expectedSalary || "Negotiable"}</div>
+              <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200/80">
+                <span className="text-neutral-500 block mb-0.5">Mobile Number</span>
+                <span className="font-semibold text-neutral-800">{userProfile.phone || "No phone number added"}</span>
               </div>
             </div>
 
-            {/* Skills */}
+            {/* Experience & Education */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200/80">
+                <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">
+                  Years of Experience
+                </div>
+                <div className="text-sm font-bold text-neutral-800">{userProfile.experience || "Not specified"}</div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200/80">
+                <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">
+                  Education / University
+                </div>
+                <div className="text-sm font-bold text-neutral-800">{userProfile.education || "Not specified"}</div>
+              </div>
+            </div>
+
+            {/* Verified Skills */}
             <div>
-              <div className="text-xs font-semibold text-neutral-700 mb-2">Verified Skills</div>
+              <div className="text-xs font-semibold text-neutral-700 mb-2">Key Skills &amp; Competencies</div>
               <div className="flex flex-wrap gap-1.5">
-                {userProfile.skills.map((skill) => (
+                {(userProfile.skills && userProfile.skills.length > 0 ? userProfile.skills : ["Fast Learner", "Communication"]).map((s, idx) => (
                   <span
-                    key={skill}
-                    className="px-2.5 py-1 rounded-md bg-neutral-100 text-neutral-800 text-xs font-medium"
+                    key={idx}
+                    className="text-xs font-medium px-2.5 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200/70"
                   >
-                    {skill}
+                    {s}
                   </span>
                 ))}
               </div>
@@ -507,6 +549,19 @@ export default function JobseekerAppView({
           </div>
         </div>
       )}
+
+      {/* Role Details Inspector Modal */}
+      <JobDetailModal
+        job={inspectingJob}
+        onClose={() => setInspectingJob(null)}
+        onApply={(job) => {
+          setInspectingJob(null);
+          setApplyModalJob(job);
+        }}
+        isSaved={inspectingJob ? bookmarkedJobIds.includes(inspectingJob.id) : false}
+        hasApplied={inspectingJob ? applications.some((a) => a.jobId === inspectingJob.id) : false}
+        onToggleBookmark={toggleBookmark}
+      />
 
     </div>
   );

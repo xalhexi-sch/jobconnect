@@ -73,6 +73,7 @@ export interface UserProfile {
   bio: string;
   skills: string[];
   education: string;
+  experience?: string;
   portfolioUrl: string;
   resumeFileName: string;
   resumeUpdated: string;

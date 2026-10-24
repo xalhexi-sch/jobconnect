@@ -188,7 +188,7 @@ export default function OnboardingModal({
                 </p>
                 <div className="flex flex-wrap gap-1.5 mt-2.5">
                   <span className="text-[10px] font-semibold bg-neutral-100 text-neutral-700 px-2 py-0.5 rounded-md">
-                    1-Click Easy Apply
+                    Direct Application
                   </span>
                   <span className="text-[10px] font-semibold bg-neutral-100 text-neutral-700 px-2 py-0.5 rounded-md">
                     Status Tracking

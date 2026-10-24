@@ -22,8 +22,8 @@ export default function HowItWorks() {
     },
     {
       num: "03",
-      title: "Submit with 1-Click",
-      desc: "Apply directly with your saved resume and an optional note without repetitive paperwork.",
+      title: "Direct Application",
+      desc: "Apply directly to local hiring managers with your verified credentials and optional note without repetitive paperwork.",
       icon: Send
     },
     {
