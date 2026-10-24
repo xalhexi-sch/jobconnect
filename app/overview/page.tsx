@@ -25,6 +25,7 @@ import ApplyModal from "@/components/ApplyModal";
 import PostJobModal from "@/components/PostJobModal";
 import ResumePortfolioModal from "@/components/overview/ResumePortfolioModal";
 import AuthModal from "@/components/AuthModal";
+import OnboardingModal from "@/components/OnboardingModal";
 import { isClerkConfigured } from "@/lib/clerk";
 import { Show, UserButton } from "@clerk/nextjs";
 import Dock, { DockItemData } from "@/components/Dock/Dock";
@@ -40,11 +41,19 @@ export default function OverviewPage() {
     bookmarkedJobIds,
     setIsPostJobOpen,
     setIsResumeModalOpen,
+    isOnboardingOpen,
+    setIsOnboardingOpen,
   } = useApp();
 
   const [viewMode, setViewMode] = useState<"jobseeker" | "employer">("jobseeker");
   const [jobseekerSubTab, setJobseekerSubTab] = useState<"find" | "applications" | "saved" | "resume">("find");
   const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (user.role === "employer") {
+      setViewMode("employer");
+    }
+  }, [user.role]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 640);
@@ -139,14 +148,18 @@ export default function OverviewPage() {
 
           {/* Active Mode Badge & Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-100/90 border border-neutral-200/80 text-[11px] sm:text-xs font-semibold text-neutral-700">
+            <button
+              onClick={() => setIsOnboardingOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 border border-neutral-200/80 text-[11px] sm:text-xs font-semibold text-neutral-700 transition-colors cursor-pointer"
+              title="Change role or company setup"
+            >
               <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
               <span>
                 {viewMode === "employer" ? "Employer" : "Seeker"}
               </span>
               <span className="text-neutral-400 hidden sm:inline">&bull;</span>
               <span className="text-neutral-500 font-medium hidden sm:inline">BXU</span>
-            </div>
+            </button>
 
             {/* Authentication Control */}
             {isClerkConfigured ? (
@@ -286,6 +299,7 @@ export default function OverviewPage() {
       <PostJobModal />
       <ResumePortfolioModal />
       <AuthModal />
+      <OnboardingModal isOpen={isOnboardingOpen} onClose={() => setIsOnboardingOpen(false)} />
     </div>
   );
 }

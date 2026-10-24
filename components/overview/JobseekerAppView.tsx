@@ -454,9 +454,9 @@ export default function JobseekerAppView({
             
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-5 border-b border-neutral-100">
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-neutral-900">{userProfile.fullName}</h3>
+                <h3 className="text-base sm:text-lg font-bold text-neutral-900">{userProfile.fullName || "Your Candidate Profile"}</h3>
                 <p className="text-xs text-neutral-500 mt-0.5">{userProfile.headline || "Jobseeker in Butuan City"}</p>
-                <p className="text-xs text-neutral-400 mt-0.5">{userProfile.location}</p>
+                <p className="text-xs text-neutral-400 mt-0.5">{userProfile.location || "Butuan City (BXU)"}</p>
               </div>
 
               <button

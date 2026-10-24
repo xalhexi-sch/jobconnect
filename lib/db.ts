@@ -382,18 +382,22 @@ export async function getProfileFromDb(userId: string): Promise<UserProfile> {
 
     return {
       id: data.id,
-      fullName: data.full_name,
-      email: data.email,
+      fullName: data.full_name || "",
+      email: data.email || "",
       phone: data.phone || "",
+      role: data.role || "jobseeker",
+      companyName: data.company_name || "",
+      companyIndustry: data.company_industry || "",
+      onboarded: Boolean(data.onboarded),
       location: data.location || "Butuan City",
       headline: data.headline || "",
       bio: data.bio || "",
       skills: data.skills || [],
       education: data.education || "",
       portfolioUrl: data.portfolio_url || "",
-      resumeFileName: data.resume_url ? "Uploaded_Resume.pdf" : "Maria_Santos_CV_2026_Caraga.pdf",
-      resumeUpdated: "Recently updated",
-      expectedSalary: "₱45,000 - ₱65,000 / month",
+      resumeFileName: data.resume_url ? "Uploaded_Resume.pdf" : "",
+      resumeUpdated: data.updated_at ? new Date(data.updated_at).toLocaleDateString() : "",
+      expectedSalary: data.expected_salary || "",
     };
   } catch {
     return memoryProfile;
@@ -416,6 +420,10 @@ export async function updateProfileInDb(profile: Partial<UserProfile>): Promise<
         skills: profile.skills,
         education: profile.education,
         portfolio_url: profile.portfolioUrl,
+        role: profile.role,
+        company_name: profile.companyName,
+        company_industry: profile.companyIndustry,
+        onboarded: profile.onboarded,
       });
       if (error) {
         console.error("Supabase update profile error:", error.message);

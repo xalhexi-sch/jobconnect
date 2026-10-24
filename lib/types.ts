@@ -64,6 +64,10 @@ export interface UserProfile {
   fullName: string;
   email: string;
   phone: string;
+  role?: RoleType;
+  companyName?: string;
+  companyIndustry?: string;
+  onboarded?: boolean;
   location: string;
   headline: string;
   bio: string;

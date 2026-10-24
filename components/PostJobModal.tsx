@@ -32,9 +32,9 @@ const CATEGORIES: JobCategory[] = [
 ];
 
 export default function PostJobModal() {
-  const { isPostJobOpen, setIsPostJobOpen, postJob } = useApp();
+  const { isPostJobOpen, setIsPostJobOpen, postJob, userProfile } = useApp();
   const [title, setTitle] = useState("");
-  const [company, setCompany] = useState("");
+  const [company, setCompany] = useState(userProfile.companyName || "");
   const [city, setCity] = useState<Job["city"]>("Butuan City");
   const [barangay, setBarangay] = useState("Montilla Blvd");
   const [location, setLocation] = useState("Montilla Blvd, Butuan City");
@@ -42,6 +42,12 @@ export default function PostJobModal() {
   const [type, setType] = useState<JobType>("On-site");
   const [category, setCategory] = useState<JobCategory>("Developer");
   const [description, setDescription] = useState("");
+
+  React.useEffect(() => {
+    if (isPostJobOpen && userProfile.companyName && !company) {
+      setCompany(userProfile.companyName);
+    }
+  }, [isPostJobOpen, userProfile.companyName, company]);
 
   if (!isPostJobOpen) return null;
 

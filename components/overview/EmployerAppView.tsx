@@ -21,6 +21,7 @@ export default function EmployerAppView() {
   const {
     jobs,
     user,
+    userProfile,
     setRole,
     updateApplicationStage,
     setIsPostJobOpen,
@@ -103,12 +104,12 @@ export default function EmployerAppView() {
               <span>Verified Employer</span>
             </span>
             <span className="text-xs text-neutral-400 font-medium hidden sm:inline">&bull;</span>
-            <span className="text-xs text-neutral-500 font-medium hidden sm:inline">
-              {user.fullName}
+            <span className="text-xs text-neutral-600 font-semibold hidden sm:inline">
+              {userProfile.companyName ? `${userProfile.companyName} (${user.fullName || "Manager"})` : (user.fullName || "Manager")}
             </span>
           </div>
           <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-neutral-900">
-            Employer Hiring Portal
+            {userProfile.companyName ? `${userProfile.companyName} Hiring Portal` : "Employer Hiring Portal"}
           </h2>
           <p className="text-xs sm:text-sm text-neutral-500 mt-0.5">
             Manage candidates, schedule interviews, and publish verified openings in Butuan City.

@@ -67,6 +67,8 @@ interface AppContextType {
   setAuthMode: (mode: "sign-in" | "sign-up") => void;
   openAuthModal: (mode?: "sign-in" | "sign-up") => void;
   closeAuthModal: () => void;
+  isOnboardingOpen: boolean;
+  setIsOnboardingOpen: (open: boolean) => void;
   isSignedIn: boolean;
   setIsSignedIn: React.Dispatch<React.SetStateAction<boolean>>;
   loginUser: (email: string, name?: string) => void;
@@ -105,8 +107,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isMobileMockupOpen, setIsMobileMockupOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"sign-in" | "sign-up">("sign-in");
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  // Check if onboarding needs to be presented for fresh user
+  useEffect(() => {
+    try {
+      const onboarded = localStorage.getItem("jobconnect_onboarded");
+      if (!onboarded) {
+        const timer = setTimeout(() => {
+          setIsOnboardingOpen(true);
+        }, 600);
+        return () => clearTimeout(timer);
+      }
+    } catch {}
+  }, []);
 
   // Load saved bookmarks from localStorage on client mount
   useEffect(() => {
@@ -392,6 +408,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setAuthMode,
         openAuthModal,
         closeAuthModal,
+        isOnboardingOpen,
+        setIsOnboardingOpen,
         isSignedIn,
         setIsSignedIn,
         setUser,
