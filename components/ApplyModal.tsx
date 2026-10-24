@@ -5,6 +5,7 @@ import { useApp } from "@/context/AppContext";
 import { CheckCircle2, FileText, Loader2, Send, UploadCloud } from "lucide-react";
 import Dialog from "@/components/ui/Dialog";
 import CompanyLogo from "@/components/CompanyLogo";
+import { useT } from "@/lib/i18n";
 
 export default function ApplyModal() {
   const { applyModalJob, setApplyModalJob, applyToJob, userProfile, user, uploadResume } = useApp();
@@ -51,6 +52,7 @@ function ApplyForm({
   onSubmit: ReturnType<typeof useApp>["applyToJob"];
   onCancel: () => void;
 }) {
+  const { t } = useT();
   const [name, setName] = useState(defaults.name);
   const [email, setEmail] = useState(defaults.email);
   const [phone, setPhone] = useState(defaults.phone);
@@ -87,23 +89,23 @@ function ApplyForm({
       </div>
 
       <div>
-        <label htmlFor="ap-name" className="block text-sm font-medium mb-1.5">Full name</label>
+        <label htmlFor="ap-name" className="block text-sm font-medium mb-1.5">{t("fullName")}</label>
         <input id="ap-name" className="field" required minLength={2} maxLength={120} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
       </div>
 
       <div className="grid sm:grid-cols-2 gap-3">
         <div>
-          <label htmlFor="ap-email" className="block text-sm font-medium mb-1.5">Email</label>
+          <label htmlFor="ap-email" className="block text-sm font-medium mb-1.5">{t("email")}</label>
           <input id="ap-email" className="field" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <div>
-          <label htmlFor="ap-phone" className="block text-sm font-medium mb-1.5">Mobile number</label>
+          <label htmlFor="ap-phone" className="block text-sm font-medium mb-1.5">{t("mobile")}</label>
           <input id="ap-phone" className="field" type="tel" inputMode="tel" autoComplete="tel" placeholder="0917 123 4567" value={phone} onChange={(e) => setPhone(e.target.value)} />
         </div>
       </div>
 
       <div>
-        <span className="block text-sm font-medium mb-1.5">Resume</span>
+        <span className="block text-sm font-medium mb-1.5">{t("resume")}</span>
         <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" className="sr-only" onChange={pickFile} aria-label="Upload resume" />
         {resumeName ? (
           <div className="flex items-center justify-between gap-3 p-3 rounded-xl border border-line bg-surface-2">
@@ -131,18 +133,18 @@ function ApplyForm({
 
       <div>
         <label htmlFor="ap-note" className="block text-sm font-medium mb-1.5">
-          Cover note <span className="text-fg-muted font-normal">(optional)</span>
+          {t("coverNote")} <span className="text-fg-muted font-normal">({t("optional")})</span>
         </label>
         <textarea id="ap-note" className="field resize-none" rows={3} maxLength={3000} placeholder="Tell them briefly why you’re a good fit…" value={note} onChange={(e) => setNote(e.target.value)} />
       </div>
 
       <div className="flex gap-3 pt-1">
         <button type="button" onClick={onCancel} className="h-11 px-5 rounded-xl border border-line bg-surface-2 text-sm font-semibold cursor-pointer">
-          Cancel
+          {t("cancel")}
         </button>
         <button type="submit" disabled={submitting || uploading} className="flex-1 btn-brand-primary h-11 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer">
           {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-          {submitting ? "Sending…" : "Send application"}
+          {submitting ? t("sending") : t("sendApplication")}
         </button>
       </div>
     </form>

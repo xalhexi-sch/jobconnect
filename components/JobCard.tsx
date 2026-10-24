@@ -4,6 +4,7 @@ import { Bookmark, CheckCircle2, MapPin, Send, Wifi, Clock3 } from "lucide-react
 import type { Job } from "@/lib/types";
 import { timeAgo } from "@/lib/format";
 import CompanyLogo from "@/components/CompanyLogo";
+import { useT } from "@/lib/i18n";
 
 /**
  * One job listing card. The whole card opens the detail view via a stretched title button
@@ -16,7 +17,6 @@ export default function JobCard({
   onOpen,
   onToggleSave,
   onApply,
-  locale = "en",
 }: {
   job: Job;
   saved: boolean;
@@ -24,8 +24,8 @@ export default function JobCard({
   onOpen: (job: Job) => void;
   onToggleSave: (jobId: string) => void;
   onApply: (job: Job) => void;
-  locale?: string;
 }) {
+  const { t, intlLocale } = useT();
   const pending = job.status === "Pending";
 
   return (
@@ -49,12 +49,12 @@ export default function JobCard({
                 <span className="font-medium text-fg/90 truncate">{job.company}</span>
                 {job.featured && (
                   <span className="text-[11px] font-bold uppercase tracking-wide bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded-md">
-                    Featured
+                    {t("featured")}
                   </span>
                 )}
                 {pending && (
                   <span className="text-[11px] font-bold uppercase tracking-wide bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-md">
-                    Awaiting approval
+                    {t("awaitingApproval")}
                   </span>
                 )}
               </p>
@@ -74,7 +74,7 @@ export default function JobCard({
             {job.createdAt && (
               <li className="flex items-center gap-1.5">
                 <Clock3 className="w-4 h-4 shrink-0" aria-hidden />
-                <span>{timeAgo(job.createdAt, locale)}</span>
+                <span>{timeAgo(job.createdAt, intlLocale)}</span>
               </li>
             )}
           </ul>
@@ -89,7 +89,7 @@ export default function JobCard({
                 type="button"
                 onClick={() => onToggleSave(job.id)}
                 aria-pressed={saved}
-                aria-label={saved ? `Remove ${job.title} from saved jobs` : `Save ${job.title}`}
+                aria-label={saved ? `${t("saved")}: ${job.title}` : `${t("save")}: ${job.title}`}
                 className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-colors cursor-pointer ${
                   saved
                     ? "text-amber-600 bg-amber-50 border-amber-200"
@@ -102,7 +102,7 @@ export default function JobCard({
               {applied ? (
                 <span className="h-10 px-4 rounded-xl text-sm font-semibold bg-blue-50 text-blue-700 flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4" aria-hidden />
-                  Applied
+                  {t("applied")}
                 </span>
               ) : pending ? null : (
                 <button
@@ -111,7 +111,7 @@ export default function JobCard({
                   className="btn-brand-primary h-10 px-4 rounded-xl text-sm font-semibold flex items-center gap-1.5 cursor-pointer"
                 >
                   <Send className="w-4 h-4" aria-hidden />
-                  Apply
+                  {t("apply")}
                 </button>
               )}
             </div>

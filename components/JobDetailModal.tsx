@@ -7,6 +7,7 @@ import type { Job } from "@/lib/types";
 import { timeAgo } from "@/lib/format";
 import Dialog from "@/components/ui/Dialog";
 import CompanyLogo from "@/components/CompanyLogo";
+import { useT } from "@/lib/i18n";
 
 export default function JobDetailModal({
   job,
@@ -23,6 +24,7 @@ export default function JobDetailModal({
   hasApplied: boolean;
   onToggleBookmark: (jobId: string) => void;
 }) {
+  const { t, intlLocale } = useT();
   return (
     <Dialog
       open={Boolean(job)}
@@ -42,23 +44,23 @@ export default function JobDetailModal({
               }`}
             >
               <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
-              {isSaved ? "Saved" : "Save"}
+              {isSaved ? t("saved") : t("save")}
             </button>
 
             <Link
               href={`/jobs/${job.id}`}
               className="hidden sm:flex h-11 px-4 rounded-xl border border-line bg-surface-2 text-sm font-semibold text-fg-muted hover:text-fg items-center gap-2"
             >
-              <ExternalLink className="w-4 h-4" /> Open page
+              <ExternalLink className="w-4 h-4" /> {t("openPage")}
             </Link>
 
             {hasApplied ? (
               <span className="flex-1 h-11 rounded-xl text-sm font-semibold bg-blue-50 text-blue-700 flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4" /> Application submitted
+                <CheckCircle2 className="w-4 h-4" /> {t("applicationSubmitted")}
               </span>
             ) : job.status !== "Active" ? (
               <span className="flex-1 h-11 rounded-xl text-sm font-semibold bg-surface-2 text-fg-muted flex items-center justify-center">
-                Not accepting applications
+                {t("notAccepting")}
               </span>
             ) : (
               <button
@@ -69,7 +71,7 @@ export default function JobDetailModal({
                 }}
                 className="flex-1 btn-brand-primary h-11 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Send className="w-4 h-4" /> Apply now
+                <Send className="w-4 h-4" /> {t("applyNow")}
               </button>
             )}
           </div>
@@ -104,13 +106,13 @@ export default function JobDetailModal({
           </dl>
 
           <section>
-            <h3 className="text-sm font-bold mb-2">About the role</h3>
+            <h3 className="text-sm font-bold mb-2">{t("aboutRole")}</h3>
             <p className="text-[15px] text-fg/85 leading-7 whitespace-pre-line">{job.description}</p>
           </section>
 
           {job.requirements.length > 0 && (
             <section>
-              <h3 className="text-sm font-bold mb-2">Requirements</h3>
+              <h3 className="text-sm font-bold mb-2">{t("requirements")}</h3>
               <ul className="space-y-2">
                 {job.requirements.map((req, i) => (
                   <li key={i} className="flex items-start gap-2.5 text-[15px] text-fg/85 leading-6">
@@ -123,8 +125,8 @@ export default function JobDetailModal({
           )}
 
           <p className="flex items-center justify-between gap-3 text-xs text-fg-muted pt-1">
-            <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-blue-600" /> Direct hiring, no agency fees</span>
-            {job.createdAt && <span className="flex items-center gap-1.5"><Clock3 className="w-3.5 h-3.5" /> Posted {timeAgo(job.createdAt)}</span>}
+            <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-blue-600" /> {t("directHiring")}</span>
+            {job.createdAt && <span className="flex items-center gap-1.5"><Clock3 className="w-3.5 h-3.5" /> {timeAgo(job.createdAt, intlLocale)}</span>}
           </p>
         </div>
       )}

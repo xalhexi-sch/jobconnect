@@ -9,6 +9,7 @@ import JobDetailModal from "@/components/JobDetailModal";
 import JobCard from "@/components/JobCard";
 import { JobListSkeleton } from "@/components/ui/Skeleton";
 import { Job } from "@/lib/types";
+import { useT } from "@/lib/i18n";
 
 const TABS = ["All", "On-site", "Hybrid", "Remote (Caraga)"];
 const PREVIEW_COUNT = 6;
@@ -30,6 +31,7 @@ export default function ExploreJobs() {
     openAuthModal,
   } = useApp();
 
+  const { t } = useT();
   const [inspectingJob, setInspectingJob] = useState<Job | null>(null);
 
   const q = searchQuery.trim().toLowerCase();
@@ -55,8 +57,8 @@ export default function ExploreJobs() {
           className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4"
         >
           <div>
-            <h2 className="text-3xl lg:text-4xl font-bold tracking-tight leading-tight">Latest opportunities</h2>
-            <p className="text-fg-muted mt-2 max-w-lg">Real jobs from Butuan City and Caraga employers. Apply directly, no agency fees.</p>
+            <h2 className="text-3xl lg:text-4xl font-bold tracking-tight leading-tight">{t("latestOpportunities")}</h2>
+            <p className="text-fg-muted mt-2 max-w-lg">{t("latestHint")}</p>
           </div>
 
           <div role="group" aria-label="Work setup" className="flex items-center gap-1 p-1 rounded-xl bg-surface border border-line self-start overflow-x-auto no-scrollbar">
@@ -101,7 +103,7 @@ export default function ExploreJobs() {
 
         <div className="mt-8 flex justify-center">
           <Link href="/overview" className="btn-supabase-dark h-12 px-6 rounded-xl text-sm font-semibold flex items-center gap-2">
-            {filtered.length > PREVIEW_COUNT ? `See all ${filtered.length} jobs` : "Open the job portal"}
+            {filtered.length > PREVIEW_COUNT ? `${t("seeAll")} ${filtered.length}` : t("openPortal")}
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

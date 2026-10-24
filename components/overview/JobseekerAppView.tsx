@@ -8,6 +8,7 @@ import CompanyLogo from "@/components/CompanyLogo";
 import { JobListSkeleton } from "@/components/ui/Skeleton";
 import { getMyResumeLinkAction } from "@/app/actions/resume";
 import { Job } from "@/lib/types";
+import { useT } from "@/lib/i18n";
 import {
   Search,
   Bookmark,
@@ -80,6 +81,7 @@ export default function JobseekerAppView({
     updateApplicationStage,
   } = useApp();
 
+  const { t } = useT();
   const [internalSubTab, setInternalSubTab] = useState<SubTab>("find");
   const [inspectingJob, setInspectingJob] = useState<Job | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -123,10 +125,10 @@ export default function JobseekerAppView({
   };
 
   const tabs: { id: SubTab; label: string; icon: React.ReactNode; count?: number }[] = [
-    { id: "find", label: "Find jobs", icon: <Search className="w-4 h-4" />, count: filteredJobs.length },
-    { id: "applications", label: "Applications", icon: <Send className="w-4 h-4" />, count: applications.length },
-    { id: "saved", label: "Saved", icon: <Bookmark className="w-4 h-4" />, count: savedJobs.length },
-    { id: "resume", label: "Profile", icon: <FileText className="w-4 h-4" /> },
+    { id: "find", label: t("findJobs"), icon: <Search className="w-4 h-4" />, count: filteredJobs.length },
+    { id: "applications", label: t("applications"), icon: <Send className="w-4 h-4" />, count: applications.length },
+    { id: "saved", label: t("saved"), icon: <Bookmark className="w-4 h-4" />, count: savedJobs.length },
+    { id: "resume", label: t("profile"), icon: <FileText className="w-4 h-4" /> },
   ];
 
   return (
@@ -161,7 +163,7 @@ export default function JobseekerAppView({
                 type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search job title, company or place…"
+                placeholder={t("searchPlaceholder")}
                 aria-label="Search jobs"
                 className="field pl-11"
               />
@@ -182,12 +184,12 @@ export default function JobseekerAppView({
             </div>
             <div className="flex items-center justify-between gap-3">
               <select value={selectedJobType} onChange={(e) => setSelectedJobType(e.target.value)} aria-label="Work setup" className="field !w-auto !py-2 cursor-pointer">
-                {TYPES.map((t) => (
-                  <option key={t} value={t}>{t === "All" ? "Any setup" : t}</option>
+                {TYPES.map((ty) => (
+                  <option key={ty} value={ty}>{ty === "All" ? t("anySetup") : ty}</option>
                 ))}
               </select>
               <p className="text-sm text-fg-muted" aria-live="polite">
-                {filteredJobs.length} {filteredJobs.length === 1 ? "job" : "jobs"}
+                {filteredJobs.length} {filteredJobs.length === 1 ? t("job") : t("jobs")}
               </p>
             </div>
           </div>
@@ -197,8 +199,8 @@ export default function JobseekerAppView({
           ) : filteredJobs.length === 0 ? (
             <EmptyState
               icon={<Briefcase className="w-6 h-6" />}
-              title={hasFilters ? "No jobs match your search" : "No openings yet"}
-              hint={hasFilters ? "Try a different keyword or clear the filters." : "New vacancies from Butuan employers will show up here."}
+              title={hasFilters ? t("noMatchTitle") : t("noJobsTitle")}
+              hint={hasFilters ? t("noMatchHint") : t("noJobsHint")}
               action={
                 hasFilters && (
                   <button
@@ -209,7 +211,7 @@ export default function JobseekerAppView({
                     }}
                     className="h-10 px-5 rounded-xl bg-surface-2 border border-line text-sm font-semibold cursor-pointer"
                   >
-                    Clear filters
+                    {t("clearFilters")}
                   </button>
                 )
               }
@@ -235,15 +237,15 @@ export default function JobseekerAppView({
       {/* --------------------------- APPLICATIONS -------------------------- */}
       {activeSubTab === "applications" && (
         <section className="space-y-3 animate-in fade-in duration-200" aria-label="My applications">
-          <h2 className="text-xl font-bold tracking-tight">My applications</h2>
+          <h2 className="text-xl font-bold tracking-tight">{t("myApplications")}</h2>
           {applications.length === 0 ? (
             <EmptyState
               icon={<Send className="w-6 h-6" />}
-              title="You haven’t applied yet"
-              hint="Browse open roles in Butuan and tap Apply to send your details straight to the employer."
+              title={t("noAppsTitle")}
+              hint={t("noAppsHint")}
               action={
                 <button onClick={() => setActiveSubTab("find")} className="btn-brand-primary h-11 px-6 rounded-xl text-sm font-semibold cursor-pointer">
-                  Browse jobs
+                  {t("browseJobs")}
                 </button>
               }
             />
@@ -269,7 +271,7 @@ export default function JobseekerAppView({
                       }}
                       className="text-sm text-fg-muted hover:text-red-600 underline underline-offset-2 cursor-pointer"
                     >
-                      Withdraw
+                      {t("withdraw")}
                     </button>
                   )}
                 </div>
@@ -282,9 +284,9 @@ export default function JobseekerAppView({
       {/* ------------------------------ SAVED ------------------------------ */}
       {activeSubTab === "saved" && (
         <section className="space-y-3 animate-in fade-in duration-200" aria-label="Saved jobs">
-          <h2 className="text-xl font-bold tracking-tight">Saved jobs</h2>
+          <h2 className="text-xl font-bold tracking-tight">{t("savedJobs")}</h2>
           {savedJobs.length === 0 ? (
-            <EmptyState icon={<Bookmark className="w-6 h-6" />} title="Nothing saved yet" hint="Tap the bookmark on any job to keep it here for later." />
+            <EmptyState icon={<Bookmark className="w-6 h-6" />} title={t("noSavedTitle")} hint={t("noSavedHint")} />
           ) : (
             savedJobs.map((job) => (
               <JobCard

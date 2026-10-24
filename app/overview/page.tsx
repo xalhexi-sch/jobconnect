@@ -13,6 +13,7 @@ import ResumePortfolioModal from "@/components/overview/ResumePortfolioModal";
 import AuthModal from "@/components/AuthModal";
 import OnboardingModal from "@/components/OnboardingModal";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import LocaleToggle from "@/components/ui/LocaleToggle";
 import { isClerkConfigured } from "@/lib/clerk";
 import { Show, UserButton } from "@clerk/nextjs";
 import Dock, { DockItemData } from "@/components/Dock/Dock";
@@ -103,6 +104,7 @@ export default function OverviewPage() {
                 {role === "jobseeker" ? "Job seeker" : role}
               </span>
             )}
+            <LocaleToggle />
             <ThemeToggle />
             {isClerkConfigured && (
               <>

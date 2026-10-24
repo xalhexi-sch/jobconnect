@@ -5,6 +5,7 @@ import Link from "next/link";
 import JobgioLogo from "./JobgioLogo";
 import { useApp } from "@/context/AppContext";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import LocaleToggle from "@/components/ui/LocaleToggle";
 import { ArrowUpRight, LogIn, Plus, Menu, X, Search, Briefcase, HelpCircle, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { isClerkConfigured } from "@/lib/clerk";
@@ -80,6 +81,7 @@ export default function Navbar() {
 
           {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-2.5">
+            <LocaleToggle />
             <ThemeToggle />
             {/* Quick Post Opening button (Desktop) */}
             <button

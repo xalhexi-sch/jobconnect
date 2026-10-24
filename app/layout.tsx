@@ -45,7 +45,7 @@ export const viewport: Viewport = {
 };
 
 // Runs before first paint so there is no light/dark flash
-const THEME_SCRIPT = `try{var t=localStorage.getItem('theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t}catch(e){}`;
+const THEME_SCRIPT = `try{var t=localStorage.getItem('theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;var l=localStorage.getItem('locale');if(l==='fil')document.documentElement.lang='fil'}catch(e){}`;
 
 export default function RootLayout({
   children,
