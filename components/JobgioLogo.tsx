@@ -26,7 +26,7 @@ export default function JobgioLogo({
   return (
     <div className={`flex items-center gap-2.5 font-bold tracking-tight select-none ${className}`}>
       {/* Geometric layered cube icon */}
-      <div className={`relative flex items-center justify-center ${iconSizes[size]}`}>
+      <div className={`relative flex items-center justify-center text-[#111116] ${iconSizes[size]}`}>
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -35,13 +35,13 @@ export default function JobgioLogo({
           {/* Top layer */}
           <path
             d="M12 2L3 6.5L12 11L21 6.5L12 2Z"
-            fill={isLight ? "#FFFFFF" : "#111116"}
+            fill={isLight ? "#FFFFFF" : "currentColor"}
             className="transition-colors duration-300"
           />
           {/* Middle layer */}
           <path
             d="M3 10.5L12 15L21 10.5M3 14.5L12 19L21 14.5"
-            stroke={isLight ? "#FFFFFF" : "#111116"}
+            stroke={isLight ? "#FFFFFF" : "currentColor"}
             strokeWidth="2.4"
             strokeLinecap="round"
             strokeLinejoin="round"

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import JobgioLogo from "./JobgioLogo";
 import { useApp } from "@/context/AppContext";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import { ArrowUpRight, LogIn, Plus, Menu, X, Search, Briefcase, HelpCircle, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { isClerkConfigured } from "@/lib/clerk";
@@ -79,9 +80,10 @@ export default function Navbar() {
 
           {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-2.5">
+            <ThemeToggle />
             {/* Quick Post Opening button (Desktop) */}
             <button
-              onClick={() => setIsPostJobOpen(true)}
+              onClick={() => (isSignedIn ? setIsPostJobOpen(true) : openAuthModal("sign-up"))}
               className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5 text-neutral-500" />

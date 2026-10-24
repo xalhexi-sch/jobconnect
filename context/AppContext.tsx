@@ -17,6 +17,7 @@ import {
   fetchSavedJobIdsAction,
   toggleSavedJobAction,
 } from "@/app/actions/profile";
+import { uploadResumeAction } from "@/app/actions/resume";
 import confetti from "canvas-confetti";
 
 interface Toast {
@@ -51,6 +52,7 @@ interface AppContextType {
   profileLoaded: boolean;
   updateUserProfile: (profile: Partial<UserProfile>) => void;
   completeOnboarding: (input: OnboardingInput) => Promise<boolean>;
+  uploadResume: (file: File) => Promise<boolean>;
   jobs: Job[];
   jobsLoading: boolean;
   applications: Application[];
@@ -216,6 +218,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return true;
   };
 
+  const uploadResume = async (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await uploadResumeAction(fd);
+    if (!res.ok) {
+      showToast(res.error, "warning");
+      return false;
+    }
+    setUserProfile((prev) => ({ ...prev, resumeFileName: res.fileName }));
+    showToast("Resume uploaded", "success");
+    return true;
+  };
+
   const updateUserProfile = (updatedFields: Partial<UserProfile>) => {
     const previous = userProfile;
     setUserProfile((prev) => ({ ...prev, ...updatedFields }));
@@ -330,6 +345,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         profileLoaded,
         updateUserProfile,
         completeOnboarding,
+        uploadResume,
         jobs,
         jobsLoading,
         applications,

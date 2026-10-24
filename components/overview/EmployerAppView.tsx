@@ -1,311 +1,237 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
-import {
-  Users,
-  Briefcase,
-  FileText,
-  Plus,
-  Clock,
-  CheckCircle2,
-  Download,
-  ShieldCheck,
-  Building2,
-  RefreshCw
-} from "lucide-react";
-import { Application } from "@/lib/types";
-import { fetchEmployerApplicationsAction } from "@/app/actions/applications";
+import { Briefcase, Clock, FileText, Loader2, Plus, ShieldCheck, Users, BadgeCheck, Download } from "lucide-react";
+import type { Application } from "@/lib/types";
+import { fetchEmployerApplicationsAction, updateApplicationStatusAction } from "@/app/actions/applications";
 import { getApplicationResumeLinkAction } from "@/app/actions/resume";
+import Dialog from "@/components/ui/Dialog";
+import CompanyLogo from "@/components/CompanyLogo";
+import { timeAgo } from "@/lib/format";
+
+const STAGES = ["Submitted", "Under Review", "Interview Scheduled", "Offer Extended", "Rejected"] as const;
+
+const STATUS_STYLE: Record<string, string> = {
+  Active: "bg-emerald-500/15 text-emerald-600",
+  Pending: "bg-amber-50 text-amber-600",
+  Expired: "bg-neutral-100 text-neutral-500",
+};
+
+function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+  return (
+    <div className="p-4 rounded-2xl bg-surface border border-line shadow-card">
+      <div className="flex items-center gap-2 text-sm text-fg-muted">{icon}{label}</div>
+      <p className="text-3xl font-bold tracking-tight mt-1.5">{value}</p>
+    </div>
+  );
+}
 
 export default function EmployerAppView() {
-  const {
-    jobs,
-    user,
-    userProfile,
-    updateApplicationStage,
-    setIsPostJobOpen,
-    showToast
-  } = useApp();
+  const { jobs, user, userProfile, updateJobStatus, setIsPostJobOpen, showToast } = useApp();
 
-  const [selectedStatusFilter, setSelectedStatusFilter] = useState("All");
-  const [employerApps, setEmployerApps] = useState<Application[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [apps, setApps] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<string>("All");
+  const [interviewFor, setInterviewFor] = useState<Application | null>(null);
+  const [interviewAt, setInterviewAt] = useState("");
 
-  // Fetch employer-specific applications (strict security boundary)
-  useEffect(() => {
-    let mounted = true;
-    setIsLoading(true);
-    fetchEmployerApplicationsAction()
-      .then((res) => {
-        if (mounted) {
-          setEmployerApps(res.ok ? res.applications : []);
-          setIsLoading(false);
-        }
-      })
-      .catch((err) => {
-        console.error("fetchEmployerApplications error:", err);
-        if (mounted) {
-          setEmployerApps([]);
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      mounted = false;
-    };
+  const load = useCallback(async () => {
+    const res = await fetchEmployerApplicationsAction();
+    setApps(res.ok ? res.applications : []);
+    setLoading(false);
   }, []);
 
-  const filteredApplications = employerApps.filter((app) => {
-    if (selectedStatusFilter !== "All" && app.status !== selectedStatusFilter) return false;
-    return true;
-  });
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load();
+  }, [load]);
 
-  const handleStageChange = async (appId: string, newStage: Application["status"]) => {
-    setEmployerApps((prev) =>
-      prev.map((a) => (a.id === appId ? { ...a, status: newStage } : a))
-    );
-    await updateApplicationStage(appId, newStage);
+  const myJobs = jobs.filter((j) => j.employerId === user.id);
+  const visible = apps.filter((a) => filter === "All" || a.status === filter);
+  const pendingCount = myJobs.filter((j) => j.status === "Pending").length;
+
+  const setStage = async (app: Application, status: string, interviewDate?: string) => {
+    const previous = apps;
+    setApps((prev) => prev.map((a) => (a.id === app.id ? { ...a, status: status as Application["status"], interviewDate: interviewDate ?? a.interviewDate } : a)));
+    const res = await updateApplicationStatusAction(app.id, status, interviewDate);
+    if (!res.ok) {
+      setApps(previous);
+      showToast(res.error, "warning");
+    } else {
+      showToast(`Moved ${app.applicantName ?? "candidate"} to ${status}`, "success");
+    }
   };
 
-  const handleExport = () => {
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      ["Title,Company,Location,Status,PostedDate,Salary"]
-        .concat(
-          jobs.map(
-            (j) =>
-              `"${j.title}","${j.company}","${j.location}","${j.status}","${j.postedDate}","${j.salary}"`
-          )
-        )
-        .join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `jobconnect_bxu_jobs_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast("Exported listings to CSV", "success");
+  const onStageChange = (app: Application, status: string) => {
+    if (status === "Interview Scheduled") {
+      setInterviewFor(app);
+      setInterviewAt("");
+    } else {
+      setStage(app, status);
+    }
   };
 
-  const interviewingCount = employerApps.filter((a) => a.status === "Interview Scheduled").length;
-  const offersCount = employerApps.filter((a) => a.status === "Offer Extended").length;
+  const viewCv = async (app: Application) => {
+    if (!app.resumeUrl) return showToast("This candidate didn’t attach a resume.", "info");
+    const res = await getApplicationResumeLinkAction(app.id);
+    if (res.ok) window.open(res.url, "_blank", "noopener,noreferrer");
+    else showToast(res.error, "warning");
+  };
+
+  const exportCsv = () => {
+    const esc = (v: string | number | undefined) => `"${String(v ?? "").replace(/"/g, '""').replace(/^[=+\-@]/, "'$&")}"`;
+    const rows = [["Candidate", "Email", "Job", "Status", "Applied"], ...apps.map((a) => [a.applicantName, a.applicantEmail, a.jobTitle, a.status, a.appliedDate])];
+    const blob = new Blob([rows.map((r) => r.map(esc).join(",")).join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `applicants-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-5xl mx-auto pb-28 sm:pb-24">
-      
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-neutral-200/80 shadow-xs">
-        <div>
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
-              <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-              <span>Verified Employer</span>
-            </span>
-            <span className="text-xs text-neutral-400 font-medium hidden sm:inline">&bull;</span>
-            <span className="text-xs text-neutral-600 font-semibold hidden sm:inline">
-              {userProfile.companyName ? `${userProfile.companyName} (${user.fullName || "Manager"})` : (user.fullName || "Manager")}
-            </span>
-          </div>
-          <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-neutral-900">
-            {userProfile.companyName ? `${userProfile.companyName} Hiring Portal` : "Employer Hiring Portal"}
-          </h2>
-          <p className="text-xs sm:text-sm text-neutral-500 mt-0.5">
-            Manage candidates, schedule interviews, and publish verified openings in Butuan City.
+    <div className="space-y-6 max-w-4xl mx-auto pb-28 sm:pb-24">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 truncate">
+            {userProfile.companyName || "Your company"}
+            {userProfile.companyVerified && <BadgeCheck className="w-6 h-6 text-blue-600 shrink-0" aria-label="Verified employer" />}
+          </h1>
+          <p className="text-fg-muted">Manage your vacancies and candidates.</p>
+        </div>
+        <button onClick={() => setIsPostJobOpen(true)} className="btn-brand-primary h-11 px-5 rounded-xl text-sm font-semibold flex items-center gap-2 cursor-pointer">
+          <Plus className="w-4 h-4" /> Post a job
+        </button>
+      </div>
+
+      {!userProfile.companyVerified && (
+        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex gap-3 text-sm">
+          <ShieldCheck className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            <strong>Your business is awaiting verification.</strong> Jobs you post are reviewed by an admin before they appear publicly
+            {pendingCount > 0 && <> — you have {pendingCount} waiting now</>}.
           </p>
         </div>
+      )}
 
-        <div className="flex items-center gap-2 pt-1 sm:pt-0">
-          <button
-            onClick={handleExport}
-            className="flex-1 sm:flex-initial justify-center px-3.5 py-2 rounded-xl btn-clerk-outline text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5 text-neutral-500" />
-            <span>Export CSV</span>
-          </button>
-
-          <button
-            onClick={() => setIsPostJobOpen(true)}
-            className="flex-1 sm:flex-initial justify-center px-4 py-2 rounded-xl btn-brand-primary text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Post Vacancy</span>
-          </button>
-        </div>
+      <div className="grid grid-cols-3 gap-3">
+        <Stat icon={<Briefcase className="w-4 h-4" />} label="Jobs" value={myJobs.length} />
+        <Stat icon={<Users className="w-4 h-4" />} label="Applicants" value={apps.length} />
+        <Stat icon={<Clock className="w-4 h-4" />} label="To review" value={apps.filter((a) => a.status === "Submitted").length} />
       </div>
 
-      {/* 4 Clean Metric Cards (Mobile 2x2 grid with balanced padding) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-        <div className="p-3.5 sm:p-4 rounded-xl bg-white border border-neutral-200/80 shadow-xs">
-          <div className="text-[11px] sm:text-xs text-neutral-500 font-medium mb-1 flex items-center gap-1.5">
-            <Briefcase className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-neutral-400" />
-            <span>Openings</span>
-          </div>
-          <div className="text-xl sm:text-2xl font-bold text-neutral-900">{jobs.length}</div>
-        </div>
-
-        <div className="p-3.5 sm:p-4 rounded-xl bg-white border border-neutral-200/80 shadow-xs">
-          <div className="text-[11px] sm:text-xs text-neutral-500 font-medium mb-1 flex items-center gap-1.5">
-            <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600" />
-            <span>Applicants</span>
-          </div>
-          <div className="text-xl sm:text-2xl font-bold text-neutral-900">{employerApps.length}</div>
-        </div>
-
-        <div className="p-3.5 sm:p-4 rounded-xl bg-white border border-neutral-200/80 shadow-xs">
-          <div className="text-[11px] sm:text-xs text-neutral-500 font-medium mb-1 flex items-center gap-1.5">
-            <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500" />
-            <span>In Interview</span>
-          </div>
-          <div className="text-xl sm:text-2xl font-bold text-neutral-900">{interviewingCount}</div>
-        </div>
-
-        <div className="p-3.5 sm:p-4 rounded-xl bg-white border border-neutral-200/80 shadow-xs">
-          <div className="text-[11px] sm:text-xs text-neutral-500 font-medium mb-1 flex items-center gap-1.5">
-            <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600" />
-            <span>Offers</span>
-          </div>
-          <div className="text-xl sm:text-2xl font-bold text-neutral-900">{offersCount}</div>
-        </div>
-      </div>
-
-      {/* Candidate Pipeline */}
-      <div className="p-4 sm:p-6 rounded-2xl bg-white border border-neutral-200/80 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 mb-4">
-          <div>
-            <h3 className="text-sm sm:text-base font-bold text-neutral-900">Candidate Pipeline &amp; Applications</h3>
-            <p className="text-xs text-neutral-500 mt-0.5">
-              Review applicant qualifications and update hiring stages.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-neutral-500">Filter:</span>
-            <select
-              value={selectedStatusFilter}
-              onChange={(e) => setSelectedStatusFilter(e.target.value)}
-              className="text-xs font-semibold text-neutral-800 bg-neutral-50 border border-neutral-200 rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer flex-1 sm:flex-initial"
-            >
-              <option value="All">All Stages</option>
-              <option value="Submitted">Submitted</option>
-              <option value="Under Review">Under Review</option>
-              <option value="Interview Scheduled">Interview Scheduled</option>
-              <option value="Offer Extended">Offer Extended</option>
-              <option value="Rejected">Rejected</option>
-            </select>
-          </div>
-        </div>
-
-        {isLoading ? (
-          <div className="py-10 text-center text-xs text-neutral-500 flex flex-col items-center gap-2">
-            <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
-            <span>Loading applicant pipeline...</span>
-          </div>
-        ) : filteredApplications.length === 0 ? (
-          <div className="py-8 text-center rounded-xl bg-neutral-50 border border-dashed border-neutral-200 p-6">
-            <Building2 className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
-            <h4 className="text-xs font-bold text-neutral-800">No applications in this view</h4>
-            <p className="text-xs text-neutral-500 max-w-sm mx-auto mt-1">
-              New candidate submissions from Butuan City jobseekers will appear here in real time.
-            </p>
+      <section aria-label="Your jobs" className="space-y-3">
+        <h2 className="text-lg font-bold">Your jobs</h2>
+        {myJobs.length === 0 ? (
+          <div className="p-8 rounded-2xl border border-dashed border-line text-center text-fg-muted">
+            <Briefcase className="w-8 h-8 mx-auto mb-2 opacity-60" />
+            You haven’t posted anything yet.
           </div>
         ) : (
-          <div className="space-y-2.5 sm:space-y-3">
-            {filteredApplications.map((app) => (
-              <div
-                key={app.id}
-                className="p-3.5 sm:p-4 rounded-xl bg-neutral-50 border border-neutral-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-neutral-100/60 transition-colors"
-              >
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-bold text-neutral-900">
-                      {app.applicantName || "Candidate Applicant"}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 rounded-md bg-blue-50 text-blue-800 font-semibold border border-blue-200">
-                      {app.jobTitle}
-                    </span>
-                  </div>
-                  <div className="text-xs text-neutral-600 mt-1">
-                    {app.applicantEmail && <span className="font-medium text-neutral-700">{app.applicantEmail} &bull; </span>}
-                    Applied: {app.appliedDate}
-                    {app.location && <span> &bull; {app.location}</span>}
-                  </div>
-                  {app.coverLetter && (
-                    <p className="text-xs text-neutral-600 mt-1.5 line-clamp-2 italic bg-white/70 p-2 rounded border border-neutral-200/60">
-                      &quot;{app.coverLetter}&quot;
-                    </p>
-                  )}
-                  {app.interviewDate && (
-                    <div className="text-xs text-amber-800 font-semibold mt-1">
-                      Scheduled: {app.interviewDate}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 self-stretch sm:self-center shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-200/60">
-                  <select
-                    value={app.status}
-                    onChange={(e) => handleStageChange(app.id, e.target.value as Application["status"])}
-                    className="flex-1 sm:flex-initial px-2.5 py-2 sm:py-1.5 rounded-lg bg-white border border-neutral-300 text-xs font-bold text-neutral-800 focus:outline-none cursor-pointer"
-                  >
-                    <option value="Submitted">Submitted</option>
-                    <option value="Under Review">Under Review</option>
-                    <option value="Interview Scheduled">Interview Scheduled</option>
-                    <option value="Offer Extended">Offer Extended</option>
-                    <option value="Rejected">Rejected</option>
-                  </select>
-
+          myJobs.map((job) => (
+            <article key={job.id} className="p-4 rounded-2xl bg-surface border border-line shadow-card flex flex-wrap items-center gap-3 justify-between">
+              <div className="min-w-0">
+                <h3 className="font-semibold truncate">{job.title}</h3>
+                <p className="text-sm text-fg-muted">{job.appliedCount} applicants · {timeAgo(job.createdAt)}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`text-sm font-semibold px-3 py-1 rounded-lg ${STATUS_STYLE[job.status]}`}>{job.status === "Expired" ? "Closed" : job.status}</span>
+                {job.status !== "Pending" && (
                   <button
-                    onClick={async () => {
-                      if (!app.resumeUrl) {
-                        showToast("This candidate did not attach a resume.", "info");
-                        return;
-                      }
-                      const res = await getApplicationResumeLinkAction(app.id);
-                      if (res.ok) window.open(res.url, "_blank", "noopener,noreferrer");
-                      else showToast(res.error, "warning");
-                    }}
-                    className="px-3.5 py-2 sm:py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold cursor-pointer transition-colors shrink-0"
+                    onClick={() => updateJobStatus(job.id, job.status === "Active" ? "Expired" : "Active")}
+                    className="text-sm font-semibold text-brand hover:underline cursor-pointer"
                   >
-                    View CV
+                    {job.status === "Active" ? "Close" : "Reopen"}
                   </button>
+                )}
+              </div>
+            </article>
+          ))
+        )}
+      </section>
+
+      <section aria-label="Candidates" className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-bold">Candidates</h2>
+          <div className="flex items-center gap-2">
+            <select value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Filter by stage" className="field !w-auto !py-2 cursor-pointer">
+              <option value="All">All stages</option>
+              {STAGES.map((s) => <option key={s}>{s}</option>)}
+            </select>
+            {apps.length > 0 && (
+              <button onClick={exportCsv} className="h-10 px-3.5 rounded-xl border border-line bg-surface-2 text-sm font-semibold flex items-center gap-2 cursor-pointer">
+                <Download className="w-4 h-4" /> CSV
+              </button>
+            )}
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="py-10 flex justify-center text-fg-muted"><Loader2 className="w-6 h-6 animate-spin" aria-label="Loading candidates" /></div>
+        ) : visible.length === 0 ? (
+          <div className="p-8 rounded-2xl border border-dashed border-line text-center text-fg-muted">
+            <Users className="w-8 h-8 mx-auto mb-2 opacity-60" />
+            {apps.length === 0 ? "No applications yet. They’ll appear here as people apply." : "No candidates in this stage."}
+          </div>
+        ) : (
+          visible.map((app) => (
+            <article key={app.id} className="p-4 sm:p-5 rounded-2xl bg-surface border border-line shadow-card space-y-3">
+              <div className="flex items-start gap-3.5">
+                <CompanyLogo name={app.applicantName ?? "?"} size={44} />
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold truncate">{app.applicantName}</h3>
+                  <p className="text-sm text-fg-muted truncate">{app.applicantEmail}</p>
+                  <p className="text-sm text-fg-muted mt-0.5">for <span className="font-medium text-fg/90">{app.jobTitle}</span> · {app.appliedDate}</p>
+                  {app.interviewDate && <p className="text-sm text-purple-700 mt-1">Interview: {app.interviewDate}</p>}
                 </div>
               </div>
-            ))}
-          </div>
+              {app.coverLetter && <p className="text-sm text-fg/80 bg-surface-2 rounded-xl p-3 leading-relaxed line-clamp-3">“{app.coverLetter}”</p>}
+              <div className="flex flex-wrap items-center gap-2.5">
+                <select
+                  value={app.status}
+                  onChange={(e) => onStageChange(app, e.target.value)}
+                  disabled={app.status === "Withdrawn"}
+                  aria-label={`Stage for ${app.applicantName}`}
+                  className="field !w-auto !py-2 cursor-pointer"
+                >
+                  {app.status === "Withdrawn" && <option>Withdrawn</option>}
+                  {STAGES.map((s) => <option key={s}>{s}</option>)}
+                </select>
+                <button onClick={() => viewCv(app)} className="h-10 px-4 rounded-xl bg-neutral-900 text-white text-sm font-semibold flex items-center gap-2 cursor-pointer">
+                  <FileText className="w-4 h-4" /> {app.resumeUrl ? "View resume" : "No resume"}
+                </button>
+              </div>
+            </article>
+          ))
         )}
-      </div>
+      </section>
 
-      {/* Your Posted Vacancies */}
-      <div className="p-4 sm:p-6 rounded-2xl bg-white border border-neutral-200/80 shadow-xs">
-        <h3 className="text-sm sm:text-base font-bold text-neutral-900 mb-1">Your Posted Vacancies</h3>
-        <p className="text-xs text-neutral-500 mb-3 sm:mb-4">Live job listings visible to Butuan &amp; Caraga seekers.</p>
-
-        <div className="space-y-2 sm:space-y-2.5">
-          {jobs.slice(0, 5).map((job) => (
-            <div
-              key={job.id}
-              className="p-3 sm:p-3.5 rounded-xl border border-neutral-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3"
-            >
-              <div>
-                <div className="text-xs sm:text-sm font-bold text-neutral-900">{job.title}</div>
-                <div className="text-xs text-neutral-500 mt-0.5">{job.company} &bull; {job.location} &bull; {job.salary}</div>
-              </div>
-
-              <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-1.5 sm:pt-0 border-t sm:border-t-0 border-neutral-100">
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-800 border border-blue-200">
-                  {job.status}
-                </span>
-                <span className="text-xs text-neutral-400">
-                  {job.appliedCount} applicants
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
+      <Dialog
+        open={Boolean(interviewFor)}
+        onClose={() => setInterviewFor(null)}
+        title="Schedule interview"
+        description={interviewFor ? `${interviewFor.applicantName} · ${interviewFor.jobTitle}` : undefined}
+        size="sm"
+      >
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!interviewFor || !interviewAt) return;
+            const when = new Date(interviewAt).toLocaleString("en-PH", { dateStyle: "medium", timeStyle: "short" });
+            setStage(interviewFor, "Interview Scheduled", when);
+            setInterviewFor(null);
+          }}
+        >
+          <div>
+            <label htmlFor="iv-at" className="block text-sm font-medium mb-1.5">Date and time</label>
+            <input id="iv-at" type="datetime-local" required className="field" value={interviewAt} onChange={(e) => setInterviewAt(e.target.value)} />
+          </div>
+          <button type="submit" className="btn-brand-primary w-full h-11 rounded-xl text-sm font-semibold cursor-pointer">Confirm interview</button>
+        </form>
+      </Dialog>
     </div>
   );
 }

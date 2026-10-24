@@ -3,59 +3,36 @@
 import React from "react";
 import Link from "next/link";
 import { useApp } from "@/context/AppContext";
-import { X } from "lucide-react";
-import JobgioLogo from "./JobgioLogo";
+import Dialog from "@/components/ui/Dialog";
 
 export default function AuthModal() {
   const { isAuthOpen, closeAuthModal, authMode } = useApp();
-
-  if (!isAuthOpen) return null;
+  const signUp = authMode === "sign-up";
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200"
-      onClick={closeAuthModal}
+    <Dialog
+      open={isAuthOpen}
+      onClose={closeAuthModal}
+      size="sm"
+      title={signUp ? "Create your account" : "Sign in to JobConnect"}
+      description="Apply to jobs, save favourites and manage your hiring in one place."
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="auth-title"
-        onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-[420px] rounded-t-3xl sm:rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-neutral-200 animate-in zoom-in-95 duration-200 text-left max-h-[90vh] overflow-y-auto"
-      >
-        <div className="w-12 h-1.5 bg-neutral-300 rounded-full mx-auto mb-3 sm:hidden" />
-        <button
+      <div className="space-y-2.5 pt-1">
+        <Link
+          href={signUp ? "/sign-up" : "/sign-in"}
           onClick={closeAuthModal}
-          aria-label="Close"
-          className="absolute top-5 right-5 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-500 hover:text-black transition-colors cursor-pointer z-10"
+          className="btn-brand-primary w-full h-12 rounded-xl text-sm font-semibold flex items-center justify-center"
         >
-          <X className="w-4 h-4" />
-        </button>
-
-        <div className="flex flex-col items-center text-center pt-2">
-          <JobgioLogo variant="dark" size="sm" />
-          <h3 id="auth-title" className="text-lg font-bold text-neutral-900 mt-4 mb-1">
-            {authMode === "sign-up" ? "Create your JobConnect account" : "Sign in to JobConnect Butuan"}
-          </h3>
-          <p className="text-sm text-neutral-500 mb-6 max-w-xs leading-relaxed">
-            Access your job applications, applicant tracker, and local employer portal.
-          </p>
-          <Link
-            href={authMode === "sign-up" ? "/sign-up" : "/sign-in"}
-            onClick={closeAuthModal}
-            className="btn-brand-primary w-full py-3 rounded-xl text-sm font-bold text-center block mb-2.5 shadow-xs cursor-pointer text-white"
-          >
-            {authMode === "sign-up" ? "Create Free Account" : "Continue to Sign In"}
-          </Link>
-          <Link
-            href={authMode === "sign-up" ? "/sign-in" : "/sign-up"}
-            onClick={closeAuthModal}
-            className="w-full py-3 rounded-xl border border-neutral-200 text-neutral-700 hover:bg-neutral-50 text-sm font-semibold text-center block transition-colors cursor-pointer"
-          >
-            {authMode === "sign-up" ? "I already have an account" : "Create Free Account"}
-          </Link>
-        </div>
+          {signUp ? "Create free account" : "Continue to sign in"}
+        </Link>
+        <Link
+          href={signUp ? "/sign-in" : "/sign-up"}
+          onClick={closeAuthModal}
+          className="w-full h-12 rounded-xl border border-line bg-surface-2 text-sm font-semibold flex items-center justify-center hover:border-neutral-300 transition-colors"
+        >
+          {signUp ? "I already have an account" : "Create free account"}
+        </Link>
       </div>
-    </div>
+    </Dialog>
   );
 }

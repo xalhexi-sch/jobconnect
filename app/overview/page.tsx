@@ -1,24 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import JobgioLogo from "@/components/JobgioLogo";
 import { useApp } from "@/context/AppContext";
-import {
-  Briefcase,
-  ArrowLeft,
-  LogIn,
-  Search,
-  Send,
-  Bookmark,
-  FileText,
-  Plus,
-  ShieldAlert,
-  Building2,
-  Lock,
-  ArrowRight,
-  Sparkles
-} from "lucide-react";
+import { Briefcase, ArrowLeft, LogIn, Search, Send, Bookmark, FileText, Plus, Building2, ShieldCheck, Lock } from "lucide-react";
 import JobseekerAppView from "@/components/overview/JobseekerAppView";
 import EmployerAppView from "@/components/overview/EmployerAppView";
 import ApplyModal from "@/components/ApplyModal";
@@ -26,276 +12,162 @@ import PostJobModal from "@/components/PostJobModal";
 import ResumePortfolioModal from "@/components/overview/ResumePortfolioModal";
 import AuthModal from "@/components/AuthModal";
 import OnboardingModal from "@/components/OnboardingModal";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import { isClerkConfigured } from "@/lib/clerk";
 import { Show, UserButton } from "@clerk/nextjs";
 import Dock, { DockItemData } from "@/components/Dock/Dock";
 
+const subscribeMobile = (cb: () => void) => {
+  const mq = window.matchMedia("(max-width: 639px)");
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+};
+const getMobile = () => window.matchMedia("(max-width: 639px)").matches;
+
+const subscribeDark = (cb: () => void) => {
+  const obs = new MutationObserver(cb);
+  obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  return () => obs.disconnect();
+};
+const getDark = () => document.documentElement.dataset.theme === "dark";
+
 export default function OverviewPage() {
   const {
+    role,
     openAuthModal,
     isSignedIn,
-    user,
     userProfile,
-    showToast,
     jobs,
     applications,
     bookmarkedJobIds,
     setIsPostJobOpen,
-    setIsResumeModalOpen,
     isOnboardingOpen,
     setIsOnboardingOpen,
   } = useApp();
 
   const [viewMode, setViewMode] = useState<"jobseeker" | "employer">("jobseeker");
   const [jobseekerSubTab, setJobseekerSubTab] = useState<"find" | "applications" | "saved" | "resume">("find");
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useSyncExternalStore(subscribeMobile, getMobile, () => false);
+  const isDark = useSyncExternalStore(subscribeDark, getDark, () => false);
 
-  useEffect(() => {
-    if (user.role === "employer") {
-      setViewMode("employer");
-    }
-  }, [user.role]);
+  // Employers land on their workspace; the role comes from the server, never from the client.
+  const [lastRole, setLastRole] = useState(role);
+  if (role !== lastRole) {
+    setLastRole(role);
+    if (role === "employer") setViewMode("employer");
+  }
 
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 640);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const isEmployer = role === "employer";
+  const showJobseeker = viewMode === "jobseeker" || !isEmployer;
 
-  const isEmployerAuthorized = user.role === "employer" || user.role === "admin";
+  const goSeeker = (tab: typeof jobseekerSubTab) => () => {
+    setViewMode("jobseeker");
+    setJobseekerSubTab(tab);
+  };
 
-  // Build items for the macOS-style React Bits Dock
   const dockItems: DockItemData[] = [
-    {
-      icon: <Search className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
-      label: "Find Jobs",
-      active: viewMode === "jobseeker" && jobseekerSubTab === "find",
-      badge: jobs.length > 0 ? jobs.length : undefined,
-      onClick: () => {
-        setViewMode("jobseeker");
-        setJobseekerSubTab("find");
-      },
-    },
-    {
-      icon: <Send className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
-      label: "My Applications",
-      active: viewMode === "jobseeker" && jobseekerSubTab === "applications",
-      badge: applications.length > 0 ? applications.length : undefined,
-      onClick: () => {
-        setViewMode("jobseeker");
-        setJobseekerSubTab("applications");
-      },
-    },
-    {
-      icon: <Bookmark className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />,
-      label: "Saved Jobs",
-      active: viewMode === "jobseeker" && jobseekerSubTab === "saved",
-      badge: bookmarkedJobIds.length > 0 ? bookmarkedJobIds.length : undefined,
-      onClick: () => {
-        setViewMode("jobseeker");
-        setJobseekerSubTab("saved");
-      },
-    },
-    {
-      icon: <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />,
-      label: "My Resume",
-      active: viewMode === "jobseeker" && jobseekerSubTab === "resume",
-      onClick: () => {
-        setViewMode("jobseeker");
-        setJobseekerSubTab("resume");
-      },
-    },
-    {
-      separator: true,
-    },
-    {
-      icon: <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700" />,
-      label: "Employer Portal",
-      active: viewMode === "employer",
-      onClick: () => {
-        setViewMode("employer");
-      },
-    },
-    {
-      icon: <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
-      label: "Post Vacancy",
-      onClick: () => {
-        setIsPostJobOpen(true);
-      },
-    },
+    { icon: <Search className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />, label: "Find Jobs", active: showJobseeker && jobseekerSubTab === "find", badge: jobs.length || undefined, onClick: goSeeker("find") },
+    { icon: <Send className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />, label: "My Applications", active: showJobseeker && jobseekerSubTab === "applications", badge: applications.length || undefined, onClick: goSeeker("applications") },
+    { icon: <Bookmark className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />, label: "Saved Jobs", active: showJobseeker && jobseekerSubTab === "saved", badge: bookmarkedJobIds.length || undefined, onClick: goSeeker("saved") },
+    { icon: <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />, label: "My Profile", active: showJobseeker && jobseekerSubTab === "resume", onClick: goSeeker("resume") },
+    ...(isEmployer
+      ? ([
+          { separator: true },
+          { icon: <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700" />, label: "Employer Portal", active: viewMode === "employer", onClick: () => setViewMode("employer") },
+          { icon: <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />, label: "Post Vacancy", onClick: () => setIsPostJobOpen(true) },
+        ] as DockItemData[])
+      : []),
+    ...(role === "admin"
+      ? ([{ separator: true }, { icon: <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700" />, label: "Admin", onClick: () => (window.location.href = "/admin") }] as DockItemData[])
+      : []),
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-[#111116] flex flex-col antialiased font-sans">
-      
-      {/* Top Application Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-neutral-200/80 px-3 sm:px-6 lg:px-8 py-3">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
-          
-          {/* Logo & Back to Home */}
-          <div className="flex items-center gap-2.5 sm:gap-4">
-            <Link href="/" className="flex items-center gap-2 hover:opacity-85 transition-opacity shrink-0">
-              <JobgioLogo variant="dark" size="sm" />
+    <div className="min-h-screen flex flex-col">
+      <header className="sticky top-0 z-40 bg-surface/90 backdrop-blur-md border-b border-line px-3 sm:px-6 lg:px-8 h-16 flex items-center">
+        <div className="w-full max-w-6xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Link href="/" className="hover:opacity-85 transition-opacity shrink-0" aria-label="JobConnect home">
+              <JobgioLogo variant={isDark ? "light" : "dark"} size="sm" />
             </Link>
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-neutral-500 hover:text-black transition-colors pl-2.5 sm:pl-3 border-l border-neutral-200"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span className="hidden xs:inline">Home</span>
+            <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-fg-muted hover:text-fg transition-colors pl-3 border-l border-line">
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Home</span>
             </Link>
           </div>
 
-          {/* Active Mode Badge & Actions */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              onClick={() => setIsOnboardingOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 border border-neutral-200/80 text-[11px] sm:text-xs font-semibold text-neutral-700 transition-colors cursor-pointer"
-              title="Change role or company setup"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
-              <span>
-                {viewMode === "employer" ? "Employer" : "Seeker"}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {isSignedIn && (
+              <span className="hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-surface-2 border border-line text-xs font-semibold text-fg-muted capitalize">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                {role === "jobseeker" ? "Job seeker" : role}
               </span>
-              <span className="text-neutral-400 hidden sm:inline">&bull;</span>
-              <span className="text-neutral-500 font-medium hidden sm:inline">BXU</span>
-            </button>
-
-            {/* Authentication Control */}
-            {isClerkConfigured ? (
-              <div className="flex items-center">
+            )}
+            <ThemeToggle />
+            {isClerkConfigured && (
+              <>
                 <Show when="signed-in">
-                  <UserButton
-                    appearance={{
-                      elements: {
-                        avatarBox: "w-7 h-7 sm:w-8 sm:h-8 border border-neutral-300 shadow-xs",
-                      }
-                    }}
-                  />
+                  <UserButton appearance={{ elements: { avatarBox: "w-8 h-8" } }} />
                 </Show>
-
                 <Show when="signed-out">
-                  <Link
-                    href="/sign-in"
-                    className="btn-brand-primary px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 cursor-pointer shadow-xs"
-                  >
-                    <LogIn className="w-3.5 h-3.5" />
-                    <span>Sign In</span>
+                  <Link href="/sign-in" className="btn-brand-primary h-9 px-4 rounded-xl text-sm font-semibold flex items-center gap-1.5">
+                    <LogIn className="w-4 h-4" /> Sign in
                   </Link>
                 </Show>
-              </div>
-            ) : (
-              !isSignedIn ? (
-                <button
-                  onClick={() => openAuthModal("sign-in")}
-                  className="btn-brand-primary px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 cursor-pointer shadow-xs"
-                >
-                  <LogIn className="w-3.5 h-3.5" />
-                  <span>Sign In</span>
-                </button>
-              ) : null
+              </>
             )}
           </div>
         </div>
       </header>
 
-      {/* Main Workspace */}
-      <main className="flex-1 p-3 sm:p-6 lg:p-8">
+      <main id="main" className="flex-1 p-3 sm:p-6 lg:p-8">
         <div className="max-w-6xl mx-auto">
-          {viewMode === "jobseeker" ? (
-            <JobseekerAppView
-              activeSubTab={jobseekerSubTab}
-              onSubTabChange={setJobseekerSubTab}
-              hideTopTabs={true}
-            />
-          ) : isEmployerAuthorized ? (
+          {isEmployer && viewMode === "employer" ? (
             <EmployerAppView />
           ) : (
-            /* Protected Employer Workspace & Candidate Privacy Gate */
-            <div className="max-w-xl mx-auto my-6 sm:my-8 p-5 sm:p-7 rounded-2xl bg-white border border-neutral-200/90 shadow-sm text-center">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3.5 sm:mb-4 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shadow-xs">
-                <Lock className="w-6 h-6 sm:w-7 sm:h-7" />
-              </div>
-
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 mb-3">
-                <ShieldAlert className="w-3.5 h-3.5 text-blue-600" />
-                <span>Protected Employer Workspace</span>
-              </span>
-
-              <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-neutral-900 mb-2">
-                Candidate Privacy &amp; Organization Access
-              </h2>
-
-              <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed max-w-md mx-auto mb-5 sm:mb-6">
-                Candidate resumes, contact details, and hiring pipelines are strictly confidential under JobConnect BXU security standards. Access to review candidate CVs and publish vacancies is restricted to verified employers.
-              </p>
-
-              <div className="text-left bg-neutral-50/80 rounded-2xl p-3.5 sm:p-4 border border-neutral-200/80 mb-5 sm:mb-6 space-y-2 text-xs text-neutral-600">
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
-                  <span><strong>Applicant Privacy:</strong> Full resumes and contact details are isolated from unverified accounts.</span>
+            <>
+              {isSignedIn && !userProfile.onboarded && (
+                <div className="max-w-4xl mx-auto mb-5 p-4 rounded-2xl bg-blue-50 border border-blue-200 flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-sm font-medium">Finish setting up your account to apply or post jobs.</p>
+                  <button onClick={() => setIsOnboardingOpen(true)} className="btn-brand-primary h-10 px-5 rounded-xl text-sm font-semibold cursor-pointer">
+                    Continue setup
+                  </button>
                 </div>
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
-                  <span><strong>Local Business Verification:</strong> Free onboarding for Butuan DTI/SEC registered entities and CSU/FSUU partners.</span>
+              )}
+              <JobseekerAppView activeSubTab={jobseekerSubTab} onSubTabChange={setJobseekerSubTab} hideTopTabs />
+              {!isSignedIn && (
+                <div className="max-w-4xl mx-auto mt-6 p-5 rounded-2xl bg-surface border border-line flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-sm text-fg-muted flex items-center gap-2"><Lock className="w-4 h-4" /> Sign in to apply, save jobs, or post a vacancy as an employer.</p>
+                  <button onClick={() => openAuthModal("sign-in")} className="h-10 px-5 rounded-xl border border-line bg-surface-2 text-sm font-semibold flex items-center gap-2 cursor-pointer">
+                    <Building2 className="w-4 h-4" /> Sign in
+                  </button>
                 </div>
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
-                  <span><strong>Zero Agency Markups:</strong> Direct hiring without intermediary fees.</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
-                <button
-                  onClick={() => {
-                    if (!isSignedIn) openAuthModal("sign-in");
-                    else if (!userProfile.onboarded) setIsOnboardingOpen(true);
-                    else showToast("This account is registered as a job seeker. Employer accounts are created during sign-up.", "info");
-                  }}
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl btn-brand-primary text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs"
-                >
-                  <Building2 className="w-4 h-4" />
-                  <span>Become an Employer</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setViewMode("jobseeker");
-                    setJobseekerSubTab("find");
-                  }}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl btn-clerk-outline text-xs font-semibold cursor-pointer"
-                >
-                  Return to Job Search
-                </button>
-              </div>
-            </div>
+              )}
+            </>
           )}
         </div>
       </main>
 
-      {/* React Bits Floating Bottom Dock (Adaptive Sizing for Mobile & Desktop) */}
-      <div className="fixed bottom-2.5 sm:bottom-4 left-0 right-0 z-50 flex justify-center pointer-events-none px-2 sm:px-4">
+      <div className="fixed bottom-2.5 sm:bottom-4 left-0 right-0 z-30 flex justify-center pointer-events-none px-2 sm:px-4">
         <div className="pointer-events-auto">
           <Dock
             items={dockItems}
             position="bottom"
-            theme="light"
+            theme={isDark ? "dark" : "light"}
             autoHide={!isMobile}
             baseItemSize={isMobile ? 38 : 46}
             magnification={isMobile ? 48 : 66}
             panelHeight={isMobile ? 52 : 62}
             roundness={0.4}
             showLabels={!isMobile}
-            showBadges={true}
-            showIndicators={true}
+            showBadges
+            showIndicators
             badgeColor="#2563EB"
             accentColor="#2563EB"
           />
         </div>
       </div>
 
-      {/* Global Interactive Modals */}
       <ApplyModal />
       <PostJobModal />
       <ResumePortfolioModal />

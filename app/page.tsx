@@ -16,11 +16,11 @@ import AuthModal from "@/components/AuthModal";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#FBFBFC] text-[#111116] overflow-x-hidden relative">
+    <div className="min-h-screen flex flex-col overflow-x-hidden relative">
       {/* Dark floating pill navigation bar */}
       <Navbar />
 
-      <main className="flex-1">
+      <main id="main" className="flex-1">
         {/* Clean Hero Section */}
         <Hero />
 

@@ -247,7 +247,9 @@ function DockMenu({
   const [chosen, setChosen] = useState(false);
   const checks = rows.some(row => row && !row.separator && row.checked !== undefined);
 
-  callbacks.current = { onSelect, onDismiss, onBack, onExited };
+  useIsomorphicLayoutEffect(() => {
+    callbacks.current = { onSelect, onDismiss, onBack, onExited };
+  });
 
   useIsomorphicLayoutEffect(() => {
     const outer = outerRef.current;
@@ -617,8 +619,10 @@ export default function Dock({
     autoHide
   };
   const settingsRef = useRef(settings);
-  settingsRef.current = settings;
-  menuRef.current = menu;
+  useIsomorphicLayoutEffect(() => {
+    settingsRef.current = settings;
+    menuRef.current = menu;
+  });
 
   useEffect(() => {
     wakeRef.current?.();

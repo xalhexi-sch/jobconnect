@@ -1,32 +1,66 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useApp } from "@/context/AppContext";
 import JobDetailModal from "@/components/JobDetailModal";
+import JobCard from "@/components/JobCard";
+import CompanyLogo from "@/components/CompanyLogo";
+import { JobListSkeleton } from "@/components/ui/Skeleton";
+import { getMyResumeLinkAction } from "@/app/actions/resume";
 import { Job } from "@/lib/types";
 import {
   Search,
-  MapPin,
   Bookmark,
   Send,
-  FileText,
   Edit3,
-  CheckCircle2,
+  Briefcase,
+  FileText,
+  UploadCloud,
+  Loader2,
+  ExternalLink,
+  Mail,
+  Phone,
+  GraduationCap,
   Clock,
-  Briefcase
 } from "lucide-react";
+
+type SubTab = "find" | "applications" | "saved" | "resume";
+
+const CATEGORIES = ["All", "Developer", "Design", "Healthcare", "Hospitality", "Trades & Logistics", "Marketing", "Admin & Support", "Security"];
+const TYPES = ["All", "On-site", "Hybrid", "Remote (Caraga)", "Remote"];
+
+const STATUS_STYLE: Record<string, string> = {
+  Submitted: "bg-surface-2 text-fg-muted",
+  "Under Review": "bg-blue-50 text-blue-700",
+  "Interview Scheduled": "bg-purple-50 text-purple-700",
+  "Offer Extended": "bg-emerald-500/15 text-emerald-600",
+  Rejected: "bg-neutral-100 text-neutral-500",
+  Withdrawn: "bg-neutral-100 text-neutral-500",
+};
+
+function EmptyState({ icon, title, hint, action }: { icon: React.ReactNode; title: string; hint: string; action?: React.ReactNode }) {
+  return (
+    <div className="py-14 px-6 text-center rounded-2xl border border-dashed border-line bg-surface">
+      <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-surface-2 flex items-center justify-center text-fg-muted">{icon}</div>
+      <h3 className="text-base font-semibold">{title}</h3>
+      <p className="text-sm text-fg-muted mt-1 max-w-sm mx-auto leading-relaxed">{hint}</p>
+      {action && <div className="mt-5">{action}</div>}
+    </div>
+  );
+}
 
 export default function JobseekerAppView({
   activeSubTab: externalSubTab,
   onSubTabChange,
   hideTopTabs = false,
 }: {
-  activeSubTab?: "find" | "applications" | "saved" | "resume";
-  onSubTabChange?: (tab: "find" | "applications" | "saved" | "resume") => void;
+  activeSubTab?: SubTab;
+  onSubTabChange?: (tab: SubTab) => void;
   hideTopTabs?: boolean;
 } = {}) {
   const {
     jobs,
+    jobsLoading,
     applications,
     bookmarkedJobIds,
     toggleBookmark,
@@ -35,534 +69,320 @@ export default function JobseekerAppView({
     setIsResumeModalOpen,
     searchQuery,
     setSearchQuery,
-    selectedCity,
-    setSelectedCity,
     selectedCategory,
-    setSelectedCategory
+    setSelectedCategory,
+    selectedJobType,
+    setSelectedJobType,
+    isSignedIn,
+    openAuthModal,
+    uploadResume,
+    showToast,
+    updateApplicationStage,
   } = useApp();
 
-  const [internalSubTab, setInternalSubTab] = useState<"find" | "applications" | "saved" | "resume">("find");
+  const [internalSubTab, setInternalSubTab] = useState<SubTab>("find");
   const [inspectingJob, setInspectingJob] = useState<Job | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const activeSubTab = externalSubTab ?? internalSubTab;
-  const setActiveSubTab = (tab: "find" | "applications" | "saved" | "resume") => {
-    if (onSubTabChange) onSubTabChange(tab);
+  const setActiveSubTab = (tab: SubTab) => {
+    onSubTabChange?.(tab);
     setInternalSubTab(tab);
   };
 
-  const [selectedBarangay, setSelectedBarangay] = useState("All");
-
-  // Filter jobs for the "Find Work" stream
-  const filteredJobs = jobs.filter((job) => {
-    if (selectedCategory !== "All" && job.category !== selectedCategory) return false;
-    if (selectedCity !== "All" && job.city !== selectedCity) return false;
-    if (selectedBarangay !== "All" && job.barangay !== selectedBarangay) return false;
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      return (
-        job.title.toLowerCase().includes(q) ||
-        job.company.toLowerCase().includes(q) ||
-        job.location.toLowerCase().includes(q) ||
-        job.category.toLowerCase().includes(q)
-      );
-    }
-    return true;
-  });
+  const filteredJobs = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return jobs.filter((job) => {
+      if (job.status !== "Active") return false;
+      if (selectedCategory !== "All" && job.category !== selectedCategory) return false;
+      if (selectedJobType !== "All" && job.type !== selectedJobType) return false;
+      if (!q) return true;
+      return [job.title, job.company, job.location, job.category].some((v) => v.toLowerCase().includes(q));
+    });
+  }, [jobs, searchQuery, selectedCategory, selectedJobType]);
 
   const savedJobs = jobs.filter((job) => bookmarkedJobIds.includes(job.id));
+  const hasFilters = Boolean(searchQuery) || selectedCategory !== "All" || selectedJobType !== "All";
+
+  const requireAuth = (fn: () => void) => (isSignedIn ? fn() : openAuthModal("sign-in"));
+
+  const openResume = async () => {
+    const res = await getMyResumeLinkAction();
+    if (res.ok) window.open(res.url, "_blank", "noopener,noreferrer");
+    else showToast(res.error, "warning");
+  };
+
+  const pickResume = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    await uploadResume(file);
+    setUploading(false);
+  };
+
+  const tabs: { id: SubTab; label: string; icon: React.ReactNode; count?: number }[] = [
+    { id: "find", label: "Find jobs", icon: <Search className="w-4 h-4" />, count: filteredJobs.length },
+    { id: "applications", label: "Applications", icon: <Send className="w-4 h-4" />, count: applications.length },
+    { id: "saved", label: "Saved", icon: <Bookmark className="w-4 h-4" />, count: savedJobs.length },
+    { id: "resume", label: "Profile", icon: <FileText className="w-4 h-4" /> },
+  ];
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-5xl mx-auto pb-28 sm:pb-24">
-      
-      {/* Top App Tab Pills (hidden when Dock is active) */}
+    <div className="space-y-5 max-w-4xl mx-auto pb-28 sm:pb-24">
       {!hideTopTabs && (
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-xs">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto">
+        <div role="tablist" aria-label="Job seeker sections" className="flex items-center gap-1.5 overflow-x-auto no-scrollbar p-1.5 rounded-2xl bg-surface border border-line">
+          {tabs.map((t) => (
             <button
-              onClick={() => setActiveSubTab("find")}
-              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-                activeSubTab === "find"
-                  ? "bg-blue-600 text-white shadow-xs"
-                  : "text-neutral-600 hover:text-black hover:bg-neutral-100"
+              key={t.id}
+              role="tab"
+              aria-selected={activeSubTab === t.id}
+              onClick={() => setActiveSubTab(t.id)}
+              className={`h-10 px-4 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap cursor-pointer transition-colors ${
+                activeSubTab === t.id ? "bg-blue-600 text-white" : "text-fg-muted hover:text-fg hover:bg-surface-2"
               }`}
             >
-              <Search className="w-3.5 h-3.5" />
-              <span>Find Jobs</span>
-              <span className="text-[11px] bg-white/20 px-1.5 py-0.2 rounded-md">
-                {filteredJobs.length}
-              </span>
+              {t.icon}
+              {t.label}
+              {t.count !== undefined && <span className="text-xs opacity-80">{t.count}</span>}
             </button>
-
-            <button
-              onClick={() => setActiveSubTab("applications")}
-              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-                activeSubTab === "applications"
-                  ? "bg-blue-600 text-white shadow-xs"
-                  : "text-neutral-600 hover:text-black hover:bg-neutral-100"
-              }`}
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>Applications</span>
-              <span className={`text-[11px] px-1.5 py-0.2 rounded-md ${
-                activeSubTab === "applications" ? "bg-white/20 text-white" : "bg-blue-100 text-blue-800 font-bold"
-              }`}>
-                {applications.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveSubTab("saved")}
-              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-                activeSubTab === "saved"
-                  ? "bg-blue-600 text-white shadow-xs"
-                  : "text-neutral-600 hover:text-black hover:bg-neutral-100"
-              }`}
-            >
-              <Bookmark className="w-3.5 h-3.5" />
-              <span>Saved</span>
-              <span className="text-[11px] bg-neutral-200 text-neutral-800 px-1.5 py-0.2 rounded-md">
-                {savedJobs.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveSubTab("resume")}
-              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-                activeSubTab === "resume"
-                  ? "bg-blue-600 text-white shadow-xs"
-                  : "text-neutral-600 hover:text-black hover:bg-neutral-100"
-              }`}
-            >
-              <FileText className="w-3.5 h-3.5" />
-              <span>Profile</span>
-            </button>
-          </div>
-
-          <button
-            onClick={() => setIsResumeModalOpen(true)}
-            className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition-colors cursor-pointer"
-          >
-            <Edit3 className="w-3.5 h-3.5" />
-            <span>Edit Profile</span>
-          </button>
+          ))}
         </div>
       )}
 
-      {/* ========================================================= */}
-      {/* SUB-VIEW 1: FIND WORK NOW */}
-      {/* ========================================================= */}
+      {/* ------------------------------- FIND ------------------------------ */}
       {activeSubTab === "find" && (
-        <div className="space-y-3 sm:space-y-4 animate-in fade-in duration-150">
-          
-          {/* Quick Search & Local Filter Bar (Mobile Optimized) */}
-          <div className="p-3 sm:p-4 rounded-2xl bg-white border border-neutral-200/80 shadow-xs flex flex-col md:flex-row items-stretch md:items-center gap-2.5 sm:gap-3">
-            <div className="flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl bg-neutral-50 md:bg-transparent border md:border-0 border-neutral-200/70 flex-1">
-              <Search className="w-4 h-4 text-neutral-400 shrink-0" />
+        <section className="space-y-4 animate-in fade-in duration-200" aria-label="Find jobs">
+          <div className="p-3 sm:p-4 rounded-2xl bg-surface border border-line shadow-card space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-fg-muted pointer-events-none" aria-hidden />
               <input
-                type="text"
+                type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search job title, skills, or business in Butuan..."
-                className="w-full text-xs sm:text-sm font-medium text-neutral-800 placeholder-neutral-400 bg-transparent focus:outline-none"
+                placeholder="Search job title, company or place…"
+                aria-label="Search jobs"
+                className="field pl-11"
               />
             </div>
-
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-              {/* Barangay selector */}
-              <select
-                value={selectedBarangay}
-                onChange={(e) => setSelectedBarangay(e.target.value)}
-                className="text-xs font-semibold text-neutral-700 bg-neutral-50 md:bg-transparent border border-neutral-200/70 md:border-0 md:border-l md:border-neutral-200 rounded-xl md:rounded-none py-2 px-2.5 focus:outline-none cursor-pointer"
-              >
-                <option value="All">All Barangays</option>
-                <option value="Montilla Blvd">Montilla Blvd</option>
-                <option value="Libertad">Libertad</option>
-                <option value="Ampayon">Ampayon</option>
-                <option value="Bancasi">Bancasi</option>
-                <option value="JC Aquino">JC Aquino</option>
-                <option value="Doongan">Doongan</option>
-                <option value="Villa Kananga">Villa Kananga</option>
-                <option value="Holy Redeemer">Holy Redeemer</option>
-              </select>
-
-              {/* Category Filter */}
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="text-xs font-semibold text-neutral-700 bg-neutral-50 md:bg-transparent border border-neutral-200/70 md:border-0 md:border-l md:border-neutral-200 rounded-xl md:rounded-none py-2 px-2.5 focus:outline-none cursor-pointer"
-              >
-                <option value="All">All Categories</option>
-                <option value="Developer">Developer</option>
-                <option value="Design">Design</option>
-                <option value="Healthcare">Healthcare</option>
-                <option value="Hospitality">Hospitality &amp; Cafes</option>
-                <option value="Trades & Logistics">Trades &amp; Logistics</option>
-                <option value="Marketing">Marketing</option>
-                <option value="Admin & Support">Admin &amp; Support</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Job Cards Stream */}
-          <div className="space-y-3">
-            {filteredJobs.length === 0 ? (
-              <div className="p-8 sm:p-10 rounded-2xl bg-white border border-neutral-200 text-center">
-                <Briefcase className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
-                <h4 className="text-sm font-bold text-neutral-800">No jobs match your current search</h4>
-                <p className="text-xs text-neutral-500 mt-1">Try resetting the filters or searching a different term.</p>
+            <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1" role="group" aria-label="Category">
+              {CATEGORIES.map((c) => (
                 <button
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSelectedCity("All");
-                    setSelectedCategory("All");
-                    setSelectedBarangay("All");
-                  }}
-                  className="mt-3 px-4 py-2 rounded-xl text-xs font-semibold bg-neutral-100 hover:bg-neutral-200 text-neutral-800 cursor-pointer"
+                  key={c}
+                  onClick={() => setSelectedCategory(c)}
+                  aria-pressed={selectedCategory === c}
+                  className={`h-9 px-3.5 rounded-full text-sm font-medium whitespace-nowrap border cursor-pointer transition-colors ${
+                    selectedCategory === c ? "bg-blue-600 text-white border-blue-600" : "bg-surface-2 text-fg-muted border-line hover:text-fg"
+                  }`}
                 >
-                  Reset Filters
+                  {c}
                 </button>
-              </div>
-            ) : (
-              filteredJobs.map((job) => {
-                const isSaved = bookmarkedJobIds.includes(job.id);
-                const hasApplied = applications.some((a) => a.jobId === job.id);
-
-                return (
-                  <div
-                    key={job.id}
-                    onClick={() => setInspectingJob(job)}
-                    className="p-4 sm:p-5 rounded-2xl bg-white border border-neutral-200/80 shadow-xs hover:border-blue-400 hover:shadow-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 cursor-pointer group"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-neutral-50 border border-neutral-200 p-1 flex items-center justify-center shrink-0 overflow-hidden group-hover:border-blue-200 transition-colors">
-                        <img
-                          src={job.companyLogo}
-                          alt={job.company}
-                          className="max-w-full max-h-full object-cover rounded-lg"
-                        />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="text-sm sm:text-base font-bold text-neutral-900 leading-tight group-hover:text-blue-600 transition-colors">
-                            {job.title}
-                          </h4>
-                          {job.featured && (
-                            <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 px-1.5 py-0.2 rounded-md shrink-0">
-                              Featured
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="text-xs text-neutral-600 font-medium mt-1 flex flex-wrap items-center gap-1.5 sm:gap-2">
-                          <span className="font-semibold text-neutral-800">{job.company}</span>
-                          <span className="text-neutral-300">&bull;</span>
-                          <span className="flex items-center gap-1 text-neutral-500">
-                            <MapPin className="w-3 h-3 text-neutral-400 shrink-0" />
-                            <span className="truncate">{job.location}</span>
-                          </span>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                          <span className="text-xs font-bold text-blue-700 bg-blue-50/90 border border-blue-200/50 px-2 py-0.5 rounded-md">
-                            {job.salary}
-                          </span>
-                          <span className="text-[11px] font-medium text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-md">
-                            {job.type}
-                          </span>
-                          <span className="text-[11px] font-medium text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-md">
-                            {job.category}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Touch Friendly Action Buttons */}
-                    <div className="flex items-center gap-2 self-stretch sm:self-center shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-100">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleBookmark(job.id);
-                        }}
-                        className={`p-2.5 sm:p-2 rounded-xl border transition-colors cursor-pointer shrink-0 ${
-                          isSaved
-                            ? "text-amber-500 bg-amber-50 border-amber-200"
-                            : "text-neutral-400 hover:text-black bg-neutral-50 border-neutral-200"
-                        }`}
-                        title="Save job"
-                      >
-                        <Bookmark className={`w-4 h-4 sm:w-3.5 sm:h-3.5 ${isSaved ? "fill-current" : ""}`} />
-                      </button>
-
-                      {hasApplied ? (
-                        <span className="flex-1 sm:flex-initial justify-center px-4 py-2 sm:py-1.5 rounded-xl text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200 flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
-                          <span>Applied</span>
-                        </span>
-                      ) : (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setApplyModalJob(job);
-                          }}
-                          className="flex-1 sm:flex-initial justify-center px-4 py-2 sm:py-1.5 rounded-xl btn-brand-primary text-xs font-bold transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
-                        >
-                          <Send className="w-3 h-3" />
-                          <span>Direct Apply</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* SUB-VIEW 2: MY APPLICATIONS TRACKER */}
-      {/* ========================================================= */}
-      {activeSubTab === "applications" && (
-        <div className="space-y-4 animate-in fade-in duration-150">
-          <div className="p-4 sm:p-6 rounded-2xl bg-white border border-neutral-200/80 shadow-xs">
-            <div className="flex items-center justify-between mb-4 sm:mb-5">
-              <div>
-                <h3 className="text-sm sm:text-base font-bold text-neutral-900">Application Pipeline</h3>
-                <p className="text-xs text-neutral-500 mt-0.5">
-                  Track your status with hiring employers across Butuan &amp; Caraga.
-                </p>
-              </div>
-              <span className="text-xs font-bold text-neutral-700 bg-neutral-100 px-2.5 py-1 rounded-md shrink-0">
-                {applications.length} Total
-              </span>
+              ))}
             </div>
-
-            {applications.length === 0 ? (
-              <div className="py-10 sm:py-12 text-center">
-                <Send className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
-                <h4 className="text-sm font-bold text-neutral-800">No applications submitted yet</h4>
-                <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">
-                  Browse open positions in Butuan City and tap &ldquo;Direct Apply&rdquo; to send your credentials directly to employers.
-                </p>
-                <button
-                  onClick={() => setActiveSubTab("find")}
-                  className="mt-3.5 px-4 py-2 rounded-xl btn-brand-primary text-xs font-bold text-white cursor-pointer shadow-xs"
-                >
-                  Browse Open Vacancies
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-2.5 sm:space-y-3">
-                {applications.map((app) => {
-                  const getStatusStyle = (status: string) => {
-                    switch (status) {
-                      case "Submitted":
-                        return "bg-neutral-100 text-neutral-700 border-neutral-200";
-                      case "Under Review":
-                        return "bg-blue-50 text-blue-700 border-blue-200";
-                      case "Interview Scheduled":
-                        return "bg-purple-50 text-purple-700 border-purple-200";
-                      case "Offered":
-                        return "bg-blue-100 text-blue-800 border-blue-300";
-                      case "Rejected":
-                        return "bg-neutral-100 text-neutral-500 border-neutral-200";
-                      default:
-                        return "bg-neutral-100 text-neutral-700 border-neutral-200";
-                    }
-                  };
-
-                  return (
-                    <div
-                      key={app.id}
-                      className="p-3.5 sm:p-4 rounded-xl bg-neutral-50 border border-neutral-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-white border border-neutral-200 flex items-center justify-center shrink-0 text-blue-600 font-bold text-xs shadow-xs">
-                          {app.company[0]}
-                        </div>
-                        <div>
-                          <div className="text-xs sm:text-sm font-bold text-neutral-900">{app.jobTitle}</div>
-                          <div className="text-xs text-neutral-500 mt-0.5">
-                            {app.company} &bull; Applied on {app.appliedDate}
-                          </div>
-                          {app.coverLetter && (
-                            <div className="text-[11px] text-neutral-600 mt-1 italic line-clamp-1">
-                              &ldquo;{app.coverLetter}&rdquo;
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-200/60">
-                        <span
-                          className={`text-xs font-semibold px-2.5 py-1 rounded-md border flex items-center gap-1.5 ${getStatusStyle(
-                            app.status
-                          )}`}
-                        >
-                          <Clock className="w-3 h-3" />
-                          <span>{app.status}</span>
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* SUB-VIEW 3: SAVED JOBS */}
-      {/* ========================================================= */}
-      {activeSubTab === "saved" && (
-        <div className="space-y-4 animate-in fade-in duration-150">
-          <div className="p-4 sm:p-6 rounded-2xl bg-white border border-neutral-200/80 shadow-xs">
-            <h3 className="text-sm sm:text-base font-bold text-neutral-900 mb-1">Saved Job Bookmarks</h3>
-            <p className="text-xs text-neutral-500 mb-4 sm:mb-5">Openings you bookmarked for review and application.</p>
-
-            {savedJobs.length === 0 ? (
-              <div className="py-10 sm:py-12 text-center">
-                <Bookmark className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
-                <h4 className="text-sm font-bold text-neutral-800">No saved jobs yet</h4>
-                <p className="text-xs text-neutral-500 mt-1">Tap the bookmark icon on any job card to save it here.</p>
-              </div>
-            ) : (
-              <div className="space-y-2.5 sm:space-y-3">
-                {savedJobs.map((job) => (
-                  <div
-                    key={job.id}
-                    onClick={() => setInspectingJob(job)}
-                    className="p-3.5 sm:p-4 rounded-xl bg-neutral-50 hover:bg-neutral-100/70 border border-neutral-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer transition-colors group"
-                  >
-                    <div>
-                      <div className="text-xs sm:text-sm font-bold text-neutral-900 group-hover:text-blue-600 transition-colors">{job.title}</div>
-                      <div className="text-xs text-neutral-500 mt-0.5">
-                        {job.company} &bull; {job.location} &bull; {job.salary}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-200/60">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleBookmark(job.id);
-                        }}
-                        className="text-xs text-neutral-500 hover:text-red-600 px-2.5 py-1.5 rounded-lg cursor-pointer"
-                      >
-                        Remove
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setApplyModalJob(job);
-                        }}
-                        className="px-3.5 py-1.5 rounded-xl btn-brand-primary text-xs font-bold cursor-pointer shadow-xs flex items-center gap-1.5"
-                      >
-                        <Send className="w-3 h-3" />
-                        <span>Direct Apply</span>
-                      </button>
-                    </div>
-                  </div>
+            <div className="flex items-center justify-between gap-3">
+              <select value={selectedJobType} onChange={(e) => setSelectedJobType(e.target.value)} aria-label="Work setup" className="field !w-auto !py-2 cursor-pointer">
+                {TYPES.map((t) => (
+                  <option key={t} value={t}>{t === "All" ? "Any setup" : t}</option>
                 ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* SUB-VIEW 4: CANDIDATE PROFILE & CREDENTIALS */}
-      {/* ========================================================= */}
-      {activeSubTab === "resume" && (
-        <div className="space-y-4 animate-in fade-in duration-150">
-          <div className="p-4 sm:p-7 rounded-2xl bg-white border border-neutral-200/80 shadow-xs space-y-5 sm:space-y-6">
-            
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-5 border-b border-neutral-100">
-              <div>
-                <h3 className="text-base sm:text-lg font-bold text-neutral-900">{userProfile.fullName || "Your Candidate Profile"}</h3>
-                <p className="text-xs text-neutral-500 mt-0.5">{userProfile.headline || "Jobseeker in Butuan City"}</p>
-                <p className="text-xs text-neutral-400 mt-0.5">{userProfile.location || "Butuan City (BXU)"}</p>
-              </div>
-
-              <button
-                onClick={() => setIsResumeModalOpen(true)}
-                className="btn-brand-primary px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer self-stretch sm:self-auto"
-              >
-                <Edit3 className="w-3.5 h-3.5" />
-                <span>Edit Profile Details</span>
-              </button>
-            </div>
-
-            {/* Contact details */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200/80">
-                <span className="text-neutral-500 block mb-0.5">Email Address</span>
-                <span className="font-semibold text-neutral-800">{userProfile.email || "No email on file"}</span>
-              </div>
-              <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200/80">
-                <span className="text-neutral-500 block mb-0.5">Mobile Number</span>
-                <span className="font-semibold text-neutral-800">{userProfile.phone || "No phone number added"}</span>
-              </div>
-            </div>
-
-            {/* Experience & Education */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200/80">
-                <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">
-                  Years of Experience
-                </div>
-                <div className="text-sm font-bold text-neutral-800">{userProfile.experience || "Not specified"}</div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200/80">
-                <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">
-                  Education / University
-                </div>
-                <div className="text-sm font-bold text-neutral-800">{userProfile.education || "Not specified"}</div>
-              </div>
-            </div>
-
-            {/* Verified Skills */}
-            <div>
-              <div className="text-xs font-semibold text-neutral-700 mb-2">Key Skills &amp; Competencies</div>
-              <div className="flex flex-wrap gap-1.5">
-                {(userProfile.skills && userProfile.skills.length > 0 ? userProfile.skills : ["Fast Learner", "Communication"]).map((s, idx) => (
-                  <span
-                    key={idx}
-                    className="text-xs font-medium px-2.5 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200/70"
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Bio */}
-            <div>
-              <div className="text-xs font-semibold text-neutral-700 mb-1">Professional Summary</div>
-              <p className="text-xs text-neutral-600 leading-relaxed bg-neutral-50 p-3.5 sm:p-4 rounded-xl border border-neutral-200/80">
-                {userProfile.bio || "No summary provided."}
+              </select>
+              <p className="text-sm text-fg-muted" aria-live="polite">
+                {filteredJobs.length} {filteredJobs.length === 1 ? "job" : "jobs"}
               </p>
             </div>
-
           </div>
-        </div>
+
+          {jobsLoading ? (
+            <JobListSkeleton />
+          ) : filteredJobs.length === 0 ? (
+            <EmptyState
+              icon={<Briefcase className="w-6 h-6" />}
+              title={hasFilters ? "No jobs match your search" : "No openings yet"}
+              hint={hasFilters ? "Try a different keyword or clear the filters." : "New vacancies from Butuan employers will show up here."}
+              action={
+                hasFilters && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedCategory("All");
+                      setSelectedJobType("All");
+                    }}
+                    className="h-10 px-5 rounded-xl bg-surface-2 border border-line text-sm font-semibold cursor-pointer"
+                  >
+                    Clear filters
+                  </button>
+                )
+              }
+            />
+          ) : (
+            <div className="space-y-3">
+              {filteredJobs.map((job) => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  saved={bookmarkedJobIds.includes(job.id)}
+                  applied={applications.some((a) => a.jobId === job.id)}
+                  onOpen={setInspectingJob}
+                  onToggleSave={toggleBookmark}
+                  onApply={(j) => requireAuth(() => setApplyModalJob(j))}
+                />
+              ))}
+            </div>
+          )}
+        </section>
       )}
 
-      {/* Role Details Inspector Modal */}
+      {/* --------------------------- APPLICATIONS -------------------------- */}
+      {activeSubTab === "applications" && (
+        <section className="space-y-3 animate-in fade-in duration-200" aria-label="My applications">
+          <h2 className="text-xl font-bold tracking-tight">My applications</h2>
+          {applications.length === 0 ? (
+            <EmptyState
+              icon={<Send className="w-6 h-6" />}
+              title="You haven’t applied yet"
+              hint="Browse open roles in Butuan and tap Apply to send your details straight to the employer."
+              action={
+                <button onClick={() => setActiveSubTab("find")} className="btn-brand-primary h-11 px-6 rounded-xl text-sm font-semibold cursor-pointer">
+                  Browse jobs
+                </button>
+              }
+            />
+          ) : (
+            applications.map((app) => (
+              <article key={app.id} className="p-4 sm:p-5 rounded-2xl bg-surface border border-line shadow-card flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                  <CompanyLogo name={app.company} src={app.companyLogo} size={46} />
+                  <div className="min-w-0">
+                    <h3 className="font-semibold truncate">{app.jobTitle}</h3>
+                    <p className="text-sm text-fg-muted truncate">{app.company} · Applied {app.appliedDate}</p>
+                    {app.interviewDate && (
+                      <p className="text-sm text-purple-700 mt-1 flex items-center gap-1.5"><Clock className="w-4 h-4" /> Interview: {app.interviewDate}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between sm:justify-end gap-3">
+                  <span className={`text-sm font-semibold px-3 py-1 rounded-lg ${STATUS_STYLE[app.status] ?? STATUS_STYLE.Submitted}`}>{app.status}</span>
+                  {(app.status === "Submitted" || app.status === "Under Review" || app.status === "Interview Scheduled") && (
+                    <button
+                      onClick={() => {
+                        if (confirm("Withdraw this application?")) updateApplicationStage(app.id, "Withdrawn");
+                      }}
+                      className="text-sm text-fg-muted hover:text-red-600 underline underline-offset-2 cursor-pointer"
+                    >
+                      Withdraw
+                    </button>
+                  )}
+                </div>
+              </article>
+            ))
+          )}
+        </section>
+      )}
+
+      {/* ------------------------------ SAVED ------------------------------ */}
+      {activeSubTab === "saved" && (
+        <section className="space-y-3 animate-in fade-in duration-200" aria-label="Saved jobs">
+          <h2 className="text-xl font-bold tracking-tight">Saved jobs</h2>
+          {savedJobs.length === 0 ? (
+            <EmptyState icon={<Bookmark className="w-6 h-6" />} title="Nothing saved yet" hint="Tap the bookmark on any job to keep it here for later." />
+          ) : (
+            savedJobs.map((job) => (
+              <JobCard
+                key={job.id}
+                job={job}
+                saved
+                applied={applications.some((a) => a.jobId === job.id)}
+                onOpen={setInspectingJob}
+                onToggleSave={toggleBookmark}
+                onApply={(j) => requireAuth(() => setApplyModalJob(j))}
+              />
+            ))
+          )}
+        </section>
+      )}
+
+      {/* ----------------------------- PROFILE ----------------------------- */}
+      {activeSubTab === "resume" && (
+        <section className="space-y-4 animate-in fade-in duration-200" aria-label="My profile">
+          {!isSignedIn ? (
+            <EmptyState
+              icon={<FileText className="w-6 h-6" />}
+              title="Sign in to build your profile"
+              hint="Your profile and resume are saved to your account and reused on every application."
+              action={<button onClick={() => openAuthModal("sign-in")} className="btn-brand-primary h-11 px-6 rounded-xl text-sm font-semibold cursor-pointer">Sign in</button>}
+            />
+          ) : (
+            <>
+              <div className="p-5 sm:p-6 rounded-2xl bg-surface border border-line shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <h2 className="text-xl font-bold tracking-tight truncate">{userProfile.fullName || "Your profile"}</h2>
+                  <p className="text-fg-muted mt-0.5">{userProfile.headline || "Add a headline so employers know what you do"}</p>
+                  <p className="text-sm text-fg-muted mt-1">{userProfile.location}</p>
+                </div>
+                <button onClick={() => setIsResumeModalOpen(true)} className="h-11 px-5 rounded-xl border border-line bg-surface-2 text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer hover:border-neutral-300">
+                  <Edit3 className="w-4 h-4" /> Edit profile
+                </button>
+              </div>
+
+              <div className="p-5 sm:p-6 rounded-2xl bg-surface border border-line shadow-card">
+                <h3 className="font-semibold mb-3">Resume</h3>
+                <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" className="sr-only" onChange={pickResume} aria-label="Upload resume" />
+                {userProfile.resumeFileName ? (
+                  <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-surface-2">
+                    <span className="flex items-center gap-2.5 min-w-0 font-medium"><FileText className="w-5 h-5 text-blue-600 shrink-0" /><span className="truncate">{userProfile.resumeFileName}</span></span>
+                    <span className="flex items-center gap-4 text-sm font-semibold">
+                      <button onClick={openResume} className="text-brand hover:underline flex items-center gap-1.5 cursor-pointer"><ExternalLink className="w-4 h-4" /> View</button>
+                      <button onClick={() => fileRef.current?.click()} disabled={uploading} className="text-brand hover:underline cursor-pointer">{uploading ? "Uploading…" : "Replace"}</button>
+                    </span>
+                  </div>
+                ) : (
+                  <button onClick={() => fileRef.current?.click()} disabled={uploading} className="w-full p-6 rounded-xl border-2 border-dashed border-neutral-300 hover:border-brand hover:bg-blue-50 text-fg-muted flex flex-col items-center gap-2 cursor-pointer transition-colors">
+                    {uploading ? <Loader2 className="w-6 h-6 animate-spin" /> : <UploadCloud className="w-6 h-6 text-brand" />}
+                    <span className="font-medium">{uploading ? "Uploading…" : "Upload your resume"}</span>
+                    <span className="text-sm">PDF or Word, up to 5 MB. Only employers you apply to can open it.</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div className="p-4 rounded-2xl bg-surface border border-line flex items-start gap-3"><Mail className="w-5 h-5 text-fg-muted mt-0.5" /><div className="min-w-0"><p className="text-xs text-fg-muted">Email</p><p className="font-medium truncate">{userProfile.email || "—"}</p></div></div>
+                <div className="p-4 rounded-2xl bg-surface border border-line flex items-start gap-3"><Phone className="w-5 h-5 text-fg-muted mt-0.5" /><div><p className="text-xs text-fg-muted">Mobile</p><p className="font-medium">{userProfile.phone || "—"}</p></div></div>
+                <div className="p-4 rounded-2xl bg-surface border border-line flex items-start gap-3 sm:col-span-2"><GraduationCap className="w-5 h-5 text-fg-muted mt-0.5" /><div><p className="text-xs text-fg-muted">Education</p><p className="font-medium">{userProfile.education || "—"}</p></div></div>
+              </div>
+
+              {userProfile.skills.length > 0 && (
+                <div className="p-5 sm:p-6 rounded-2xl bg-surface border border-line shadow-card">
+                  <h3 className="font-semibold mb-3">Skills</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {userProfile.skills.map((s) => (
+                      <span key={s} className="text-sm font-medium px-3 py-1 rounded-lg bg-blue-50 text-blue-700">{s}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {userProfile.bio && (
+                <div className="p-5 sm:p-6 rounded-2xl bg-surface border border-line shadow-card">
+                  <h3 className="font-semibold mb-2">About me</h3>
+                  <p className="text-[15px] leading-7 text-fg/85 whitespace-pre-line">{userProfile.bio}</p>
+                </div>
+              )}
+            </>
+          )}
+        </section>
+      )}
+
       <JobDetailModal
         job={inspectingJob}
         onClose={() => setInspectingJob(null)}
         onApply={(job) => {
           setInspectingJob(null);
-          setApplyModalJob(job);
+          requireAuth(() => setApplyModalJob(job));
         }}
         isSaved={inspectingJob ? bookmarkedJobIds.includes(inspectingJob.id) : false}
         hasApplied={inspectingJob ? applications.some((a) => a.jobId === inspectingJob.id) : false}
         onToggleBookmark={toggleBookmark}
       />
-
     </div>
   );
 }
