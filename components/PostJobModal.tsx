@@ -47,7 +47,14 @@ export default function PostJobModal() {
     if (isPostJobOpen && userProfile.companyName && !company) {
       setCompany(userProfile.companyName);
     }
-  }, [isPostJobOpen, userProfile.companyName, company]);
+    if (isPostJobOpen) {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setIsPostJobOpen(false);
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [isPostJobOpen, userProfile.companyName, company, setIsPostJobOpen]);
 
   if (!isPostJobOpen) return null;
 
@@ -83,7 +90,10 @@ export default function PostJobModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      onClick={() => setIsPostJobOpen(false)}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+    >
       <div
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-lg rounded-t-3xl sm:rounded-2xl bg-white p-5 sm:p-7 shadow-2xl border border-neutral-200 text-left max-h-[90vh] overflow-y-auto"
@@ -94,14 +104,15 @@ export default function PostJobModal() {
         {/* Close button */}
         <button
           onClick={() => setIsPostJobOpen(false)}
-          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-500 hover:text-black transition-colors cursor-pointer"
-          aria-label="Close"
+          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-9 h-9 sm:w-8 sm:h-8 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:scale-95 text-neutral-600 hover:text-black flex items-center justify-center transition-all cursor-pointer shadow-xs z-10"
+          aria-label="Close dialog"
+          title="Close (Esc)"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4 stroke-[2.2]" />
         </button>
 
         {/* Header */}
-        <div className="mb-4 pr-8">
+        <div className="mb-4 pr-11 sm:pr-12">
           <div className="flex items-center gap-2 mb-1">
             <Briefcase className="w-4 h-4 text-blue-600" />
             <h3 className="text-base sm:text-lg font-bold text-neutral-900">Post a Job Opening</h3>

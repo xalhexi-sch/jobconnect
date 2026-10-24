@@ -152,6 +152,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       fetchUserProfileAction(user.id).then((profile) => {
         if (mounted && profile) {
           setUserProfile(profile);
+          if (profile.role) {
+            setRoleState(profile.role);
+            setUser((prev) => ({ ...prev, role: profile.role || "jobseeker" }));
+          }
         }
       });
     } else {
@@ -214,19 +218,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setUser((prev) => ({
       ...prev,
       role: newRole,
-      fullName: prev.fullName || (newRole === "employer" ? "Verified Employer" : "Jobseeker"),
-      email: prev.email || (newRole === "employer" ? "employer@butuan.tech" : "")
     }));
-    showToast(
-      `Switched to ${
-        newRole === "admin"
-          ? "Admin Dashboard 🛡️"
-          : newRole === "employer"
-          ? "Employer Hiring Portal 🏢"
-          : "Jobseeker Portal 🎯"
-      }`,
-      "info"
-    );
+    setUserProfile((prev) => ({
+      ...prev,
+      role: newRole,
+    }));
   };
 
   const updateUserProfile = (updatedFields: Partial<UserProfile>) => {

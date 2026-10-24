@@ -14,15 +14,21 @@ export default function ApplyModal() {
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Sync with authenticated user details when modal opens
+  // Sync with authenticated user details when modal opens and listen for Escape key
   useEffect(() => {
     if (applyModalJob) {
       setApplicantName(user?.fullName || userProfile?.fullName || "");
       setApplicantEmail(user?.email || userProfile?.email || "");
       setPhone(userProfile?.phone || "");
       setResumeFileName(userProfile?.resumeFileName || "");
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setApplyModalJob(null);
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
     }
-  }, [applyModalJob, user, userProfile]);
+  }, [applyModalJob, user, userProfile, setApplyModalJob]);
 
   if (!applyModalJob) return null;
 
@@ -51,7 +57,10 @@ export default function ApplyModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      onClick={() => setApplyModalJob(null)}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+    >
       <div
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-md rounded-t-2xl sm:rounded-2xl bg-white p-5 sm:p-6 shadow-2xl border border-neutral-200 text-left max-h-[90vh] overflow-y-auto"
@@ -62,14 +71,15 @@ export default function ApplyModal() {
         {/* Close button */}
         <button
           onClick={() => setApplyModalJob(null)}
-          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-7 h-7 rounded-lg bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-500 hover:text-black transition-colors cursor-pointer"
-          aria-label="Close"
+          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-9 h-9 sm:w-8 sm:h-8 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:scale-95 text-neutral-600 hover:text-black flex items-center justify-center transition-all cursor-pointer shadow-xs z-10"
+          aria-label="Close dialog"
+          title="Close (Esc)"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4 stroke-[2.2]" />
         </button>
 
         {/* Job Header */}
-        <div className="flex items-center gap-3 mb-4 pr-8">
+        <div className="flex items-center gap-3 mb-4 pr-11 sm:pr-12">
           <div className="w-10 h-10 rounded-xl bg-neutral-50 border border-neutral-200 p-1 flex items-center justify-center shrink-0 overflow-hidden">
             <img
               src={applyModalJob.companyLogo}

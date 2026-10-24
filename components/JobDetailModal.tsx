@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Job } from "@/lib/types";
 import {
   X,
@@ -30,10 +30,23 @@ export default function JobDetailModal({
   hasApplied: boolean;
   onToggleBookmark: (jobId: string) => void;
 }) {
+  // Listen for Escape key to close dialog
+  useEffect(() => {
+    if (!job) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [job, onClose]);
+
   if (!job) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+    >
       <div
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-xl rounded-t-2xl sm:rounded-2xl bg-white p-5 sm:p-7 shadow-2xl border border-neutral-200 text-left max-h-[92vh] sm:max-h-[85vh] overflow-y-auto"
@@ -41,17 +54,18 @@ export default function JobDetailModal({
         {/* Mobile Drag Indicator */}
         <div className="w-10 h-1 bg-neutral-300 rounded-full mx-auto mb-3 sm:hidden" />
 
-        {/* Close button */}
+        {/* Prominent, touch-friendly close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-7 h-7 rounded-lg bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-500 hover:text-black transition-colors cursor-pointer"
-          aria-label="Close"
+          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-9 h-9 sm:w-8 sm:h-8 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:scale-95 text-neutral-600 hover:text-black flex items-center justify-center transition-all cursor-pointer shadow-xs z-10"
+          aria-label="Close dialog"
+          title="Close (Esc)"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4 stroke-[2.2]" />
         </button>
 
-        {/* Header Block */}
-        <div className="flex items-start gap-3.5 mb-5 pr-8">
+        {/* Header Block with safe right padding */}
+        <div className="flex items-start gap-3.5 mb-5 pr-11 sm:pr-12">
           <div className="w-12 h-12 rounded-xl bg-neutral-50 border border-neutral-200 p-1 flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
             <img
               src={job.companyLogo}

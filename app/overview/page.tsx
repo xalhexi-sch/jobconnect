@@ -13,11 +13,8 @@ import {
   Bookmark,
   FileText,
   Plus,
-  ShieldAlert,
-  Building2,
-  Lock,
-  ArrowRight,
-  Sparkles
+  Users,
+  Building2
 } from "lucide-react";
 import JobseekerAppView from "@/components/overview/JobseekerAppView";
 import EmployerAppView from "@/components/overview/EmployerAppView";
@@ -35,25 +32,17 @@ export default function OverviewPage() {
     openAuthModal,
     isSignedIn,
     user,
-    setRole,
+    userProfile,
     jobs,
     applications,
     bookmarkedJobIds,
     setIsPostJobOpen,
-    setIsResumeModalOpen,
     isOnboardingOpen,
     setIsOnboardingOpen,
   } = useApp();
 
-  const [viewMode, setViewMode] = useState<"jobseeker" | "employer">("jobseeker");
   const [jobseekerSubTab, setJobseekerSubTab] = useState<"find" | "applications" | "saved" | "resume">("find");
   const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    if (user.role === "employer") {
-      setViewMode("employer");
-    }
-  }, [user.role]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 640);
@@ -62,68 +51,75 @@ export default function OverviewPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Strict role check: authentic accounts only
   const isEmployerAuthorized = user.role === "employer" || user.role === "admin";
 
-  // Build items for the macOS-style React Bits Dock
-  const dockItems: DockItemData[] = [
-    {
-      icon: <Search className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
-      label: "Find Jobs",
-      active: viewMode === "jobseeker" && jobseekerSubTab === "find",
-      badge: jobs.length > 0 ? jobs.length : undefined,
-      onClick: () => {
-        setViewMode("jobseeker");
-        setJobseekerSubTab("find");
-      },
-    },
-    {
-      icon: <Send className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
-      label: "My Applications",
-      active: viewMode === "jobseeker" && jobseekerSubTab === "applications",
-      badge: applications.length > 0 ? applications.length : undefined,
-      onClick: () => {
-        setViewMode("jobseeker");
-        setJobseekerSubTab("applications");
-      },
-    },
-    {
-      icon: <Bookmark className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />,
-      label: "Saved Jobs",
-      active: viewMode === "jobseeker" && jobseekerSubTab === "saved",
-      badge: bookmarkedJobIds.length > 0 ? bookmarkedJobIds.length : undefined,
-      onClick: () => {
-        setViewMode("jobseeker");
-        setJobseekerSubTab("saved");
-      },
-    },
-    {
-      icon: <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />,
-      label: "My Resume",
-      active: viewMode === "jobseeker" && jobseekerSubTab === "resume",
-      onClick: () => {
-        setViewMode("jobseeker");
-        setJobseekerSubTab("resume");
-      },
-    },
-    {
-      separator: true,
-    },
-    {
-      icon: <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700" />,
-      label: "Employer Portal",
-      active: viewMode === "employer",
-      onClick: () => {
-        setViewMode("employer");
-      },
-    },
-    {
-      icon: <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
-      label: "Post Vacancy",
-      onClick: () => {
-        setIsPostJobOpen(true);
-      },
-    },
-  ];
+  // Build role-isolated Dock items
+  const dockItems: DockItemData[] = isEmployerAuthorized
+    ? [
+        {
+          icon: <Users className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
+          label: "Candidate Pipeline",
+          active: true,
+          badge: applications.length > 0 ? applications.length : undefined,
+          onClick: () => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          },
+        },
+        {
+          icon: <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
+          label: "Active Vacancies",
+          badge: jobs.filter((j) => j.company === userProfile.companyName).length || undefined,
+          onClick: () => {
+            const el = document.getElementById("active-vacancies-section");
+            if (el) el.scrollIntoView({ behavior: "smooth" });
+          },
+        },
+        {
+          icon: <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
+          label: "Post Vacancy",
+          onClick: () => {
+            setIsPostJobOpen(true);
+          },
+        },
+      ]
+    : [
+        {
+          icon: <Search className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
+          label: "Find Jobs",
+          active: jobseekerSubTab === "find",
+          badge: jobs.length > 0 ? jobs.length : undefined,
+          onClick: () => {
+            setJobseekerSubTab("find");
+          },
+        },
+        {
+          icon: <Send className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
+          label: "My Applications",
+          active: jobseekerSubTab === "applications",
+          badge: applications.length > 0 ? applications.length : undefined,
+          onClick: () => {
+            setJobseekerSubTab("applications");
+          },
+        },
+        {
+          icon: <Bookmark className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />,
+          label: "Saved Jobs",
+          active: jobseekerSubTab === "saved",
+          badge: bookmarkedJobIds.length > 0 ? bookmarkedJobIds.length : undefined,
+          onClick: () => {
+            setJobseekerSubTab("saved");
+          },
+        },
+        {
+          icon: <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />,
+          label: "My Resume",
+          active: jobseekerSubTab === "resume",
+          onClick: () => {
+            setJobseekerSubTab("resume");
+          },
+        },
+      ];
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-[#111116] flex flex-col antialiased font-sans">
@@ -146,20 +142,23 @@ export default function OverviewPage() {
             </Link>
           </div>
 
-          {/* Active Mode Badge & Actions */}
+          {/* Authentic Role Status (Non-arbitrary, securely bound) & Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              onClick={() => setIsOnboardingOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 border border-neutral-200/80 text-[11px] sm:text-xs font-semibold text-neutral-700 transition-colors cursor-pointer"
-              title="Change role or company setup"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
-              <span>
-                {viewMode === "employer" ? "Employer" : "Seeker"}
-              </span>
-              <span className="text-neutral-400 hidden sm:inline">&bull;</span>
-              <span className="text-neutral-500 font-medium hidden sm:inline">BXU</span>
-            </button>
+            {isEmployerAuthorized ? (
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-50 border border-blue-200/80 text-[11px] sm:text-xs font-semibold text-blue-800 shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                <span>{userProfile.companyName || "Verified Employer"}</span>
+                <span className="text-blue-300 hidden sm:inline">&bull;</span>
+                <span className="text-blue-600 font-medium hidden sm:inline">Hiring Portal</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-neutral-100 border border-neutral-200/80 text-[11px] sm:text-xs font-semibold text-neutral-700 shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                <span>Candidate</span>
+                <span className="text-neutral-400 hidden sm:inline">&bull;</span>
+                <span className="text-neutral-500 font-medium hidden sm:inline">Butuan City</span>
+              </div>
+            )}
 
             {/* Authentication Control */}
             {isClerkConfigured ? (
@@ -199,76 +198,17 @@ export default function OverviewPage() {
         </div>
       </header>
 
-      {/* Main Workspace */}
+      {/* Main Workspace (Strictly Isolated by Account Role) */}
       <main className="flex-1 p-3 sm:p-6 lg:p-8">
         <div className="max-w-6xl mx-auto">
-          {viewMode === "jobseeker" ? (
+          {isEmployerAuthorized ? (
+            <EmployerAppView />
+          ) : (
             <JobseekerAppView
               activeSubTab={jobseekerSubTab}
               onSubTabChange={setJobseekerSubTab}
               hideTopTabs={true}
             />
-          ) : isEmployerAuthorized ? (
-            <EmployerAppView />
-          ) : (
-            /* Protected Employer Workspace & Candidate Privacy Gate */
-            <div className="max-w-xl mx-auto my-6 sm:my-8 p-5 sm:p-7 rounded-2xl bg-white border border-neutral-200/90 shadow-sm text-center">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3.5 sm:mb-4 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shadow-xs">
-                <Lock className="w-6 h-6 sm:w-7 sm:h-7" />
-              </div>
-
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 mb-3">
-                <ShieldAlert className="w-3.5 h-3.5 text-blue-600" />
-                <span>Protected Employer Workspace</span>
-              </span>
-
-              <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-neutral-900 mb-2">
-                Candidate Privacy &amp; Organization Access
-              </h2>
-
-              <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed max-w-md mx-auto mb-5 sm:mb-6">
-                Candidate resumes, contact details, and hiring pipelines are strictly confidential under JobConnect BXU security standards. Access to review candidate CVs and publish vacancies is restricted to verified employers.
-              </p>
-
-              <div className="text-left bg-neutral-50/80 rounded-2xl p-3.5 sm:p-4 border border-neutral-200/80 mb-5 sm:mb-6 space-y-2 text-xs text-neutral-600">
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
-                  <span><strong>Applicant Privacy:</strong> Full resumes and contact details are isolated from unverified accounts.</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
-                  <span><strong>Local Business Verification:</strong> Free onboarding for Butuan DTI/SEC registered entities and CSU/FSUU partners.</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 shrink-0" />
-                  <span><strong>Zero Agency Markups:</strong> Direct hiring without intermediary fees.</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
-                <button
-                  onClick={() => setRole("employer")}
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl btn-brand-primary text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs"
-                >
-                  <Building2 className="w-4 h-4" />
-                  <span>Switch to Employer Profile</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setViewMode("jobseeker");
-                    setJobseekerSubTab("find");
-                  }}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl btn-clerk-outline text-xs font-semibold cursor-pointer"
-                >
-                  Return to Job Search
-                </button>
-              </div>
-
-              <p className="text-[11px] text-neutral-400 mt-3.5">
-                Tip for evaluators: Click &ldquo;Switch to Employer Profile&rdquo; for instant simulated employer portal access.
-              </p>
-            </div>
           )}
         </div>
       </main>
@@ -278,28 +218,26 @@ export default function OverviewPage() {
         <div className="pointer-events-auto">
           <Dock
             items={dockItems}
-            position="bottom"
-            theme="light"
-            autoHide={!isMobile}
-            baseItemSize={isMobile ? 38 : 46}
-            magnification={isMobile ? 48 : 66}
-            panelHeight={isMobile ? 52 : 62}
+            panelHeight={isMobile ? 54 : 64}
+            baseItemSize={isMobile ? 38 : 44}
+            magnification={isMobile ? 50 : 60}
+            distance={isMobile ? 80 : 120}
             roundness={0.4}
-            showLabels={!isMobile}
-            showBadges={true}
-            showIndicators={true}
-            badgeColor="#2563EB"
-            accentColor="#2563EB"
+            autoHide={!isMobile}
           />
         </div>
       </div>
 
-      {/* Global Interactive Modals */}
+      {/* Production Modals */}
       <ApplyModal />
       <PostJobModal />
       <ResumePortfolioModal />
       <AuthModal />
-      <OnboardingModal isOpen={isOnboardingOpen} onClose={() => setIsOnboardingOpen(false)} />
+      <OnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+      />
+
     </div>
   );
 }

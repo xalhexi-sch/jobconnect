@@ -22,7 +22,6 @@ export default function EmployerAppView() {
     jobs,
     user,
     userProfile,
-    setRole,
     updateApplicationStage,
     setIsPostJobOpen,
     showToast

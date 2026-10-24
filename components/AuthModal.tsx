@@ -15,6 +15,17 @@ export default function AuthModal() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Escape key listener
+  React.useEffect(() => {
+    if (isAuthOpen) {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") closeAuthModal();
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [isAuthOpen, closeAuthModal]);
+
   if (!isAuthOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -43,7 +54,10 @@ export default function AuthModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+    <div
+      onClick={closeAuthModal}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200"
+    >
       <div
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-[420px] rounded-t-3xl sm:rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-neutral-200 animate-in zoom-in-95 duration-200 text-left max-h-[90vh] overflow-y-auto"
@@ -53,9 +67,11 @@ export default function AuthModal() {
         {/* Close button */}
         <button
           onClick={closeAuthModal}
-          className="absolute top-5 right-5 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-500 hover:text-black transition-colors cursor-pointer z-10"
+          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-9 h-9 sm:w-8 sm:h-8 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:scale-95 text-neutral-600 hover:text-black flex items-center justify-center transition-all cursor-pointer shadow-xs z-10"
+          aria-label="Close dialog"
+          title="Close (Esc)"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4 stroke-[2.2]" />
         </button>
 
         {isClerkConfigured ? (

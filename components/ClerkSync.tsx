@@ -28,6 +28,8 @@ function ClerkSyncInner() {
         "Butuan User";
       const avatar = user.imageUrl || "/hero-applicant.png";
 
+      const clerkRole = (user.publicMetadata?.role as "jobseeker" | "employer" | "admin") || "jobseeker";
+
       // Sync user state into AppContext
       setIsSignedIn(true);
       setUser((prev) => ({
@@ -36,6 +38,7 @@ function ClerkSyncInner() {
         fullName,
         email,
         avatar,
+        role: clerkRole,
       }));
 
       // Upsert profile in Supabase database

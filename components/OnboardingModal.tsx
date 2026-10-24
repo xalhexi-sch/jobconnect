@@ -13,7 +13,8 @@ import {
   Phone,
   Mail,
   User,
-  ShieldCheck
+  ShieldCheck,
+  X
 } from "lucide-react";
 import JobgioLogo from "./JobgioLogo";
 import confetti from "canvas-confetti";
@@ -77,15 +78,21 @@ export default function OnboardingModal({
   const [companyIndustry, setCompanyIndustry] = useState("Technology & Software");
   const [employerContactName, setEmployerContactName] = useState("");
 
-  // Sync initial user information from Clerk or AppContext
+  // Sync initial user information from Clerk or AppContext and listen for Escape
   useEffect(() => {
     if (isOpen) {
       setFullName(user.fullName || userProfile.fullName || "");
       setEmail(user.email || userProfile.email || "");
       setPhone(userProfile.phone || "");
       setEmployerContactName(user.fullName || userProfile.fullName || "");
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") onClose();
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
     }
-  }, [isOpen, user, userProfile]);
+  }, [isOpen, user, userProfile, onClose]);
 
   if (!isOpen) return null;
 
@@ -139,13 +146,26 @@ export default function OnboardingModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+    >
       <div
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-lg rounded-t-2xl sm:rounded-2xl bg-white p-5 sm:p-7 shadow-2xl border border-neutral-200 text-left max-h-[92vh] overflow-y-auto"
       >
         {/* Mobile Pull Handle Indicator */}
         <div className="w-10 h-1 bg-neutral-300 rounded-full mx-auto mb-3 sm:hidden" />
+
+        {/* Touch-friendly Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-9 h-9 sm:w-8 sm:h-8 rounded-xl bg-neutral-100 hover:bg-neutral-200 active:scale-95 text-neutral-600 hover:text-black flex items-center justify-center transition-all cursor-pointer shadow-xs z-10"
+          aria-label="Close dialog"
+          title="Close (Esc)"
+        >
+          <X className="w-4 h-4 stroke-[2.2]" />
+        </button>
 
         {/* Top Branding Header */}
         <div className="text-center mb-5">
