@@ -2,11 +2,8 @@
 
 import React from "react";
 import { CheckCircle2, MapPin, Building2, Users } from "lucide-react";
-import { useApp } from "@/context/AppContext";
 
 export default function StatsProof() {
-  const { jobs } = useApp();
-
   const localDistricts = [
     "Montilla Boulevard",
     "Libertad",

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Minus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { FAQS } from "@/lib/mock-data";
 import { motion, AnimatePresence } from "motion/react";
 

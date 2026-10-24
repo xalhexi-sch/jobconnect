@@ -2,6 +2,7 @@
 
 import React, { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import JobgioLogo from "@/components/JobgioLogo";
 import { useApp } from "@/context/AppContext";
 import { Briefcase, ArrowLeft, LogIn, Search, Send, Bookmark, FileText, Plus, Building2, ShieldCheck, Lock } from "lucide-react";
@@ -49,6 +50,7 @@ export default function OverviewPage() {
     setIsOnboardingOpen,
   } = useApp();
 
+  const router = useRouter();
   const [viewMode, setViewMode] = useState<"jobseeker" | "employer">("jobseeker");
   const [jobseekerSubTab, setJobseekerSubTab] = useState<"find" | "applications" | "saved" | "resume">("find");
   const isMobile = useSyncExternalStore(subscribeMobile, getMobile, () => false);
@@ -82,7 +84,7 @@ export default function OverviewPage() {
         ] as DockItemData[])
       : []),
     ...(role === "admin"
-      ? ([{ separator: true }, { icon: <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700" />, label: "Admin", onClick: () => (window.location.href = "/admin") }] as DockItemData[])
+      ? ([{ separator: true }, { icon: <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700" />, label: "Admin", onClick: () => router.push("/admin") }] as DockItemData[])
       : []),
   ];
 

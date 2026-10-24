@@ -2,7 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { Search, MapPin, ArrowRight, Briefcase, CheckCircle2, Sparkles } from "lucide-react";
+import Image from "next/image";
+import { Search, MapPin, ArrowRight, Briefcase, CheckCircle2 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { motion } from "motion/react";
 
@@ -160,11 +161,7 @@ export default function Hero() {
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="relative w-full max-w-[340px] sm:max-w-[380px] aspect-[4/5] rounded-2xl overflow-hidden shadow-xl border-4 border-white bg-neutral-100 group"
             >
-              <img
-                src="/hero-applicant.png"
-                alt="Butuan Job Seeker using JobConnect"
-                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
-              />
+              <Image src="/hero-applicant.png" alt="Butuan Job Seeker using JobConnect" fill priority sizes="380px" className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out" />
 
               {/* Photo Bottom Caption */}
               <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 p-3 rounded-xl bg-white/95 backdrop-blur-md border border-neutral-200/80 shadow-md text-left">

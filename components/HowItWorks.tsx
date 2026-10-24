@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { UserCheck, Search, Send, BellRing, ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { UserCheck, Search, Send, BellRing } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export default function HowItWorks() {
@@ -65,11 +66,7 @@ export default function HowItWorks() {
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="rounded-3xl overflow-hidden aspect-[4/5] bg-neutral-100 shadow-xl border-4 border-white"
             >
-              <img
-                src="/hero-applicant.png"
-                alt="Jobseeker finding opportunities in Butuan"
-                className="w-full h-full object-cover object-center contrast-105"
-              />
+              <Image src="/hero-applicant.png" alt="Jobseeker finding opportunities in Butuan" fill sizes="440px" className="object-cover object-center contrast-105" />
             </motion.div>
 
             {/* Overlapping search badge with floating motion */}

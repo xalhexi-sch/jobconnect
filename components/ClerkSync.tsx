@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useApp } from "@/context/AppContext";
-import { isClerkConfigured } from "@/lib/clerk";
+import { isClerkConfigured, DEFAULT_MOCK_USER } from "@/lib/clerk";
 
 export default function ClerkSync() {
   if (!isClerkConfigured) return null;
@@ -29,6 +29,7 @@ function ClerkSyncInner() {
       setUser((prev) => ({ ...prev, id: user.id, fullName, email, avatar: user.imageUrl || "/hero-applicant.png" }));
     } else {
       setIsSignedIn(false);
+      setUser(DEFAULT_MOCK_USER);
     }
   }, [isLoaded, isSignedIn, user, setUser, setIsSignedIn]);
 

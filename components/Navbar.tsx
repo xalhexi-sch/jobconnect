@@ -6,7 +6,7 @@ import JobgioLogo from "./JobgioLogo";
 import { useApp } from "@/context/AppContext";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import LocaleToggle from "@/components/ui/LocaleToggle";
-import { ArrowUpRight, LogIn, Plus, Menu, X, Search, Briefcase, HelpCircle, Sparkles } from "lucide-react";
+import { ArrowUpRight, LogIn, Plus, Menu, X, Search, Briefcase, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { isClerkConfigured } from "@/lib/clerk";
 import { Show, UserButton } from "@clerk/nextjs";
