@@ -1,7 +1,10 @@
 "use server";
 
 import { requireRole } from "@/lib/auth";
-import { audit, getJobById, insertJob, listActiveJobs, listJobsByEmployer, listJobsByStatus, setJobStatus } from "@/lib/db";
+import {
+  audit, getJobById, insertJob, listActiveJobs, listJobsByEmployer, listJobsByStatus, searchJobs, setJobStatus,
+  type JobSearch,
+} from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { run, UserError, type ActionResult } from "@/lib/action";
 import { jobInputSchema } from "@/lib/validation";
@@ -14,6 +17,24 @@ export async function fetchJobsAction(category?: string): Promise<Job[]> {
   } catch (error) {
     console.error("fetchJobsAction failed:", error);
     return [];
+  }
+}
+
+/** Public: server-side search with cursor pagination. */
+export async function searchJobsAction(input: JobSearch): Promise<{ jobs: Job[]; nextCursor: string | null }> {
+  try {
+    return await searchJobs({
+      q: typeof input?.q === "string" ? input.q : undefined,
+      category: typeof input?.category === "string" ? input.category : undefined,
+      type: typeof input?.type === "string" ? input.type : undefined,
+      city: typeof input?.city === "string" ? input.city : undefined,
+      minSalary: Number.isFinite(input?.minSalary) ? Number(input.minSalary) : undefined,
+      cursor: typeof input?.cursor === "string" ? input.cursor : undefined,
+      limit: Number.isFinite(input?.limit) ? Number(input.limit) : undefined,
+    });
+  } catch (error) {
+    console.error("searchJobsAction failed:", error);
+    return { jobs: [], nextCursor: null };
   }
 }
 

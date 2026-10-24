@@ -49,7 +49,8 @@ function mapApplication(r: Row): Application {
     status: r.status,
     interviewDate: r.interview_date || undefined,
     coverLetter: r.cover_letter || undefined,
-    resumeUrl: r.resume_url || undefined,
+    // Presence marker only: the storage path is never sent to the browser (see getApplicationResumeLinkAction).
+    resumeUrl: r.resume_url ? "private" : undefined,
   };
 }
 
@@ -70,7 +71,7 @@ function mapProfile(r: Row): UserProfile {
     skills: r.skills || [],
     education: r.education || "",
     portfolioUrl: r.portfolio_url || "",
-    resumeFileName: r.resume_url ? "Resume" : "",
+    resumeFileName: r.resume_url ? r.resume_name || "Resume" : "",
     resumeUpdated: r.updated_at ? shortDate(r.updated_at) : "",
     expectedSalary: r.expected_salary || "",
   };
@@ -181,7 +182,7 @@ export async function insertApplication(a: {
   applicantEmail: string;
   phone?: string;
   coverLetter?: string;
-  resumeUrl?: string;
+  resume?: { path: string; name: string } | null;
 }): Promise<{ application?: Application; duplicate?: boolean }> {
   const { data, error } = await getSupabaseAdmin()
     .from("applications")
@@ -192,7 +193,8 @@ export async function insertApplication(a: {
       applicant_email: a.applicantEmail,
       phone: a.phone || null,
       cover_letter: a.coverLetter || null,
-      resume_url: a.resumeUrl || null,
+      resume_url: a.resume?.path ?? null,
+      resume_name: a.resume?.name ?? null,
       status: "Submitted",
     })
     .select("*, jobs(*)")
@@ -246,6 +248,78 @@ export async function setSaved(userId: string, jobId: string, saved: boolean): P
         .upsert({ user_id: userId, job_id: jobId }, { onConflict: "user_id,job_id", ignoreDuplicates: true })
     : await db.from("saved_jobs").delete().eq("user_id", userId).eq("job_id", jobId);
   if (error) fail("updating saved jobs", error);
+}
+
+/* --------------------------------- Search -------------------------------- */
+
+export interface JobSearch {
+  q?: string;
+  category?: string;
+  type?: string;
+  city?: string;
+  minSalary?: number;
+  cursor?: string; // created_at of the last item from the previous page
+  limit?: number;
+}
+
+export async function searchJobs(s: JobSearch): Promise<{ jobs: Job[]; nextCursor: string | null }> {
+  const limit = Math.min(Math.max(s.limit ?? 20, 1), 50);
+  let q = getSupabaseAdmin().from("jobs").select("*").eq("status", "Active");
+  if (s.category && s.category !== "All") q = q.eq("category", s.category);
+  if (s.type && s.type !== "All") q = q.eq("type", s.type);
+  if (s.city && s.city !== "All") q = q.eq("city", s.city);
+  if (s.minSalary) q = q.gte("salary_php", s.minSalary);
+  if (s.cursor) q = q.lt("created_at", s.cursor);
+  const term = s.q?.trim().replace(/[%,()]/g, " ").slice(0, 80);
+  if (term) q = q.or(`title.ilike.%${term}%,company.ilike.%${term}%,description.ilike.%${term}%`);
+  const { data, error } = await q.order("created_at", { ascending: false }).limit(limit + 1);
+  if (error) fail("searching jobs", error);
+  const rows = data ?? [];
+  const page = rows.slice(0, limit);
+  return { jobs: page.map(mapJob), nextCursor: rows.length > limit ? page[page.length - 1].created_at : null };
+}
+
+/* --------------------------------- Resumes ------------------------------- */
+
+export async function getResumeRef(userId: string): Promise<{ path: string; name: string } | null> {
+  const { data, error } = await getSupabaseAdmin()
+    .from("profiles").select("resume_url, resume_name").eq("id", userId).maybeSingle();
+  if (error) fail("loading resume", error);
+  return data?.resume_url ? { path: data.resume_url, name: data.resume_name || "Resume" } : null;
+}
+
+export async function getApplicationResumeRef(
+  applicationId: string
+): Promise<{ path: string; name: string; employerId: string; applicantId: string } | null> {
+  const { data, error } = await getSupabaseAdmin()
+    .from("applications").select("resume_url, resume_name, applicant_id, jobs(employer_id)").eq("id", applicationId).maybeSingle();
+  if (error) fail("loading resume", error);
+  if (!data?.resume_url) return null;
+  const job = data.jobs as unknown as { employer_id: string } | null;
+  return { path: data.resume_url, name: data.resume_name || "Resume", employerId: job?.employer_id ?? "", applicantId: data.applicant_id };
+}
+
+/* ---------------------------------- Admin -------------------------------- */
+
+export async function listEmployerProfiles(): Promise<UserProfile[]> {
+  const { data, error } = await getSupabaseAdmin()
+    .from("profiles").select("*").eq("role", "employer").order("company_verified", { ascending: true }).order("created_at", { ascending: false }).limit(200);
+  if (error) fail("loading employers", error);
+  return (data ?? []).map(mapProfile);
+}
+
+export async function setCompanyVerified(userId: string, verified: boolean): Promise<boolean> {
+  const { data, error } = await getSupabaseAdmin()
+    .from("profiles").update({ company_verified: verified }).eq("id", userId).eq("role", "employer").select("id");
+  if (error) fail("verifying company", error);
+  return (data?.length ?? 0) > 0;
+}
+
+export async function setSuspended(userId: string, suspended: boolean): Promise<boolean> {
+  const { data, error } = await getSupabaseAdmin()
+    .from("profiles").update({ suspended }).eq("id", userId).neq("role", "admin").select("id");
+  if (error) fail("updating account", error);
+  return (data?.length ?? 0) > 0;
 }
 
 /* ---------------------------------- Audit -------------------------------- */

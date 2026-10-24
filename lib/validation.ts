@@ -34,7 +34,6 @@ export const applicationInputSchema = z.object({
   applicantEmail: z.string().trim().email().max(200).optional(),
   phone: z.string().trim().max(30).regex(/^[+\d\s()-]*$/, "Invalid phone number").optional(),
   coverLetter: z.string().trim().max(3000).optional(),
-  resumeUrl: httpsUrl.optional(),
 });
 
 export const EMPLOYER_STAGES = ["Under Review", "Interview Scheduled", "Offer Extended", "Rejected"] as const;

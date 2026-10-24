@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Application } from "@/lib/types";
 import { fetchEmployerApplicationsAction } from "@/app/actions/applications";
+import { getApplicationResumeLinkAction } from "@/app/actions/resume";
 
 export default function EmployerAppView() {
   const {
@@ -256,12 +257,14 @@ export default function EmployerAppView() {
                   </select>
 
                   <button
-                    onClick={() => {
-                      if (app.resumeUrl) {
-                        window.open(app.resumeUrl, "_blank");
-                      } else {
-                        showToast("Candidate resume submitted directly with application", "info");
+                    onClick={async () => {
+                      if (!app.resumeUrl) {
+                        showToast("This candidate did not attach a resume.", "info");
+                        return;
                       }
+                      const res = await getApplicationResumeLinkAction(app.id);
+                      if (res.ok) window.open(res.url, "_blank", "noopener,noreferrer");
+                      else showToast(res.error, "warning");
                     }}
                     className="px-3.5 py-2 sm:py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold cursor-pointer transition-colors shrink-0"
                   >

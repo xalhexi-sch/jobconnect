@@ -5,6 +5,7 @@ import {
   audit,
   getApplication,
   getJobById,
+  getResumeRef,
   insertApplication,
   listApplicationsByApplicant,
   listApplicationsForEmployer,
@@ -48,7 +49,8 @@ export async function submitApplicationAction(input: unknown): Promise<ActionRes
       applicantEmail: data.applicantEmail || user.email,
       phone: data.phone || user.phone,
       coverLetter: data.coverLetter,
-      resumeUrl: data.resumeUrl,
+      // Snapshot the seeker's stored resume at apply time; clients can never supply a path or URL.
+      resume: await getResumeRef(user.id),
     });
     if (duplicate || !application) throw new UserError("You already applied to this job.");
     await audit(user.id, "application.submit", application.id, { jobId: job.id });
