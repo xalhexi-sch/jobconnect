@@ -58,9 +58,9 @@ export default function CtaBanner() {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
               <Link
                 href="/overview"
-                className="flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl btn-brand-primary text-white text-xs sm:text-sm font-semibold cursor-pointer shadow-md w-full"
+                className="btn-shimmer flex items-center justify-center gap-2.5 px-6 min-h-12 text-sm font-semibold cursor-pointer w-full"
               >
-                <UserCheck className="w-4 h-4 text-blue-100" />
+                <UserCheck className="w-4 h-4 text-blue-300" />
                 <span>Launch Jobseeker Hub</span>
               </Link>
             </motion.div>
@@ -68,11 +68,11 @@ export default function CtaBanner() {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full sm:w-auto">
               <Link
                 href="/overview"
-                className="flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 transition-colors text-xs sm:text-sm font-semibold cursor-pointer text-white w-full"
+                className="group flex items-center justify-center gap-2.5 px-6 min-h-12 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 transition-colors text-sm font-semibold cursor-pointer text-white w-full"
               >
                 <Briefcase className="w-4 h-4 text-amber-400" />
                 <span>Employer Recruitment Portal</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </motion.div>
           </div>

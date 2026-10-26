@@ -29,17 +29,17 @@ export default function JobCategories() {
         className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4"
       >
         <div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[#111116] leading-tight">
-            Browse by Sector
+          <h2 className="text-3xl lg:text-4xl font-bold tracking-tight leading-tight">
+            Browse by sector
           </h2>
-          <p className="text-xs sm:text-sm text-neutral-500 mt-1">
+          <p className="text-base text-fg-muted mt-2">
             Explore active openings across key industries in Butuan City &amp; Caraga.
           </p>
         </div>
       </motion.div>
 
       {/* Grid of Category cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {categories.map((cat, index) => {
           const Icon = cat.icon;
           const isActive = selectedCategory === cat.id;
@@ -57,7 +57,11 @@ export default function JobCategories() {
               }}
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setSelectedCategory(isActive ? "All" : cat.id)}
+              onClick={() => {
+                setSelectedCategory(isActive ? "All" : cat.id);
+                document.getElementById("opportunities")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              aria-pressed={isActive}
               className={`p-3.5 rounded-xl text-left transition-all cursor-pointer flex items-center gap-3 border ${
                 isActive
                   ? "bg-[#111116] text-white border-black shadow-xs"
@@ -65,15 +69,15 @@ export default function JobCategories() {
               }`}
             >
               <div
-                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                  isActive ? "bg-white/10 text-white" : "bg-neutral-100 text-neutral-700"
+                className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                  isActive ? "bg-white/20 text-white" : "bg-brand/10 text-brand group-hover:bg-brand/15"
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-5 h-5" aria-hidden />
               </div>
               <div className="min-w-0">
-                <div className="text-xs sm:text-sm font-bold truncate">{cat.name}</div>
-                <div className={`text-[11px] ${isActive ? "text-neutral-400" : "text-neutral-500"}`}>
+                <div className="text-sm sm:text-base font-bold truncate">{cat.name}</div>
+                <div className={`text-sm ${isActive ? "text-white/80" : "text-fg-muted"}`}>
                   View Openings
                 </div>
               </div>

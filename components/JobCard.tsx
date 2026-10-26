@@ -29,7 +29,26 @@ export default function JobCard({
   const pending = job.status === "Pending";
 
   return (
-    <article className="group relative p-4 sm:p-5 rounded-2xl bg-surface border border-line shadow-card hover:shadow-card-hover hover:border-brand/40 hover:-translate-y-0.5 transition-all duration-200">
+    <article
+      onPointerMove={(e) => {
+        const el = e.currentTarget;
+        const r = el.getBoundingClientRect();
+        const x = e.clientX - r.left;
+        const y = e.clientY - r.top;
+        el.style.setProperty("--mx", `${x}px`);
+        el.style.setProperty("--my", `${y}px`);
+        // Subtle 3D tilt (max ~2deg), mouse only and never when the user prefers reduced motion
+        if (e.pointerType === "mouse" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          const rx = (0.5 - y / r.height) * 4;
+          const ry = (x / r.width - 0.5) * 4;
+          el.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+        }
+      }}
+      onPointerLeave={(e) => {
+        e.currentTarget.style.transform = "";
+      }}
+      className="spotlight group relative p-4 sm:p-5 rounded-2xl bg-surface border border-line shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
+    >
       <div className="flex gap-3.5 sm:gap-4">
         <CompanyLogo name={job.company} src={job.companyLogo} size={52} />
 
@@ -48,18 +67,18 @@ export default function JobCard({
               <p className="text-sm text-fg-muted mt-0.5 flex items-center gap-1.5">
                 <span className="font-medium text-fg/90 truncate">{job.company}</span>
                 {job.featured && (
-                  <span className="text-[11px] font-bold uppercase tracking-wide bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded-md">
+                  <span className="text-xs font-bold uppercase tracking-wide bg-brand/12 text-brand px-1.5 py-0.5 rounded-md">
                     {t("featured")}
                   </span>
                 )}
                 {pending && (
-                  <span className="text-[11px] font-bold uppercase tracking-wide bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-md">
+                  <span className="text-xs font-bold uppercase tracking-wide bg-amber-500/15 text-amber-600 px-1.5 py-0.5 rounded-md">
                     {t("awaitingApproval")}
                   </span>
                 )}
               </p>
             </div>
-            <p className="hidden sm:block shrink-0 text-right text-base font-bold text-blue-700 leading-snug">{job.salary}</p>
+            <p className="hidden sm:block shrink-0 text-right text-base font-bold text-brand leading-snug tabular-nums">{job.salary}</p>
           </div>
 
           <ul className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-fg-muted">
@@ -79,7 +98,7 @@ export default function JobCard({
             )}
           </ul>
 
-          <p className="sm:hidden mt-2.5 text-base font-bold text-blue-700">{job.salary}</p>
+          <p className="sm:hidden mt-2.5 text-base font-bold text-brand tabular-nums">{job.salary}</p>
 
           <div className="mt-3.5 flex items-center justify-between gap-3">
             <span className="text-xs font-medium text-fg-muted bg-surface-2 px-2.5 py-1 rounded-lg">{job.category}</span>
@@ -90,17 +109,17 @@ export default function JobCard({
                 onClick={() => onToggleSave(job.id)}
                 aria-pressed={saved}
                 aria-label={saved ? `${t("saved")}: ${job.title}` : `${t("save")}: ${job.title}`}
-                className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-colors cursor-pointer ${
+                className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-colors cursor-pointer ${
                   saved
                     ? "text-amber-600 bg-amber-50 border-amber-200"
                     : "text-fg-muted hover:text-fg bg-surface-2 border-line hover:border-neutral-300"
                 }`}
               >
-                <Bookmark className={`w-[18px] h-[18px] ${saved ? "fill-current" : ""}`} />
+                <Bookmark key={String(saved)} className={`w-[18px] h-[18px] ${saved ? "fill-current bookmark-pop" : ""}`} />
               </button>
 
               {applied ? (
-                <span className="h-10 px-4 rounded-xl text-sm font-semibold bg-blue-50 text-blue-700 flex items-center gap-1.5">
+                <span className="h-11 px-4 rounded-xl text-sm font-semibold bg-emerald-500/12 text-emerald-600 flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4" aria-hidden />
                   {t("applied")}
                 </span>
@@ -108,7 +127,7 @@ export default function JobCard({
                 <button
                   type="button"
                   onClick={() => onApply(job)}
-                  className="btn-brand-primary h-10 px-4 rounded-xl text-sm font-semibold flex items-center gap-1.5 cursor-pointer"
+                  className="btn-brand-primary h-11 px-5 rounded-xl text-sm font-semibold flex items-center gap-1.5 cursor-pointer"
                 >
                   <Send className="w-4 h-4" aria-hidden />
                   {t("apply")}

@@ -269,3 +269,142 @@ body:has(dialog.dlg[open]) { overflow: hidden; }
 }
 
 dialog.dlg:focus, dialog.dlg:focus-visible { outline: none; }
+
+/* ------------------------------------------------------------------ */
+/* Visual effects: aurora, dot grid, spotlight, marquee, gradient text */
+/* ------------------------------------------------------------------ */
+:root {
+  --accent: #7c3aed;
+  --accent-2: #06b6d4;
+  --ring-soft: color-mix(in srgb, var(--primary) 18%, transparent);
+}
+:root[data-theme="dark"] {
+  --accent: #a78bfa;
+  --accent-2: #22d3ee;
+}
+
+.text-gradient {
+  background: linear-gradient(100deg, var(--primary) 0%, var(--accent) 55%, var(--accent-2) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient 10s ease-in-out infinite;
+}
+
+.aurora {
+  position: absolute;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+}
+.aurora::before,
+.aurora::after {
+  content: "";
+  position: absolute;
+  width: 55rem;
+  height: 38rem;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.55;
+  will-change: transform;
+}
+.aurora::before {
+  top: -14rem;
+  left: -10rem;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 45%, transparent), transparent);
+  animation: aurora-a 18s ease-in-out infinite alternate;
+}
+.aurora::after {
+  top: -8rem;
+  right: -14rem;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 38%, transparent), transparent);
+  animation: aurora-b 22s ease-in-out infinite alternate;
+}
+:root[data-theme="dark"] .aurora::before,
+:root[data-theme="dark"] .aurora::after { opacity: 0.4; }
+@keyframes aurora-a { to { transform: translate3d(8rem, 4rem, 0) scale(1.15); } }
+@keyframes aurora-b { to { transform: translate3d(-9rem, 6rem, 0) scale(1.1); } }
+
+.dot-grid {
+  position: absolute;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background-image: radial-gradient(color-mix(in srgb, var(--foreground) 16%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 25%, #000 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 25%, #000 30%, transparent 75%);
+}
+
+/* Cursor-following spotlight; --mx/--my are written by SpotlightCard without re-rendering */
+.spotlight { position: relative; isolation: isolate; }
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--primary) 14%, transparent), transparent 70%);
+}
+.spotlight::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  padding: 1px;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--primary) 70%, transparent), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+@media (hover: hover) {
+  .spotlight:hover::before,
+  .spotlight:hover::after { opacity: 1; }
+}
+
+.marquee { display: flex; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.marquee-track { display: flex; flex-shrink: 0; gap: 0.625rem; padding-right: 0.625rem; animation: marquee 38s linear infinite; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+@keyframes marquee { to { transform: translateX(-100%); } }
+
+/* Press feedback that never shifts layout */
+.btn-brand-primary:active, .btn-supabase-dark:active, .btn-clerk-outline:active { filter: brightness(0.94); transform: translateY(0.5px); }
+
+/* Search shell that lights up as a unit */
+.search-shell { transition: box-shadow 0.2s, border-color 0.2s; }
+.search-shell:focus-within { border-color: var(--primary); box-shadow: 0 0 0 4px var(--ring-soft), 0 12px 32px -12px color-mix(in srgb, var(--primary) 40%, transparent); }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 0.375rem; min-height: 2.25rem;
+  padding: 0 0.875rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500;
+  color: var(--muted-foreground); background: var(--surface); border: 1px solid var(--border);
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+.chip:hover { color: var(--foreground); border-color: color-mix(in srgb, var(--primary) 50%, var(--border)); background: color-mix(in srgb, var(--primary) 6%, var(--surface)); }
+
+/* Shimmer CTA: rotating conic border + sheen (adapted from 21st shimmer/glass CTA patterns) */
+@property --shimmer-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes shimmer-spin { to { --shimmer-angle: 360deg; } }
+.btn-shimmer {
+  position: relative; isolation: isolate; border-radius: 0.75rem; color: #fff;
+  background: linear-gradient(#111116, #111116) padding-box,
+    conic-gradient(from var(--shimmer-angle), transparent 0 60%, #60a5fa 80%, #fff 90%, transparent 100%) border-box;
+  border: 1.5px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-shimmer:hover { box-shadow: 0 0 28px -4px rgb(96 165 250 / 0.55); }
+@media (prefers-reduced-motion: no-preference) {
+  .btn-shimmer { animation: shimmer-spin 3.5s linear infinite; }
+}
+@keyframes bookmark-pop { 0% { transform: scale(1); } 40% { transform: scale(1.3) rotate(-8deg); } 100% { transform: scale(1); } }
+.bookmark-pop { animation: bookmark-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
