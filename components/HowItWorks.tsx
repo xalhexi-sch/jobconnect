@@ -45,10 +45,10 @@ export default function HowItWorks() {
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className="mb-16"
       >
-        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#111116] mb-4">
+        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-fg mb-4">
           How it works
         </h2>
-        <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl leading-relaxed">
+        <p className="text-lg sm:text-xl text-fg-muted max-w-2xl leading-relaxed">
           Find the right career, apply instantly from any browser, and start your journey with complete transparency.
         </p>
       </motion.div>
@@ -100,63 +100,70 @@ export default function HowItWorks() {
           </div>
         </div>
 
-        {/* Right: 4 Steps with spacious cards & smooth layout expansion */}
-        <div className="lg:col-span-7 space-y-4">
+        {/* Right: vertical timeline with dashed rail */}
+        <ol className="lg:col-span-7 relative flex flex-col gap-5 border-l border-dashed border-line ml-5 pl-10 sm:pl-12">
           {steps.map((step, idx) => {
             const isSelected = activeStep === idx;
             const Icon = step.icon;
 
             return (
-              <motion.div
+              <motion.li
                 key={step.num}
-                layout
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.4, delay: idx * 0.08 }}
-                onClick={() => setActiveStep(idx)}
-                className={`p-7 sm:p-8 rounded-[32px] transition-all duration-300 cursor-pointer ${
-                  isSelected
-                    ? "bg-[#111116] text-white shadow-xl scale-[1.01]"
-                    : "bg-[#F8F9FB] text-neutral-800 hover:bg-neutral-100/90 border border-black/[0.04]"
-                }`}
+                className="relative"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-5">
-                    <span className={`text-sm sm:text-base font-mono font-bold ${isSelected ? "text-emerald-400" : "text-neutral-400"}`}>
-                      {step.num}
-                    </span>
-                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight">
-                      {step.title}
-                    </h3>
-                  </div>
-
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    isSelected ? "bg-white/10 text-white" : "bg-neutral-200/80 text-neutral-700"
-                  }`}>
-                    <Icon className="w-5 h-5" />
-                  </div>
-                </div>
-
-                <AnimatePresence>
-                  {isSelected && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="overflow-hidden"
+                <span
+                  className={`absolute -left-[3.75rem] sm:-left-[4.25rem] top-5 grid size-9 place-items-center rounded-full border font-mono text-xs font-bold shadow-sm transition-colors duration-300 ${
+                    isSelected ? "bg-[#111116] text-emerald-400 border-transparent" : "bg-surface text-fg-muted border-line"
+                  }`}
+                  aria-hidden
+                >
+                  {step.num}
+                </span>
+                <button
+                  type="button"
+                  aria-expanded={isSelected}
+                  onClick={() => setActiveStep(idx)}
+                  className={`w-full text-left p-5 sm:p-6 rounded-2xl border transition-all duration-300 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+                    isSelected
+                      ? "bg-[#111116] text-white shadow-xl border-transparent"
+                      : "bg-surface-2 text-fg border-line hover:border-brand/40"
+                  }`}
+                >
+                  <span className="flex items-center justify-between gap-4">
+                    <span className="text-lg sm:text-xl font-bold tracking-tight">{step.title}</span>
+                    <span
+                      className={`size-10 shrink-0 rounded-full flex items-center justify-center ${
+                        isSelected ? "bg-white/10 text-white" : "bg-surface text-fg-muted"
+                      }`}
                     >
-                      <p className="mt-4 pt-4 border-t border-white/10 text-base sm:text-lg text-neutral-300 leading-relaxed">
-                        {step.desc}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
+                      <Icon className="w-5 h-5" aria-hidden />
+                    </span>
+                  </span>
+
+                  <AnimatePresence initial={false}>
+                    {isSelected && (
+                      <motion.span
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="block overflow-hidden"
+                      >
+                        <span className="block mt-4 pt-4 border-t border-white/10 text-base text-neutral-300 leading-relaxed">
+                          {step.desc}
+                        </span>
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </button>
+              </motion.li>
             );
           })}
-        </div>
+        </ol>
 
       </div>
     </section>
