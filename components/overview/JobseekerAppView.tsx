@@ -194,7 +194,7 @@ export default function JobseekerAppView({
             </div>
           </div>
 
-          {jobsLoading ? (
+          {jobsLoading && filteredJobs.length === 0 ? (
             <JobListSkeleton />
           ) : filteredJobs.length === 0 ? (
             <EmptyState

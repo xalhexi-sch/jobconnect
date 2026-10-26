@@ -77,7 +77,7 @@ export default function ExploreJobs() {
           </div>
         </motion.div>
 
-        {jobsLoading ? (
+        {jobsLoading && shown.length === 0 ? (
           <JobListSkeleton count={3} />
         ) : shown.length === 0 ? (
           <div className="py-14 px-6 text-center rounded-2xl border border-dashed border-neutral-300 bg-surface">

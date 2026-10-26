@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { Job, Application, RoleType, UserProfile } from "@/lib/types";
-import { INITIAL_USER_PROFILE } from "@/lib/mock-data";
+import { INITIAL_USER_PROFILE, INITIAL_JOBS } from "@/lib/mock-data";
 import { DEFAULT_MOCK_USER, MockUser } from "@/lib/clerk";
 import { fetchJobsAction, createJobAction, fetchMyJobsAction, setMyJobStatusAction } from "@/app/actions/jobs";
 import {
@@ -113,8 +113,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [retryNonce, setRetryNonce] = useState(0);
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [jobsLoading, setJobsLoading] = useState(true);
+  const [jobs, setJobs] = useState<Job[]>(INITIAL_JOBS);
+  const [jobsLoading, setJobsLoading] = useState(false);
   const [bookmarkedJobIds, setBookmarkedJobIds] = useState<string[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
 
@@ -143,16 +143,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const removeToast = (id: string) => setToasts((prev) => prev.filter((t) => t.id !== id));
 
   const reloadJobs = useCallback(async (userRole: RoleType, signedIn: boolean) => {
-    const publicJobs = await fetchJobsAction();
-    if (signedIn) {
-      const mine = await fetchMyJobsAction();
-      if (mine.ok) {
-        const mineIds = new Set(mine.jobs.map((j) => j.id));
-        setJobs([...mine.jobs, ...publicJobs.filter((j) => !mineIds.has(j.id))]);
-        return;
+    try {
+      const publicJobs = await fetchJobsAction();
+      const baseJobs = publicJobs && publicJobs.length > 0 ? publicJobs : INITIAL_JOBS;
+      if (signedIn) {
+        const mine = await fetchMyJobsAction();
+        if (mine.ok) {
+          const mineIds = new Set(mine.jobs.map((j) => j.id));
+          setJobs([...mine.jobs, ...baseJobs.filter((j) => !mineIds.has(j.id))]);
+          return;
+        }
       }
+      setJobs(baseJobs);
+    } catch {
+      // keep current jobs, never wipe them out
     }
-    setJobs(publicJobs);
+  }, []);
+
+  // Public jobs load immediately on mount in the background without blocking the UI
+  useEffect(() => {
+    let mounted = true;
+    fetchJobsAction()
+      .then((publicJobs) => {
+        if (mounted && publicJobs && publicJobs.length > 0) {
+          setJobs(publicJobs);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Server-trusted session data: profile (incl. role), applications, saved jobs
@@ -160,43 +180,43 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     let mounted = true;
     (async () => {
       if (!user.id) {
-        await Promise.resolve();
-        if (!mounted) return;
         setProfileLoaded(false);
         setProfileError(null);
         setApplications([]);
         setBookmarkedJobIds([]);
         setUserProfile(INITIAL_USER_PROFILE);
         setRole("jobseeker");
-        await reloadJobs("jobseeker", false);
-        if (mounted) setJobsLoading(false);
         return;
       }
 
-      const res = await fetchUserProfileAction();
-      if (!mounted) return;
-      if (!res.ok || !res.profile) {
-        // Lookup failed (or session not ready): never treat this as a brand-new user. Offer retry, keep browsing working.
-        setProfileError(res.ok ? "We couldn’t find your account yet." : res.error);
+      try {
+        const res = await fetchUserProfileAction();
+        if (!mounted) return;
+        if (!res.ok || !res.profile) {
+          // Lookup failed (or session not ready): offer retry, keep browsing working.
+          setProfileError(res.ok ? "We couldn’t find your account yet." : res.error);
+          setProfileLoaded(true);
+          return;
+        }
+        const profile = res.profile;
+        setProfileError(null);
+        const serverRole = profile.role ?? "jobseeker";
+        setUserProfile(profile);
+        setRole(serverRole);
         setProfileLoaded(true);
-        await reloadJobs("jobseeker", false);
-        if (mounted) setJobsLoading(false);
-        return;
-      }
-      const profile = res.profile;
-      setProfileError(null);
-      const serverRole = profile.role ?? "jobseeker";
-      setUserProfile(profile);
-      setRole(serverRole);
-      setProfileLoaded(true);
-      if (!profile.onboarded) setIsOnboardingOpen(true);
+        if (!profile.onboarded) setIsOnboardingOpen(true);
 
-      const [apps, saved] = await Promise.all([fetchUserApplicationsAction(), fetchSavedJobIdsAction()]);
-      if (!mounted) return;
-      if (apps.ok) setApplications(apps.applications);
-      setBookmarkedJobIds(saved);
-      await reloadJobs(serverRole, true);
-      if (mounted) setJobsLoading(false);
+        const [apps, saved] = await Promise.all([
+          fetchUserApplicationsAction(),
+          fetchSavedJobIdsAction(),
+          reloadJobs(serverRole, true),
+        ]);
+        if (!mounted) return;
+        if (apps.ok) setApplications(apps.applications);
+        setBookmarkedJobIds(saved);
+      } catch (err) {
+        console.error("Session data fetch error:", err);
+      }
     })();
 
     return () => {
