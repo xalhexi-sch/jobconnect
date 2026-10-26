@@ -1,6 +1,6 @@
 import "server-only";
 import { getSupabaseAdmin } from "./supabase";
-import type { Job, Application, UserProfile } from "./types";
+import type { Job, Application, UserProfile, ApplicationMessage } from "./types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Row = Record<string, any>;
@@ -327,4 +327,92 @@ export async function setSuspended(userId: string, suspended: boolean): Promise<
 export async function audit(actorId: string, action: string, target?: string, meta?: Row) {
   const { error } = await getSupabaseAdmin().from("audit_log").insert({ actor_id: actorId, action, target, meta });
   if (error) console.error("[audit] failed:", error.message);
+}
+
+
+/* --------------------------------- Messages ------------------------------ */
+
+export function mapMessage(r: Row): ApplicationMessage {
+  return {
+    id: r.id,
+    applicationId: r.application_id,
+    senderId: r.sender_id,
+    senderRole: r.sender_role as "employer" | "jobseeker",
+    senderName: r.sender_name,
+    content: r.content,
+    readAt: r.read_at || undefined,
+    createdAt: r.created_at,
+  };
+}
+
+export async function listApplicationMessages(applicationId: string): Promise<ApplicationMessage[]> {
+  const { data, error } = await getSupabaseAdmin()
+    .from("application_messages")
+    .select("*")
+    .eq("application_id", applicationId)
+    .order("created_at", { ascending: true });
+  if (error) fail("loading messages", error);
+  return (data ?? []).map(mapMessage);
+}
+
+export async function insertApplicationMessage(msg: {
+  applicationId: string;
+  senderId: string;
+  senderRole: "employer" | "jobseeker";
+  senderName: string;
+  content: string;
+}): Promise<ApplicationMessage> {
+  const { data, error } = await getSupabaseAdmin()
+    .from("application_messages")
+    .insert({
+      application_id: msg.applicationId,
+      sender_id: msg.senderId,
+      sender_role: msg.senderRole,
+      sender_name: msg.senderName,
+      content: msg.content,
+    })
+    .select("*")
+    .single();
+  if (error || !data) fail("sending message", error ?? { message: "insert failed" });
+  return mapMessage(data);
+}
+
+export async function markApplicationMessagesRead(applicationId: string, currentUserId: string): Promise<void> {
+  const { error } = await getSupabaseAdmin()
+    .from("application_messages")
+    .update({ read_at: new Date().toISOString() })
+    .eq("application_id", applicationId)
+    .neq("sender_id", currentUserId)
+    .is("read_at", null);
+  if (error) console.error("[db] mark messages read failed:", error.message);
+}
+
+export async function getApplicationChatRef(
+  applicationId: string
+): Promise<{
+  id: string;
+  jobId: string;
+  jobTitle: string;
+  company: string;
+  applicantId: string;
+  applicantName: string;
+  employerId: string;
+} | null> {
+  const { data, error } = await getSupabaseAdmin()
+    .from("applications")
+    .select("id, job_id, applicant_id, applicant_name, jobs(id, title, company, employer_id)")
+    .eq("id", applicationId)
+    .maybeSingle();
+  if (error) fail("loading application details", error);
+  if (!data) return null;
+  const job = data.jobs as unknown as { id: string; title: string; company: string; employer_id: string } | null;
+  return {
+    id: data.id,
+    jobId: data.job_id,
+    jobTitle: job?.title ?? "Job Application",
+    company: job?.company ?? "",
+    applicantId: data.applicant_id,
+    applicantName: data.applicant_name ?? "Applicant",
+    employerId: job?.employer_id ?? "",
+  };
 }

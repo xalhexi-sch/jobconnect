@@ -7,7 +7,8 @@ import JobCard from "@/components/JobCard";
 import CompanyLogo from "@/components/CompanyLogo";
 import { JobListSkeleton } from "@/components/ui/Skeleton";
 import { getMyResumeLinkAction } from "@/app/actions/resume";
-import { Job } from "@/lib/types";
+import { Job, Application } from "@/lib/types";
+import ApplicationChatModal from "@/components/ApplicationChatModal";
 import { useT } from "@/lib/i18n";
 import {
   Search,
@@ -84,6 +85,7 @@ export default function JobseekerAppView({
   const { t } = useT();
   const [internalSubTab, setInternalSubTab] = useState<SubTab>("find");
   const [inspectingJob, setInspectingJob] = useState<Job | null>(null);
+  const [chatFor, setChatFor] = useState<Application | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -262,8 +264,14 @@ export default function JobseekerAppView({
                     )}
                   </div>
                 </div>
-                <div className="flex items-center justify-between sm:justify-end gap-3">
+                <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2.5">
                   <span className={`text-sm font-semibold px-3 py-1 rounded-lg ${STATUS_STYLE[app.status] ?? STATUS_STYLE.Submitted}`}>{app.status}</span>
+                  <button
+                    onClick={() => setChatFor(app)}
+                    className="h-9 px-3.5 rounded-xl border border-line bg-surface-2 text-xs font-semibold flex items-center gap-1.5 hover:bg-surface-3 transition-colors cursor-pointer"
+                  >
+                    <Send className="w-3.5 h-3.5 text-blue-600" /> Message employer
+                  </button>
                   {(app.status === "Submitted" || app.status === "Under Review" || app.status === "Interview Scheduled") && (
                     <button
                       onClick={() => {
@@ -385,6 +393,8 @@ export default function JobseekerAppView({
         hasApplied={inspectingJob ? applications.some((a) => a.jobId === inspectingJob.id) : false}
         onToggleBookmark={toggleBookmark}
       />
+
+      <ApplicationChatModal application={chatFor} onClose={() => setChatFor(null)} />
     </div>
   );
 }

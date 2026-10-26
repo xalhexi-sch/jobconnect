@@ -104,3 +104,15 @@ export interface ReviewItem {
   avatar: string;
   videoDuration?: string;
 }
+
+
+export interface ApplicationMessage {
+  id: string;
+  applicationId: string;
+  senderId: string;
+  senderRole: "employer" | "jobseeker";
+  senderName: string;
+  content: string;
+  readAt?: string;
+  createdAt: string;
+}

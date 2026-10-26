@@ -71,3 +71,9 @@ export function firstIssue(err: z.ZodError): string {
   const i = err.issues[0];
   return i ? `${i.path.join(".") || "input"}: ${i.message}` : "Invalid input";
 }
+
+
+export const messageInputSchema = z.object({
+  applicationId: text(1, 100),
+  content: z.string().trim().min(1, "Message cannot be empty").max(2000, "Message cannot exceed 2000 characters"),
+});

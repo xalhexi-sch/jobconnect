@@ -2,11 +2,12 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
-import { Briefcase, Clock, FileText, Loader2, Plus, ShieldCheck, Users, BadgeCheck, Download } from "lucide-react";
+import { Briefcase, Clock, FileText, Loader2, Plus, ShieldCheck, Users, BadgeCheck, Download, Send } from "lucide-react";
 import type { Application } from "@/lib/types";
 import { fetchEmployerApplicationsAction, updateApplicationStatusAction } from "@/app/actions/applications";
 import { getApplicationResumeLinkAction } from "@/app/actions/resume";
 import Dialog from "@/components/ui/Dialog";
+import ApplicationChatModal from "@/components/ApplicationChatModal";
 import CompanyLogo from "@/components/CompanyLogo";
 import { timeAgo } from "@/lib/format";
 
@@ -35,6 +36,7 @@ export default function EmployerAppView() {
   const [filter, setFilter] = useState<string>("All");
   const [interviewFor, setInterviewFor] = useState<Application | null>(null);
   const [interviewAt, setInterviewAt] = useState("");
+  const [chatFor, setChatFor] = useState<Application | null>(null);
 
   const load = useCallback(async () => {
     const res = await fetchEmployerApplicationsAction();
@@ -192,6 +194,12 @@ export default function EmployerAppView() {
                 <button onClick={() => viewCv(app)} className="h-10 px-4 rounded-xl bg-neutral-900 text-white text-sm font-semibold flex items-center gap-2 cursor-pointer">
                   <FileText className="w-4 h-4" /> {app.resumeUrl ? "View resume" : "No resume"}
                 </button>
+                <button
+                  onClick={() => setChatFor(app)}
+                  className="h-10 px-4 rounded-xl border border-line bg-surface-2 text-sm font-semibold flex items-center gap-2 hover:bg-surface-3 transition-colors cursor-pointer"
+                >
+                  <Send className="w-4 h-4 text-blue-600" /> Message
+                </button>
               </div>
             </article>
           ))
@@ -222,6 +230,8 @@ export default function EmployerAppView() {
           <button type="submit" className="btn-brand-primary w-full h-11 rounded-xl text-sm font-semibold cursor-pointer">Confirm interview</button>
         </form>
       </Dialog>
+
+      <ApplicationChatModal application={chatFor} onClose={() => setChatFor(null)} />
     </div>
   );
 }
