@@ -49,7 +49,15 @@ export interface Application {
   applicantEmail?: string;
   employerId?: string;
   coverLetter?: string;
-  resumeUrl?: string;
+    resumeUrl?: string;
+  applicantPhone?: string;
+  applicantHeadline?: string;
+  applicantBio?: string;
+  applicantLocation?: string;
+  applicantSkills?: string[];
+  applicantEducation?: string;
+  applicantPortfolioUrl?: string;
+  hasUnreadMessages?: boolean;
 }
 
 export interface PendingApproval {

@@ -32,13 +32,14 @@ export function mapJob(r: Row): Job {
   };
 }
 
-function mapApplication(r: Row): Application {
+function mapApplication(r: Row, profile?: Row, hasUnread = false): Application {
   return {
     id: r.id,
     jobId: r.job_id,
     applicantId: r.applicant_id,
     applicantName: r.applicant_name,
     applicantEmail: r.applicant_email,
+    applicantPhone: r.phone || profile?.phone || undefined,
     employerId: r.jobs?.employer_id,
     jobTitle: r.jobs?.title || "Job Application",
     company: r.jobs?.company || "Employer",
@@ -49,8 +50,14 @@ function mapApplication(r: Row): Application {
     status: r.status,
     interviewDate: r.interview_date || undefined,
     coverLetter: r.cover_letter || undefined,
-    // Presence marker only: the storage path is never sent to the browser (see getApplicationResumeLinkAction).
     resumeUrl: r.resume_url ? "private" : undefined,
+    applicantHeadline: profile?.headline || undefined,
+    applicantBio: profile?.bio || undefined,
+    applicantLocation: profile?.barangay ? `${profile.barangay}, ${profile.location || "Butuan City"}` : profile?.location || undefined,
+    applicantSkills: Array.isArray(profile?.skills) ? profile.skills : [],
+    applicantEducation: profile?.education || undefined,
+    applicantPortfolioUrl: profile?.portfolio_url || undefined,
+    hasUnreadMessages: hasUnread,
   };
 }
 
@@ -156,7 +163,19 @@ export async function listApplicationsByApplicant(userId: string): Promise<Appli
   const { data, error } = await getSupabaseAdmin()
     .from("applications").select("*, jobs(*)").eq("applicant_id", userId).order("applied_at", { ascending: false });
   if (error) fail("loading applications", error);
-  return (data ?? []).map(mapApplication);
+  const rows = data ?? [];
+  if (rows.length === 0) return [];
+
+  const appIds = rows.map((d) => d.id);
+  const { data: unread } = await getSupabaseAdmin()
+    .from("application_messages")
+    .select("application_id")
+    .in("application_id", appIds)
+    .neq("sender_id", userId)
+    .is("read_at", null);
+  const unreadAppIds = new Set((unread ?? []).map((u) => u.application_id));
+
+  return rows.map((r) => mapApplication(r, undefined, unreadAppIds.has(r.id)));
 }
 
 export async function listApplicationsForEmployer(employerId: string): Promise<Application[]> {
@@ -166,7 +185,33 @@ export async function listApplicationsForEmployer(employerId: string): Promise<A
     .eq("jobs.employer_id", employerId)
     .order("applied_at", { ascending: false });
   if (error) fail("loading applicants", error);
-  return (data ?? []).map(mapApplication);
+  const rows = data ?? [];
+  if (rows.length === 0) return [];
+
+  const applicantIds = Array.from(new Set(rows.map((d) => d.applicant_id).filter(Boolean)));
+  const appIds = rows.map((d) => d.id);
+
+  const [profilesRes, unreadRes] = await Promise.all([
+    applicantIds.length > 0
+      ? getSupabaseAdmin()
+          .from("profiles")
+          .select("id, headline, bio, location, barangay, skills, education, portfolio_url, phone")
+          .in("id", applicantIds)
+      : Promise.resolve({ data: [] }),
+    appIds.length > 0
+      ? getSupabaseAdmin()
+          .from("application_messages")
+          .select("application_id")
+          .in("application_id", appIds)
+          .neq("sender_id", employerId)
+          .is("read_at", null)
+      : Promise.resolve({ data: [] }),
+  ]);
+
+  const profileMap = new Map((profilesRes.data ?? []).map((p) => [p.id, p]));
+  const unreadAppIds = new Set((unreadRes.data ?? []).map((u) => u.application_id));
+
+  return rows.map((r) => mapApplication(r, profileMap.get(r.applicant_id), unreadAppIds.has(r.id)));
 }
 
 export async function getApplication(id: string): Promise<Application | null> {

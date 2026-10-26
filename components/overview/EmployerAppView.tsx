@@ -2,12 +2,27 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
-import { Briefcase, Clock, FileText, Loader2, Plus, ShieldCheck, Users, BadgeCheck, Download, Send } from "lucide-react";
+import {
+  Briefcase,
+  Clock,
+  FileText,
+  Loader2,
+  Plus,
+  ShieldCheck,
+  Users,
+  BadgeCheck,
+  Download,
+  Send,
+  Phone,
+  UserCheck,
+  Sparkles,
+} from "lucide-react";
 import type { Application } from "@/lib/types";
 import { fetchEmployerApplicationsAction, updateApplicationStatusAction } from "@/app/actions/applications";
 import { getApplicationResumeLinkAction } from "@/app/actions/resume";
 import Dialog from "@/components/ui/Dialog";
 import ApplicationChatModal from "@/components/ApplicationChatModal";
+import CandidateProfileModal from "@/components/CandidateProfileModal";
 import CompanyLogo from "@/components/CompanyLogo";
 import { timeAgo } from "@/lib/format";
 
@@ -37,6 +52,7 @@ export default function EmployerAppView() {
   const [interviewFor, setInterviewFor] = useState<Application | null>(null);
   const [interviewAt, setInterviewAt] = useState("");
   const [chatFor, setChatFor] = useState<Application | null>(null);
+  const [inspectingCandidate, setInspectingCandidate] = useState<Application | null>(null);
 
   const load = useCallback(async () => {
     const res = await fetchEmployerApplicationsAction();
@@ -83,7 +99,10 @@ export default function EmployerAppView() {
 
   const exportCsv = () => {
     const esc = (v: string | number | undefined) => `"${String(v ?? "").replace(/"/g, '""').replace(/^[=+\-@]/, "'$&")}"`;
-    const rows = [["Candidate", "Email", "Job", "Status", "Applied"], ...apps.map((a) => [a.applicantName, a.applicantEmail, a.jobTitle, a.status, a.appliedDate])];
+    const rows = [
+      ["Candidate", "Email", "Phone", "Job", "Status", "Applied"],
+      ...apps.map((a) => [a.applicantName, a.applicantEmail, a.applicantPhone || "", a.jobTitle, a.status, a.appliedDate])
+    ];
     const blob = new Blob([rows.map((r) => r.map(esc).join(",")).join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -169,36 +188,92 @@ export default function EmployerAppView() {
           </div>
         ) : (
           visible.map((app) => (
-            <article key={app.id} className="p-4 sm:p-5 rounded-2xl bg-surface border border-line shadow-card space-y-3">
+            <article key={app.id} className="p-4 sm:p-5 rounded-2xl bg-surface border border-line shadow-card space-y-3.5">
               <div className="flex items-start gap-3.5">
-                <CompanyLogo name={app.applicantName ?? "?"} size={44} />
+                <CompanyLogo name={app.applicantName ?? "?"} size={46} />
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-semibold truncate">{app.applicantName}</h3>
-                  <p className="text-sm text-fg-muted truncate">{app.applicantEmail}</p>
-                  <p className="text-sm text-fg-muted mt-0.5">for <span className="font-medium text-fg/90">{app.jobTitle}</span> · {app.appliedDate}</p>
-                  {app.interviewDate && <p className="text-sm text-purple-700 mt-1">Interview: {app.interviewDate}</p>}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={() => setInspectingCandidate(app)}
+                      className="font-bold text-base truncate text-fg hover:text-blue-600 transition-colors cursor-pointer text-left"
+                    >
+                      {app.applicantName}
+                    </button>
+                    {app.hasUnreadMessages && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" /> New message
+                      </span>
+                    )}
+                  </div>
+                  {app.applicantHeadline && (
+                    <p className="text-xs font-medium text-blue-700 mt-0.5 truncate">{app.applicantHeadline}</p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-fg-muted mt-1">
+                    <span>{app.applicantEmail}</span>
+                    {app.applicantPhone && (
+                      <a href={`tel:${app.applicantPhone}`} className="text-emerald-700 hover:underline flex items-center gap-1 font-medium">
+                        <Phone className="w-3 h-3" /> {app.applicantPhone}
+                      </a>
+                    )}
+                    {app.applicantLocation && (
+                      <span>· {app.applicantLocation}</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-fg-muted mt-1">for <span className="font-medium text-fg/90">{app.jobTitle}</span> · {app.appliedDate}</p>
+                  {app.interviewDate && <p className="text-xs text-purple-700 mt-1 font-medium">Interview: {app.interviewDate}</p>}
                 </div>
               </div>
+
+              {app.applicantSkills && app.applicantSkills.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-0.5">
+                  {app.applicantSkills.slice(0, 4).map((skill, i) => (
+                    <span key={i} className="px-2.5 py-0.5 rounded-lg bg-surface-2 border border-line text-[11px] font-medium text-fg-muted">
+                      {skill}
+                    </span>
+                  ))}
+                  {app.applicantSkills.length > 4 && (
+                    <span className="text-[11px] text-fg-muted self-center">+{app.applicantSkills.length - 4} more</span>
+                  )}
+                </div>
+              )}
+
               {app.coverLetter && <p className="text-sm text-fg/80 bg-surface-2 rounded-xl p-3 leading-relaxed line-clamp-3">“{app.coverLetter}”</p>}
-              <div className="flex flex-wrap items-center gap-2.5">
+
+              <div className="flex flex-wrap items-center gap-2.5 pt-1">
                 <select
                   value={app.status}
                   onChange={(e) => onStageChange(app, e.target.value)}
                   disabled={app.status === "Withdrawn"}
                   aria-label={`Stage for ${app.applicantName}`}
-                  className="field !w-auto !py-2 cursor-pointer"
+                  className="field !w-auto !py-2 cursor-pointer text-xs sm:text-sm"
                 >
                   {app.status === "Withdrawn" && <option>Withdrawn</option>}
                   {STAGES.map((s) => <option key={s}>{s}</option>)}
                 </select>
-                <button onClick={() => viewCv(app)} className="h-10 px-4 rounded-xl bg-neutral-900 text-white text-sm font-semibold flex items-center gap-2 cursor-pointer">
-                  <FileText className="w-4 h-4" /> {app.resumeUrl ? "View resume" : "No resume"}
-                </button>
+
                 <button
-                  onClick={() => setChatFor(app)}
+                  onClick={() => setInspectingCandidate(app)}
                   className="h-10 px-4 rounded-xl border border-line bg-surface-2 text-sm font-semibold flex items-center gap-2 hover:bg-surface-3 transition-colors cursor-pointer"
                 >
-                  <Send className="w-4 h-4 text-blue-600" /> Message
+                  <UserCheck className="w-4 h-4 text-blue-600" /> View profile
+                </button>
+
+                <button
+                  onClick={() => setChatFor(app)}
+                  className="h-10 px-4 rounded-xl border border-line bg-surface-2 text-sm font-semibold flex items-center gap-2 hover:bg-surface-3 transition-colors cursor-pointer relative"
+                >
+                  <Send className="w-4 h-4 text-blue-600" />
+                  <span>Message</span>
+                  {app.hasUnreadMessages && (
+                    <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse ml-0.5" />
+                  )}
+                </button>
+
+                <button
+                  onClick={() => viewCv(app)}
+                  className="h-10 px-4 rounded-xl bg-neutral-900 text-white text-sm font-semibold flex items-center gap-2 cursor-pointer hover:bg-black transition-colors"
+                >
+                  <FileText className="w-4 h-4" /> {app.resumeUrl ? "View resume" : "No resume"}
                 </button>
               </div>
             </article>
@@ -232,6 +307,13 @@ export default function EmployerAppView() {
       </Dialog>
 
       <ApplicationChatModal application={chatFor} onClose={() => setChatFor(null)} />
+      
+      <CandidateProfileModal
+        candidate={inspectingCandidate}
+        onClose={() => setInspectingCandidate(null)}
+        onOpenChat={(app) => setChatFor(app)}
+        onOpenResume={(app) => viewCv(app)}
+      />
     </div>
   );
 }
