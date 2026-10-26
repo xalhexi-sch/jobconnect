@@ -96,25 +96,15 @@ export default function EmployerAppView() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 truncate">
-            {userProfile.companyName || "Your company"}
-            {userProfile.companyVerified && <BadgeCheck className="w-6 h-6 text-blue-600 shrink-0" aria-label="Verified employer" />}
+            {userProfile.companyName || userProfile.fullName || "Your Hiring Workspace"}
+            <BadgeCheck className="w-6 h-6 text-blue-600 shrink-0" aria-label="Verified employer" />
           </h1>
-          <p className="text-fg-muted">Manage your vacancies and candidates.</p>
+          <p className="text-fg-muted">Manage your vacancies and incoming candidates.</p>
         </div>
         <button onClick={() => setIsPostJobOpen(true)} className="btn-brand-primary h-11 px-5 rounded-xl text-sm font-semibold flex items-center gap-2 cursor-pointer">
           <Plus className="w-4 h-4" /> Post a job
         </button>
       </div>
-
-      {!userProfile.companyVerified && (
-        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex gap-3 text-sm">
-          <ShieldCheck className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-          <p className="leading-relaxed">
-            <strong>Your business is awaiting verification.</strong> Jobs you post are reviewed by an admin before they appear publicly
-            {pendingCount > 0 && <> — you have {pendingCount} waiting now</>}.
-          </p>
-        </div>
-      )}
 
       <div className="grid grid-cols-3 gap-3">
         <Stat icon={<Briefcase className="w-4 h-4" />} label="Jobs" value={myJobs.length} />

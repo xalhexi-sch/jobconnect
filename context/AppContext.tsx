@@ -144,7 +144,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const reloadJobs = useCallback(async (userRole: RoleType, signedIn: boolean) => {
     const publicJobs = await fetchJobsAction();
-    if (signedIn && userRole === "employer") {
+    if (signedIn) {
       const mine = await fetchMyJobsAction();
       if (mine.ok) {
         const mineIds = new Set(mine.jobs.map((j) => j.id));
@@ -293,6 +293,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     if (!res.ok) {
       showToast(res.error, "warning");
+      if (res.error.toLowerCase().includes("profile") || res.error.toLowerCase().includes("onboard")) {
+        setApplyModalJob(null);
+        setIsOnboardingOpen(true);
+      }
       return false;
     }
 
@@ -312,6 +316,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const res = await createJobAction(newJobData);
     if (!res.ok) {
       showToast(res.error, "warning");
+      if (res.error.toLowerCase().includes("profile") || res.error.toLowerCase().includes("onboard")) {
+        setIsPostJobOpen(false);
+        setIsOnboardingOpen(true);
+      }
       return false;
     }
     setJobs((prev) => [res.job, ...prev]);

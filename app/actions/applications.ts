@@ -1,6 +1,6 @@
 "use server";
 
-import { requireRole, requireUser } from "@/lib/auth";
+import { requireUser } from "@/lib/auth";
 import {
   audit,
   getApplication,
@@ -16,7 +16,7 @@ import { run, UserError, type ActionResult } from "@/lib/action";
 import { applicationInputSchema, statusUpdateSchema } from "@/lib/validation";
 import type { Application } from "@/lib/types";
 
-/** The signed-in seeker's own applications. No ID is accepted from the client. */
+/** The signed-in user's own applications. */
 export async function fetchUserApplicationsAction(): Promise<ActionResult<{ applications: Application[] }>> {
   return run(async () => {
     const user = await requireUser();
@@ -24,19 +24,19 @@ export async function fetchUserApplicationsAction(): Promise<ActionResult<{ appl
   });
 }
 
-/** Applications to the signed-in employer's own jobs. */
+/** Applications to jobs posted by the signed-in user. */
 export async function fetchEmployerApplicationsAction(): Promise<ActionResult<{ applications: Application[] }>> {
   return run(async () => {
-    const user = await requireRole("employer");
+    const user = await requireUser();
     return { applications: await listApplicationsForEmployer(user.id) };
   });
 }
 
+/** Any signed-in user can apply to an active job listing. */
 export async function submitApplicationAction(input: unknown): Promise<ActionResult<{ application: Application }>> {
   return run(async () => {
-    const user = await requireRole("jobseeker");
-    if (!user.onboarded) throw new UserError("Complete your profile before applying.");
-    await rateLimit(`apply:${user.id}`, 20, 3600);
+    const user = await requireUser();
+    await rateLimit(`apply:${user.id}`, 30, 3600);
     const data = applicationInputSchema.parse(input);
 
     const job = await getJobById(data.jobId);
@@ -49,7 +49,6 @@ export async function submitApplicationAction(input: unknown): Promise<ActionRes
       applicantEmail: data.applicantEmail || user.email,
       phone: data.phone || user.phone,
       coverLetter: data.coverLetter,
-      // Snapshot the seeker's stored resume at apply time; clients can never supply a path or URL.
       resume: await getResumeRef(user.id),
     });
     if (duplicate || !application) throw new UserError("You already applied to this job.");
@@ -58,7 +57,7 @@ export async function submitApplicationAction(input: unknown): Promise<ActionRes
   });
 }
 
-const EMPLOYER_ALLOWED = new Set(["Under Review", "Interview Scheduled", "Offer Extended", "Rejected"]);
+const STAGES_ALLOWED = new Set(["Under Review", "Interview Scheduled", "Offer Extended", "Rejected"]);
 
 export async function updateApplicationStatusAction(
   applicationId: string,
@@ -79,8 +78,8 @@ export async function updateApplicationStatusAction(
         throw new UserError("This application can no longer be withdrawn.");
       }
     } else {
-      if (user.role !== "employer" || app.employerId !== user.id) throw new UserError("Application not found.");
-      if (!EMPLOYER_ALLOWED.has(data.status)) throw new UserError("Invalid stage.");
+      if (app.employerId !== user.id && user.role !== "admin") throw new UserError("Application not found.");
+      if (!STAGES_ALLOWED.has(data.status)) throw new UserError("Invalid stage.");
       if (app.status === "Withdrawn") throw new UserError("The applicant withdrew this application.");
     }
 

@@ -15,7 +15,7 @@ export default function OnboardingModal({ isOpen, onClose }: { isOpen: boolean; 
       open={isOpen}
       onClose={onClose}
       title="Welcome to JobConnect"
-      description="Tell us how you’ll use it. This takes under a minute and can’t be changed later."
+      description="Choose your primary focus to get started. You can both apply for jobs and hire on JobConnect anytime."
     >
       <OnboardingFlow onDone={onClose} />
     </Dialog>
@@ -49,7 +49,7 @@ function OnboardingFlow({ onDone }: { onDone: () => void }) {
     );
     setBusy(false);
     if (!ok) return;
-    showToast(role === "jobseeker" ? "You’re all set. Happy job hunting!" : "Employer workspace created. Listings go live once your business is verified.", "success");
+    showToast(role === "jobseeker" ? "You’re all set! You can browse jobs or switch to Hiring Hub anytime." : "Hiring workspace ready! You can post jobs and apply anytime.", "success");
     try {
       confetti({ particleCount: 90, spread: 70, origin: { y: 0.65 } });
     } catch {

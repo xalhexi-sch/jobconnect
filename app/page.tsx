@@ -13,8 +13,12 @@ import Footer from "@/components/Footer";
 import ApplyModal from "@/components/ApplyModal";
 import PostJobModal from "@/components/PostJobModal";
 import AuthModal from "@/components/AuthModal";
+import OnboardingModal from "@/components/OnboardingModal";
+import { useApp } from "@/context/AppContext";
 
 export default function HomePage() {
+  const { isOnboardingOpen, setIsOnboardingOpen } = useApp();
+
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden relative">
       {/* Dark floating pill navigation bar */}
@@ -50,6 +54,7 @@ export default function HomePage() {
       <ApplyModal />
       <PostJobModal />
       <AuthModal />
+      <OnboardingModal isOpen={isOnboardingOpen} onClose={() => setIsOnboardingOpen(false)} />
     </div>
   );
 }

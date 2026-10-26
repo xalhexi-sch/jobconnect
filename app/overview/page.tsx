@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import JobgioLogo from "@/components/JobgioLogo";
 import { useApp } from "@/context/AppContext";
-import { Briefcase, ArrowLeft, LogIn, Search, Send, Bookmark, FileText, Plus, Building2, ShieldCheck, Lock } from "lucide-react";
+import { Briefcase, ArrowLeft, LogIn, Search, Send, Bookmark, FileText, Plus, Building2, ShieldCheck, Lock, UserCheck } from "lucide-react";
 import JobseekerAppView from "@/components/overview/JobseekerAppView";
 import EmployerAppView from "@/components/overview/EmployerAppView";
 import ApplyModal from "@/components/ApplyModal";
@@ -56,33 +56,19 @@ export default function OverviewPage() {
   const isMobile = useSyncExternalStore(subscribeMobile, getMobile, () => false);
   const isDark = useSyncExternalStore(subscribeDark, getDark, () => false);
 
-  // Employers land on their workspace; the role comes from the server, never from the client.
-  const [lastRole, setLastRole] = useState(role);
-  if (role !== lastRole) {
-    setLastRole(role);
-    if (role === "employer") setViewMode("employer");
-  }
-
-  const isEmployer = role === "employer";
-  const showJobseeker = viewMode === "jobseeker" || !isEmployer;
-
   const goSeeker = (tab: typeof jobseekerSubTab) => () => {
     setViewMode("jobseeker");
     setJobseekerSubTab(tab);
   };
 
   const dockItems: DockItemData[] = [
-    { icon: <Search className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />, label: "Find Jobs", active: showJobseeker && jobseekerSubTab === "find", badge: jobs.length || undefined, onClick: goSeeker("find") },
-    { icon: <Send className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />, label: "My Applications", active: showJobseeker && jobseekerSubTab === "applications", badge: applications.length || undefined, onClick: goSeeker("applications") },
-    { icon: <Bookmark className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />, label: "Saved Jobs", active: showJobseeker && jobseekerSubTab === "saved", badge: bookmarkedJobIds.length || undefined, onClick: goSeeker("saved") },
-    { icon: <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />, label: "My Profile", active: showJobseeker && jobseekerSubTab === "resume", onClick: goSeeker("resume") },
-    ...(isEmployer
-      ? ([
-          { separator: true },
-          { icon: <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700" />, label: "Employer Portal", active: viewMode === "employer", onClick: () => setViewMode("employer") },
-          { icon: <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />, label: "Post Vacancy", onClick: () => setIsPostJobOpen(true) },
-        ] as DockItemData[])
-      : []),
+    { icon: <Search className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />, label: "Find Jobs", active: viewMode === "jobseeker" && jobseekerSubTab === "find", badge: jobs.length || undefined, onClick: goSeeker("find") },
+    { icon: <Send className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />, label: "My Applications", active: viewMode === "jobseeker" && jobseekerSubTab === "applications", badge: applications.length || undefined, onClick: goSeeker("applications") },
+    { icon: <Bookmark className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />, label: "Saved Jobs", active: viewMode === "jobseeker" && jobseekerSubTab === "saved", badge: bookmarkedJobIds.length || undefined, onClick: goSeeker("saved") },
+    { icon: <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />, label: "My Profile", active: viewMode === "jobseeker" && jobseekerSubTab === "resume", onClick: goSeeker("resume") },
+    { separator: true },
+    { icon: <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />, label: "Employer Hub", active: viewMode === "employer", onClick: () => setViewMode("employer") },
+    { icon: <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />, label: "Post Vacancy", onClick: () => setIsPostJobOpen(true) },
     ...(role === "admin"
       ? ([{ separator: true }, { icon: <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700" />, label: "Admin", onClick: () => router.push("/admin") }] as DockItemData[])
       : []),
@@ -102,13 +88,35 @@ export default function OverviewPage() {
             </Link>
           </div>
 
+          {/* Quick Dual Switcher: Candidate vs Employer Hub */}
+          <div className="flex items-center p-1 rounded-xl bg-surface-2 border border-line">
+            <button
+              type="button"
+              onClick={() => setViewMode("jobseeker")}
+              className={`h-8 px-3 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                viewMode === "jobseeker"
+                  ? "bg-surface shadow-xs text-blue-600 font-bold"
+                  : "text-fg-muted hover:text-fg"
+              }`}
+            >
+              <UserCheck className="w-3.5 h-3.5" />
+              <span>Jobseeker</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("employer")}
+              className={`h-8 px-3 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                viewMode === "employer"
+                  ? "bg-surface shadow-xs text-emerald-600 font-bold"
+                  : "text-fg-muted hover:text-fg"
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>Hiring Hub</span>
+            </button>
+          </div>
+
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {isSignedIn && userProfile.onboarded && (
-              <span className="hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-surface-2 border border-line text-xs font-semibold text-fg-muted capitalize">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
-                {role === "jobseeker" ? "Job seeker" : role}
-              </span>
-            )}
             <LocaleToggle />
             <ThemeToggle />
             {isClerkConfigured && (
@@ -129,8 +137,26 @@ export default function OverviewPage() {
 
       <main id="main" className="flex-1 p-3 sm:p-6 lg:p-8">
         <div className="max-w-6xl mx-auto">
-          {isEmployer && viewMode === "employer" ? (
-            <EmployerAppView />
+          {viewMode === "employer" ? (
+            isSignedIn ? (
+              <EmployerAppView />
+            ) : (
+              <div className="max-w-xl mx-auto my-12 p-8 rounded-2xl bg-surface border border-line text-center space-y-4">
+                <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <Building2 className="w-7 h-7" />
+                </div>
+                <h2 className="text-xl font-bold">Employer &amp; Hiring Hub</h2>
+                <p className="text-sm text-fg-muted max-w-md mx-auto leading-relaxed">
+                  Post vacancies, review applicant resumes, schedule interviews, and manage hiring for your business in Butuan City &amp; Caraga.
+                </p>
+                <button
+                  onClick={() => openAuthModal("sign-in")}
+                  className="btn-brand-primary h-11 px-6 rounded-xl text-sm font-semibold inline-flex items-center gap-2 cursor-pointer"
+                >
+                  <LogIn className="w-4 h-4" /> Sign In to Access Hiring Hub
+                </button>
+              </div>
+            )
           ) : (
             <>
               {isSignedIn && profileError && (
@@ -143,7 +169,7 @@ export default function OverviewPage() {
               )}
               {isSignedIn && profileLoaded && !profileError && !userProfile.onboarded && (
                 <div className="max-w-4xl mx-auto mb-5 p-4 rounded-2xl bg-blue-50 border border-blue-200 flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-sm font-medium">Finish setting up your account to apply or post jobs.</p>
+                  <p className="text-sm font-medium">Quick setup: Personalize your account to start applying and hiring.</p>
                   <button onClick={() => setIsOnboardingOpen(true)} className="btn-brand-primary h-10 px-5 rounded-xl text-sm font-semibold cursor-pointer">
                     Continue setup
                   </button>
@@ -152,7 +178,7 @@ export default function OverviewPage() {
               <JobseekerAppView activeSubTab={jobseekerSubTab} onSubTabChange={setJobseekerSubTab} hideTopTabs />
               {!isSignedIn && (
                 <div className="max-w-4xl mx-auto mt-6 p-5 rounded-2xl bg-surface border border-line flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-sm text-fg-muted flex items-center gap-2"><Lock className="w-4 h-4" /> Sign in to apply, save jobs, or post a vacancy as an employer.</p>
+                  <p className="text-sm text-fg-muted flex items-center gap-2"><Lock className="w-4 h-4" /> Sign in to apply, save jobs, or manage your hiring workspace.</p>
                   <button onClick={() => openAuthModal("sign-in")} className="h-10 px-5 rounded-xl border border-line bg-surface-2 text-sm font-semibold flex items-center gap-2 cursor-pointer">
                     <Building2 className="w-4 h-4" /> Sign in
                   </button>

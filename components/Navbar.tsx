@@ -215,12 +215,13 @@ export default function Navbar() {
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    setIsPostJobOpen(true);
+                    if (!isSignedIn) openAuthModal("sign-in");
+                    else setIsPostJobOpen(true);
                   }}
                   className="w-full py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Plus className="w-4 h-4 text-blue-600" />
-                  <span>Post Vacancy (For Employers)</span>
+                  <span>Post a Job Opening</span>
                 </button>
 
                 <Link

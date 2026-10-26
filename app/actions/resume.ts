@@ -1,7 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { requireRole, requireUser } from "@/lib/auth";
+import { requireUser } from "@/lib/auth";
 import { audit, getApplicationResumeRef, getResumeRef, patchProfile } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { getSupabaseAdmin } from "@/lib/supabase";
@@ -22,11 +22,11 @@ function detect(buf: Uint8Array): { ext: string; mime: string } | null {
   return null;
 }
 
-/** Seeker uploads (or replaces) their resume. Expects FormData with a "file" field. */
+/** User uploads (or replaces) their resume. Expects FormData with a "file" field. */
 export async function uploadResumeAction(formData: FormData): Promise<ActionResult<{ fileName: string }>> {
   return run(async () => {
-    const user = await requireRole("jobseeker");
-    await rateLimit(`resume-upload:${user.id}`, 10, 3600);
+    const user = await requireUser();
+    await rateLimit(`resume-upload:${user.id}`, 20, 3600);
 
     const file = formData.get("file");
     if (!(file instanceof File) || file.size === 0) throw new UserError("Choose a file to upload.");
@@ -56,7 +56,7 @@ export async function uploadResumeAction(formData: FormData): Promise<ActionResu
   });
 }
 
-/** Short-lived link to the signed-in seeker's own resume. */
+/** Short-lived link to the signed-in user's own resume. */
 export async function getMyResumeLinkAction(): Promise<ActionResult<{ url: string }>> {
   return run(async () => {
     const user = await requireUser();

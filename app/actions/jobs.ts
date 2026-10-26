@@ -1,6 +1,6 @@
 "use server";
 
-import { requireRole } from "@/lib/auth";
+import { requireRole, requireUser } from "@/lib/auth";
 import {
   audit, getJobById, insertJob, listActiveJobs, listJobsByEmployer, listJobsByStatus, searchJobs, setJobStatus,
   type JobSearch,
@@ -38,35 +38,34 @@ export async function searchJobsAction(input: JobSearch): Promise<{ jobs: Job[];
   }
 }
 
-/** Employer: all of their own listings, including Pending/Expired. */
+/** Signed-in user: all of their own posted listings. */
 export async function fetchMyJobsAction(): Promise<ActionResult<{ jobs: Job[] }>> {
   return run(async () => {
-    const user = await requireRole("employer");
+    const user = await requireUser();
     return { jobs: await listJobsByEmployer(user.id) };
   });
 }
 
+/** Any signed-in user can post a job vacancy; immediately live (Active) without verification delay. */
 export async function createJobAction(input: unknown): Promise<ActionResult<{ job: Job }>> {
   return run(async () => {
-    const user = await requireRole("employer");
-    if (!user.onboarded) throw new UserError("Finish setting up your employer profile first.");
-    await rateLimit(`post-job:${user.id}`, 10, 3600);
+    const user = await requireUser();
+    await rateLimit(`post-job:${user.id}`, 30, 3600);
     const data = jobInputSchema.parse(input);
-    const status = user.companyVerified ? "Active" : "Pending";
+    const status = "Active";
     const job = await insertJob(user.id, data, status);
     await audit(user.id, "job.create", job.id, { status });
     return { job };
   });
 }
 
-/** Employer: close or re-open own listing. Pending listings can only be released by an admin. */
+/** Owner: close or re-open own listing. */
 export async function setMyJobStatusAction(jobId: string, status: "Active" | "Expired"): Promise<ActionResult> {
   return run(async () => {
-    const user = await requireRole("employer");
+    const user = await requireUser();
     if (status !== "Active" && status !== "Expired") throw new UserError("Invalid status.");
     const job = await getJobById(jobId);
     if (!job || job.employerId !== user.id) throw new UserError("Job not found.");
-    if (job.status === "Pending") throw new UserError("This listing is awaiting admin approval.");
     await setJobStatus(jobId, status, user.id);
     await audit(user.id, "job.status", jobId, { status });
     return {};
