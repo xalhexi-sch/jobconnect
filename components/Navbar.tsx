@@ -6,13 +6,13 @@ import JobgioLogo from "./JobgioLogo";
 import { useApp } from "@/context/AppContext";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import LocaleToggle from "@/components/ui/LocaleToggle";
-import { ArrowUpRight, LogIn, Plus, Menu, X, Search, Briefcase, HelpCircle } from "lucide-react";
+import { ArrowUpRight, LogIn, Plus, Menu, X, Search, Briefcase, HelpCircle, Send } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { isClerkConfigured } from "@/lib/clerk";
 import { Show, UserButton } from "@clerk/nextjs";
 
 export default function Navbar() {
-  const { openAuthModal, isSignedIn, setIsPostJobOpen } = useApp();
+  const { openAuthModal, isSignedIn, setIsPostJobOpen, setIsInboxOpen, unreadMessagesCount } = useApp();
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -83,6 +83,22 @@ export default function Navbar() {
           <div className="flex items-center gap-2 sm:gap-2.5">
             <LocaleToggle />
             <ThemeToggle />
+
+            {/* Direct Inbox Messages Button on Top (with Send icon) */}
+            <button
+              type="button"
+              onClick={() => (isSignedIn ? setIsInboxOpen(true) : openAuthModal("sign-in"))}
+              className="relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors cursor-pointer"
+              title="Inbox Messages"
+              aria-label="Direct inbox messages"
+            >
+              <Send className="w-3.5 h-3.5 text-blue-600" />
+              <span>Inbox</span>
+              {unreadMessagesCount > 0 && (
+                <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+              )}
+            </button>
+
             {/* Quick Post Opening button (Desktop) */}
             <button
               onClick={() => (isSignedIn ? setIsPostJobOpen(true) : openAuthModal("sign-up"))}
@@ -174,6 +190,29 @@ export default function Navbar() {
               </div>
 
               <div className="space-y-1">
+                {/* Inbox Messages on Mobile Menu */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    if (!isSignedIn) openAuthModal("sign-in");
+                    else setIsInboxOpen(true);
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-50 text-xs font-semibold text-neutral-800 transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Send className="w-4 h-4 text-blue-600" />
+                    <span>Inbox Messages</span>
+                  </span>
+                  {unreadMessagesCount > 0 ? (
+                    <span className="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-full animate-pulse">
+                      {unreadMessagesCount} new
+                    </span>
+                  ) : (
+                    <ArrowUpRight className="w-3.5 h-3.5 text-neutral-400" />
+                  )}
+                </button>
+
                 <Link
                   href="#opportunities"
                   onClick={() => setMobileMenuOpen(false)}
@@ -221,7 +260,7 @@ export default function Navbar() {
                   className="w-full py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Plus className="w-4 h-4 text-blue-600" />
-                  <span>Post a Job Opening</span>
+                  <span>Post a Job</span>
                 </button>
 
                 <Link
@@ -229,7 +268,7 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="w-full py-2.5 rounded-xl btn-brand-primary text-xs font-bold flex items-center justify-center gap-2 shadow-xs"
                 >
-                  <span>Open JobConnect Portal</span>
+                  <span>Open job portal</span>
                   <ArrowUpRight className="w-4 h-4" />
                 </Link>
 
@@ -241,7 +280,7 @@ export default function Navbar() {
                       className="w-full py-2.5 rounded-xl btn-clerk-outline text-xs font-semibold flex items-center justify-center gap-2"
                     >
                       <LogIn className="w-4 h-4 text-neutral-500" />
-                      <span>Sign In with Clerk</span>
+                      <span>Sign in</span>
                     </Link>
                   </Show>
                 )}

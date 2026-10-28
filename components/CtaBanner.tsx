@@ -14,7 +14,7 @@ export default function CtaBanner() {
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="relative rounded-2xl bg-[#111116] text-white p-8 sm:p-12 md:p-14 text-center overflow-hidden shadow-xl border border-white/10"
+        className="relative rounded-3xl bg-[#111116] text-white p-8 sm:p-14 md:p-20 text-center overflow-hidden shadow-xl border border-white/10"
       >
         {/* Soft radial glowing gradients with ambient breathing */}
         <motion.div
@@ -37,20 +37,20 @@ export default function CtaBanner() {
         <div className="relative z-10 max-w-2xl mx-auto space-y-5">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-md">
             <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-            <span className="text-xs font-semibold tracking-tight text-white/90">
-              JobConnect Butuan &bull; Web Application
+            <span className="text-xs font-semibold tracking-tight text-white">
+              JobConnect Butuan
             </span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-[1.15]">
-            Start Your Career in<br />
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.1] text-balance">
+            Find your next job<br />
             <AnimatedGradientText colorFrom="#FFFFFF" colorTo="#60A5FA" speed={1.2}>
-              Butuan &amp; Caraga Today
+              in Butuan today
             </AnimatedGradientText>
           </h2>
 
-          <p className="text-sm sm:text-base text-neutral-300 font-normal leading-relaxed max-w-lg mx-auto">
-            100% web-native app experience. Submit one-click applications, track HR screening stages, and connect with regional employers directly from your browser.
+          <p className="text-base sm:text-lg text-white/75 font-normal leading-relaxed max-w-xl mx-auto text-pretty">
+            Apply in a few taps, see how your application is doing, and talk to employers directly. It is free.
           </p>
 
           {/* Action Pills */}
@@ -61,7 +61,7 @@ export default function CtaBanner() {
                 className="btn-shimmer flex items-center justify-center gap-2.5 px-6 min-h-12 text-sm font-semibold cursor-pointer w-full"
               >
                 <UserCheck className="w-4 h-4 text-blue-300" />
-                <span>Launch Jobseeker Hub</span>
+                <span>Find a job</span>
               </Link>
             </motion.div>
 
@@ -71,7 +71,7 @@ export default function CtaBanner() {
                 className="group flex items-center justify-center gap-2.5 px-6 min-h-12 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 transition-colors text-sm font-semibold cursor-pointer text-white w-full"
               >
                 <Briefcase className="w-4 h-4 text-amber-400" />
-                <span>Employer Recruitment Portal</span>
+                <span>Post a job</span>
                 <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </motion.div>

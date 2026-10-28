@@ -9,20 +9,20 @@ const PILLARS = [
   {
     icon: Building2,
     tone: "bg-brand/12 text-brand",
-    title: "Local business focus",
-    body: "Built for Butuan shops, cafes, clinics, logistics hubs and regional employers who want local staff without agency fees.",
+    title: "Jobs near you",
+    body: "Shops, cafes, clinics and offices in Butuan that want to hire people from the area.",
   },
   {
     icon: Users,
     tone: "bg-violet-500/12 text-violet-600",
-    title: "Direct contact",
-    body: "Send your resume and contact info straight to the employer. They review, message you, and update your interview status in real time.",
+    title: "Talk to the employer",
+    body: "Send your resume straight to the employer. They can message you here and tell you what happens next.",
   },
   {
     icon: CheckCircle2,
     tone: "bg-emerald-500/12 text-emerald-600",
-    title: "Zero placement fees",
-    body: "100% free for applicants. No agency commissions, salary deductions or hidden charges, ever.",
+    title: "Free to apply",
+    body: "No agency fees. No salary cuts. No hidden charges.",
   },
 ];
 
@@ -59,10 +59,10 @@ export default function StatsProof() {
         <div className="flex flex-col lg:flex-row lg:items-center gap-4 pt-7 border-t border-line">
           <span className="font-semibold flex items-center gap-2 shrink-0 text-sm">
             <MapPin className="w-4 h-4 text-brand" aria-hidden />
-            Serving Butuan City areas
+            Jobs all around Butuan
           </span>
           <div className="min-w-0 flex-1">
-            <Marquee label="Butuan City areas served">
+            <Marquee label="Areas in Butuan with jobs">
               {DISTRICTS.map((d) => (
                 <span key={d} className="chip whitespace-nowrap">
                   {d}

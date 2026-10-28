@@ -48,7 +48,7 @@ export default function ExploreJobs() {
 
   return (
     <section id="opportunities" className="py-16 sm:py-20 bg-surface-2 border-y border-line">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -86,7 +86,7 @@ export default function ExploreJobs() {
             <p className="text-sm text-fg-muted mt-1">{jobs.length === 0 ? "Be the first employer to post a vacancy." : "Try another category or work setup."}</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {shown.map((job) => (
               <JobCard
                 key={job.id}

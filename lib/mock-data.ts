@@ -356,27 +356,27 @@ export const PENDING_APPROVALS: PendingApproval[] = [
 
 export const FAQS = [
   {
-    category: "Jobseekers in Caraga",
+    category: "Job seekers",
     questions: [
-      { q: "Is JobConnect free for applicants in Butuan & Caraga?", a: "Yes, 100% free! Jobseekers can browse, search, build their interactive portfolio, and apply to unlimited local and remote listings at no charge." },
-      { q: "Are the companies and jobs verified?", a: "Yes, every job listing is reviewed so applicants know they are applying to real local businesses with clear salaries." },
-      { q: "Can fresh graduates from CSU, FSUU, and SJIT apply?", a: "Definitely. We have a dedicated 'Entry Level / Fresh Grad' filter specifically welcoming graduates from Caraga universities and vocational centers." },
-      { q: "Can I apply using my mobile phone browser?", a: "Yes, JobConnect is engineered as a responsive web app. You don't need to download anything from app stores; just open the browser and tap Direct Apply." }
+      { q: "Is JobConnect free?", a: "Yes. Job seekers can search and apply to as many jobs as they like. It never costs anything." },
+      { q: "Are the jobs real?", a: "Yes. We check every job before it goes live, so you apply to real local businesses with clear pay." },
+      { q: "Can fresh graduates apply?", a: "Yes. Many jobs here are open to fresh graduates and first-time workers." },
+      { q: "Can I apply on my phone?", a: "Yes. Open JobConnect in your phone browser. You do not need to download an app." }
     ]
   },
   {
-    category: "Employers & HR in Caraga",
+    category: "Employers",
     questions: [
-      { q: "How do we post jobs for our Butuan or Caraga business?", a: "Switch to Employer Mode in the top navigation, click 'Post Vacancy', set your salary range in ₱ PHP and location, and publish instantly." },
-      { q: "Can we review candidate resumes and schedule interviews?", a: "Yes! The candidate pipeline in your Overview hub lets you view resumes, move candidates through recruitment stages, and send interview notices." },
-      { q: "Does JobConnect support hybrid and remote roles in the region?", a: "Yes. Many Caraga IT, BPO, and design teams hire for 100% remote or hybrid setups across Agusan and Surigao." }
+      { q: "How do I post a job?", a: "Sign in and tap Post a Job. Enter the job details, the pay in pesos and the location, then submit. We check it, then it goes live." },
+      { q: "Can I see applicants and set interviews?", a: "Yes. In your dashboard you can read resumes, move applicants to the next step, and message them." },
+      { q: "Can I post remote or hybrid jobs?", a: "Yes. When you post a job, choose on-site, hybrid or remote." }
     ]
   },
   {
-    category: "Locations Covered",
+    category: "Areas we cover",
     questions: [
-      { q: "Which areas in Caraga Region (Region XIII) are supported?", a: "We actively cover Butuan City, Cabadbaran City, Surigao City, Bayugan City, Bislig City, and all 5 provinces: Agusan del Norte, Agusan del Sur, Surigao del Norte, Surigao del Sur, and Dinagat Islands." },
-      { q: "Where is the JobConnect Caraga coordination center?", a: "Our regional tech hub coordinates from J.C. Aquino Avenue, Butuan City, Agusan del Norte." }
+      { q: "Which areas do you cover?", a: "Butuan, Cabadbaran, Surigao, Bayugan and Bislig. We also cover the provinces of Agusan del Norte, Agusan del Sur, Surigao del Norte, Surigao del Sur and Dinagat Islands." },
+      { q: "Where is your office?", a: "J.C. Aquino Avenue, Butuan City, Agusan del Norte." }
     ]
   }
 ];

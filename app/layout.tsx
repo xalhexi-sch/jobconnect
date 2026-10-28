@@ -1,16 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Figtree } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "@/context/AppContext";
 import ToastContainer from "@/components/ToastContainer";
 import SmoothScroll from "@/components/SmoothScroll";
 import AuthProvider from "@/components/AuthProvider";
 import ClerkSync from "@/components/ClerkSync";
+import InboxModal from "@/components/InboxModal";
 
-const figtree = Figtree({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-figtree",
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -53,7 +53,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${figtree.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
@@ -69,6 +69,7 @@ export default function RootLayout({
             <AppProvider>
               <ClerkSync />
               {children}
+              <InboxModal />
               <ToastContainer />
             </AppProvider>
           </SmoothScroll>

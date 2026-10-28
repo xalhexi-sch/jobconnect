@@ -10,7 +10,7 @@ const SPRING = { type: "spring", stiffness: 380, damping: 34 } as const;
 
 export default function FaqSection() {
   const reduceMotion = useReducedMotion();
-  const [activeCategory, setActiveCategory] = useState(FAQS[0]?.category || "Jobseekers in Caraga");
+  const [activeCategory, setActiveCategory] = useState(FAQS[0]?.category ?? "");
   const [openQuestionIndex, setOpenQuestionIndex] = useState<number | null>(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
@@ -30,10 +30,10 @@ export default function FaqSection() {
         className="mb-14"
       >
         <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-fg leading-tight text-balance">
-          Frequently<br />asked questions
+          Questions<br />people ask
         </h2>
         <p className="text-base sm:text-lg text-fg-muted mt-2 max-w-md text-pretty">
-          Clear answers about verified employers, regional compensation, and web application flow.
+          Short answers about jobs, pay and how to apply.
         </p>
       </motion.div>
 

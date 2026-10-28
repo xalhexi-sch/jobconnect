@@ -9,14 +9,14 @@ export default function JobCategories() {
   const { selectedCategory, setSelectedCategory } = useApp();
 
   const categories = [
-    { id: "Developer", name: "Developer & IT", icon: Code },
-    { id: "Hospitality", name: "Hospitality & Cafes", icon: Coffee },
-    { id: "Trades & Logistics", name: "Trades & Logistics", icon: Truck },
-    { id: "Healthcare", name: "Healthcare & Clinic", icon: Stethoscope },
+    { id: "Developer", name: "IT & Software", icon: Code },
+    { id: "Hospitality", name: "Cafes & Hotels", icon: Coffee },
+    { id: "Trades & Logistics", name: "Delivery & Trades", icon: Truck },
+    { id: "Healthcare", name: "Health & Clinics", icon: Stethoscope },
     { id: "Marketing", name: "Sales & Retail", icon: TrendingUp },
     { id: "Design", name: "Design & Media", icon: PenTool },
-    { id: "Admin & Support", name: "Admin & Operations", icon: FileSpreadsheet },
-    { id: "Security", name: "Security & Tech", icon: ShieldCheck },
+    { id: "Admin & Support", name: "Office & Admin", icon: FileSpreadsheet },
+    { id: "Security", name: "Security", icon: ShieldCheck },
   ];
 
   return (
@@ -30,10 +30,10 @@ export default function JobCategories() {
       >
         <div>
           <h2 className="text-3xl lg:text-4xl font-bold tracking-tight leading-tight">
-            Browse by sector
+            Browse by type of job
           </h2>
           <p className="text-base text-fg-muted mt-2">
-            Explore active openings across key industries in Butuan City &amp; Caraga.
+            Pick a kind of work to see open jobs in Butuan and Caraga.
           </p>
         </div>
       </motion.div>
@@ -78,7 +78,7 @@ export default function JobCategories() {
               <div className="min-w-0">
                 <div className="text-sm sm:text-base font-bold truncate">{cat.name}</div>
                 <div className={`text-sm ${isActive ? "text-white/80" : "text-fg-muted"}`}>
-                  View Openings
+                  See jobs
                 </div>
               </div>
             </motion.button>

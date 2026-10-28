@@ -83,6 +83,9 @@ interface AppContextType {
   setApplyModalJob: (job: Job | null) => void;
   isPostJobOpen: boolean;
   setIsPostJobOpen: (open: boolean) => void;
+  isInboxOpen: boolean;
+  setIsInboxOpen: (open: boolean) => void;
+  unreadMessagesCount: number;
   isResumeModalOpen: boolean;
   setIsResumeModalOpen: (open: boolean) => void;
   isMobileMockupOpen: boolean;
@@ -126,6 +129,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const [applyModalJob, setApplyModalJob] = useState<Job | null>(null);
   const [isPostJobOpen, setIsPostJobOpen] = useState(false);
+  const [isInboxOpen, setIsInboxOpen] = useState(false);
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
   const [isMobileMockupOpen, setIsMobileMockupOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -375,6 +379,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast(`Candidate stage moved to: ${stage}`, "success");
   };
 
+  const unreadMessagesCount = applications.filter((a) => a.hasUnreadMessages).length;
+
   return (
     <AppContext.Provider
       value={{
@@ -411,6 +417,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setApplyModalJob,
         isPostJobOpen,
         setIsPostJobOpen,
+        isInboxOpen,
+        setIsInboxOpen,
+        unreadMessagesCount,
         isResumeModalOpen,
         setIsResumeModalOpen,
         isMobileMockupOpen,

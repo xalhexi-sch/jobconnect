@@ -4,11 +4,30 @@
 /* Design tokens                                                       */
 /* ------------------------------------------------------------------ */
 @theme {
-  /* Slightly larger small text for readability (12px/14px -> 13px/15px) */
-  --text-xs: 0.8125rem;
-  --text-xs--line-height: 1.25rem;
-  --text-sm: 0.9375rem;
-  --text-sm--line-height: 1.45rem;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+  /* Minimal type scale: headings ~28% smaller than Tailwind defaults, body kept >=13px for legibility */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.1rem;
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 0.875rem;
+  --text-base--line-height: 1.45rem;
+  --text-lg: 0.9375rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.0625rem;
+  --text-xl--line-height: 1.5rem;
+  --text-2xl: 1.125rem;
+  --text-2xl--line-height: 1.6rem;
+  --text-3xl: 1.375rem;
+  --text-3xl--line-height: 1.75rem;
+  --text-4xl: 1.625rem;
+  --text-4xl--line-height: 1.2;
+  --text-5xl: 2.125rem;
+  --text-5xl--line-height: 1.1;
+  --text-6xl: 2.625rem;
+  --text-6xl--line-height: 1.05;
+  --text-7xl: 3.125rem;
+  --text-7xl--line-height: 1.05;
 
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
@@ -111,7 +130,6 @@
 /* ------------------------------------------------------------------ */
 html {
   scroll-behavior: smooth;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }

@@ -28,23 +28,23 @@ export default function Footer() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-12 border-b border-white/10">
           <div className="lg:col-span-6 space-y-4">
             <JobgioLogo variant="light" size="md" />
-            <p className="text-sm text-neutral-400 max-w-md leading-relaxed">
-              The premier employment and talent ecosystem for Butuan City and the Caraga Region. Connecting local university graduates and seasoned professionals with trusted enterprises.
+            <p className="text-sm text-white/65 max-w-md leading-relaxed">
+              A job board for Butuan City and Caraga. We help local people find work and help local businesses find staff.
             </p>
           </div>
 
           <div className="lg:col-span-6 flex flex-col justify-end">
-            <div className="text-sm font-semibold text-neutral-300 mb-3">
-              Get Weekly Caraga Job Alerts &amp; Hiring Trends
+            <div className="text-sm font-semibold text-white/85 mb-3">
+              Get new jobs by email every week
             </div>
             <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 max-w-md">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="your.email@caraga.tech"
+                placeholder="you@example.com"
                 required
-                className="w-full px-4 py-2.5 rounded-xl bg-white/10 border border-white/10 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-white/30"
+                className="w-full px-4 py-2.5 rounded-xl bg-white/10 border border-white/10 text-sm text-white placeholder-white/45 focus:outline-none focus:border-white/30"
               />
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -55,7 +55,7 @@ export default function Footer() {
                 {subscribed ? (
                   <>
                     <Check className="w-4 h-4 text-blue-600" />
-                    <span>Active</span>
+                    <span>Subscribed</span>
                   </>
                 ) : (
                   <>
@@ -72,8 +72,8 @@ export default function Footer() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 py-12 border-b border-white/10 text-sm">
           
           <div>
-            <div className="font-bold text-neutral-200 uppercase tracking-wider mb-4 text-xs">Regional Center</div>
-            <p className="text-neutral-400 leading-relaxed">
+            <div className="font-bold text-white/90 uppercase tracking-wider mb-4 text-xs">Our office</div>
+            <p className="text-white/65 leading-relaxed">
               J.C. Aquino Avenue,<br />
               Butuan City, 8600<br />
               Agusan del Norte, Caraga
@@ -81,19 +81,19 @@ export default function Footer() {
           </div>
 
           <div>
-            <div className="font-bold text-neutral-200 uppercase tracking-wider mb-4 text-xs">Features</div>
-            <ul className="space-y-2.5 text-neutral-400">
-              <li><Link href="/overview" className="hover:text-white transition-colors">Instant Job Search</Link></li>
-              <li><Link href="/overview" className="hover:text-white transition-colors">My Applications Tracker</Link></li>
+            <div className="font-bold text-white/90 uppercase tracking-wider mb-4 text-xs">For job seekers</div>
+            <ul className="space-y-2.5 text-white/65">
+              <li><Link href="/overview" className="hover:text-white transition-colors">Search jobs</Link></li>
+              <li><Link href="/overview" className="hover:text-white transition-colors">My applications</Link></li>
               <li><Link href="/overview" className="hover:text-white transition-colors">Saved Jobs</Link></li>
-              <li><Link href="/overview" className="hover:text-white transition-colors">Resume & Portfolio</Link></li>
-              <li><Link href="/overview" className="hover:text-white transition-colors">Employer Pipeline</Link></li>
+              <li><Link href="/overview" className="hover:text-white transition-colors">My profile</Link></li>
+              <li><Link href="/overview" className="hover:text-white transition-colors">For employers</Link></li>
             </ul>
           </div>
 
           <div>
-            <div className="font-bold text-neutral-200 uppercase tracking-wider mb-4 text-xs">Caraga Coverage</div>
-            <ul className="space-y-2.5 text-neutral-400">
+            <div className="font-bold text-white/90 uppercase tracking-wider mb-4 text-xs">Areas we cover</div>
+            <ul className="space-y-2.5 text-white/65">
               <li><Link href="/overview" className="hover:text-white transition-colors">Butuan City</Link></li>
               <li><Link href="/overview" className="hover:text-white transition-colors">Cabadbaran City</Link></li>
               <li><Link href="/overview" className="hover:text-white transition-colors">Surigao City</Link></li>
@@ -102,23 +102,23 @@ export default function Footer() {
           </div>
 
           <div>
-            <div className="font-bold text-neutral-200 uppercase tracking-wider mb-4 text-xs">About</div>
-            <p className="text-neutral-400 leading-relaxed text-xs">
-              A modern job board helping people in Butuan and Caraga find good work and local companies hire great talent.
+            <div className="font-bold text-white/90 uppercase tracking-wider mb-4 text-xs">About</div>
+            <p className="text-white/65 leading-relaxed text-xs">
+              Free to use. Every job is checked before it goes live.
             </p>
           </div>
 
         </div>
 
         {/* Bottom: Legal & Copyright */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4">
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-white/55 gap-4">
           <div>
-            © 2026 JobConnect Caraga. All rights reserved.
+            © 2026 JobConnect. All rights reserved.
           </div>
           <div className="flex items-center gap-6">
-            <span className="hover:text-neutral-300 transition-colors cursor-pointer">Privacy</span>
-            <span className="hover:text-neutral-300 transition-colors cursor-pointer">Terms</span>
-            <span className="hover:text-neutral-300 transition-colors cursor-pointer">Help &amp; Contact</span>
+            <span className="hover:text-white transition-colors cursor-pointer">Privacy</span>
+            <span className="hover:text-white transition-colors cursor-pointer">Terms</span>
+            <span className="hover:text-white transition-colors cursor-pointer">Contact us</span>
           </div>
         </div>
 

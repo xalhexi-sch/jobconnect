@@ -1,171 +1,87 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
+import React from "react";
 import { UserCheck, Search, Send, BellRing } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
+import SpotlightCard from "@/components/ui/SpotlightCard";
+
+const STEPS = [
+  {
+    num: "01",
+    title: "Make your profile",
+    desc: "Add your contact details, where you live, and your resume. It takes about 2 minutes.",
+    icon: UserCheck,
+  },
+  {
+    num: "02",
+    title: "Find a job near you",
+    desc: "Search by area or type of job. See which shops, clinics and offices are hiring.",
+    icon: Search,
+  },
+  {
+    num: "03",
+    title: "Apply directly",
+    desc: "Send your application to the employer. You can add a short message. No agency in between.",
+    icon: Send,
+  },
+  {
+    num: "04",
+    title: "Get updates",
+    desc: "See when the employer reads your application, messages you, or sets an interview.",
+    icon: BellRing,
+  },
+];
 
 export default function HowItWorks() {
-  const [activeStep, setActiveStep] = useState(1);
-
-  const steps = [
-    {
-      num: "01",
-      title: "Set Up Your Profile",
-      desc: "Add your contact info, location in Butuan or Caraga, and your resume in under 2 minutes.",
-      icon: UserCheck
-    },
-    {
-      num: "02",
-      title: "Find Local Openings",
-      desc: "Search by barangay or category across neighborhood shops, healthcare clinics, and tech teams.",
-      icon: Search
-    },
-    {
-      num: "03",
-      title: "Direct Application",
-      desc: "Apply directly to local hiring managers with your verified credentials and optional note without repetitive paperwork.",
-      icon: Send
-    },
-    {
-      num: "04",
-      title: "Track Interview Updates",
-      desc: "Get clear notifications when employers review your application and schedule interviews.",
-      icon: BellRing
-    }
-  ];
-
   return (
-    <section id="how-it-works" className="py-24 md:py-36 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
-      {/* Title with Golden Ratio spacing */}
+    <section id="how-it-works" className="py-20 md:py-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="mb-16"
+        className="mb-12 md:mb-14 max-w-2xl"
       >
-        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-fg mb-4">
-          How it works
+        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand mb-3">How it works</p>
+        <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-fg text-balance">
+          Get hired in 4 simple steps.
         </h2>
-        <p className="text-lg sm:text-xl text-fg-muted max-w-2xl leading-relaxed">
-          Find the right career, apply instantly from any browser, and start your journey with complete transparency.
+        <p className="text-base sm:text-lg text-fg-muted mt-4 leading-relaxed text-pretty">
+          Find a job, apply from your phone or computer, and get updates from the employer.
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-14 lg:gap-16 items-center">
-        
-        {/* Left: Lifestyle photo featuring regional applicant */}
-        <div className="lg:col-span-5 relative flex justify-center">
-          <div className="relative w-full max-w-[440px]">
-            {/* Background image container with subtle levitation */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="rounded-3xl overflow-hidden aspect-[4/5] bg-neutral-100 shadow-xl border-4 border-white"
-            >
-              <Image src="/hero-applicant.png" alt="Jobseeker finding opportunities in Butuan" fill sizes="440px" className="object-cover object-center contrast-105" />
-            </motion.div>
+      <ol className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        {/* connector line behind the cards (desktop only) */}
+        <div
+          className="hidden lg:block absolute left-[12%] right-[12%] top-12 border-t-2 border-dashed border-line"
+          aria-hidden
+        />
 
-            {/* Overlapping search badge with floating motion */}
-            <motion.div
-              animate={{ y: [0, -6, 0] }}
-              transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut" }}
-              className="absolute -bottom-8 -right-4 sm:-right-8 w-[240px] sm:w-[260px] rounded-2xl p-3 bg-neutral-900 shadow-xl ring-1 ring-white/20"
-            >
-              <div className="bg-white rounded-xl p-3.5 text-left">
-                <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-neutral-100 text-xs text-neutral-600 mb-3 font-medium">
-                  <Search className="w-3.5 h-3.5 text-neutral-400" />
-                  <span>Full-Stack Developer</span>
-                </div>
-                <div className="text-xs font-bold text-neutral-900 mb-2">Recent Matches in Butuan</div>
-                <div className="space-y-1.5 text-xs text-neutral-500 font-medium">
-                  <div className="flex items-center gap-2 py-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span>CSU Innovation Hub</span>
-                  </div>
-                  <div className="flex items-center gap-2 py-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span>TechVenture Caraga</span>
-                  </div>
-                  <div className="flex items-center gap-2 py-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span>FSUU Systems</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Right: vertical timeline with dashed rail */}
-        <ol className="lg:col-span-7 relative flex flex-col gap-5 border-l border-dashed border-line ml-5 pl-10 sm:pl-12">
-          {steps.map((step, idx) => {
-            const isSelected = activeStep === idx;
-            const Icon = step.icon;
-
-            return (
-              <motion.li
-                key={step.num}
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.4, delay: idx * 0.08 }}
-                className="relative"
-              >
-                <span
-                  className={`absolute -left-[3.75rem] sm:-left-[4.25rem] top-5 grid size-9 place-items-center rounded-full border font-mono text-xs font-bold shadow-sm transition-colors duration-300 ${
-                    isSelected ? "bg-[#111116] text-emerald-400 border-transparent" : "bg-surface text-fg-muted border-line"
-                  }`}
-                  aria-hidden
-                >
-                  {step.num}
+        {STEPS.map(({ num, title, desc, icon: Icon }, idx) => (
+          <motion.li
+            key={num}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.5, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
+            className="relative"
+          >
+            <SpotlightCard className="h-full p-6 rounded-2xl bg-surface border border-line shadow-card hover:shadow-card-hover transition-shadow">
+              <div className="flex items-center justify-between mb-5">
+                <span className="relative z-10 size-12 rounded-2xl bg-brand text-white flex items-center justify-center shadow-md ring-4 ring-surface">
+                  <Icon className="w-5 h-5" aria-hidden />
                 </span>
-                <button
-                  type="button"
-                  aria-expanded={isSelected}
-                  onClick={() => setActiveStep(idx)}
-                  className={`w-full text-left p-5 sm:p-6 rounded-2xl border transition-all duration-300 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
-                    isSelected
-                      ? "bg-[#111116] text-white shadow-xl border-transparent"
-                      : "bg-surface-2 text-fg border-line hover:border-brand/40"
-                  }`}
-                >
-                  <span className="flex items-center justify-between gap-4">
-                    <span className="text-lg sm:text-xl font-bold tracking-tight">{step.title}</span>
-                    <span
-                      className={`size-10 shrink-0 rounded-full flex items-center justify-center ${
-                        isSelected ? "bg-white/10 text-white" : "bg-surface text-fg-muted"
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" aria-hidden />
-                    </span>
-                  </span>
-
-                  <AnimatePresence initial={false}>
-                    {isSelected && (
-                      <motion.span
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="block overflow-hidden"
-                      >
-                        <span className="block mt-4 pt-4 border-t border-white/10 text-base text-neutral-300 leading-relaxed">
-                          {step.desc}
-                        </span>
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </button>
-              </motion.li>
-            );
-          })}
-        </ol>
-
-      </div>
+                <span className="font-mono text-sm font-bold text-fg-muted/70" aria-hidden>
+                  {num}
+                </span>
+              </div>
+              <h3 className="text-lg font-bold tracking-tight mb-2">{title}</h3>
+              <p className="text-base text-fg-muted leading-relaxed text-pretty">{desc}</p>
+            </SpotlightCard>
+          </motion.li>
+        ))}
+      </ol>
     </section>
   );
 }

@@ -48,6 +48,8 @@ export default function OverviewPage() {
     setIsPostJobOpen,
     isOnboardingOpen,
     setIsOnboardingOpen,
+    setIsInboxOpen,
+    unreadMessagesCount,
   } = useApp();
 
   const router = useRouter();
@@ -117,6 +119,19 @@ export default function OverviewPage() {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
+            <button
+              type="button"
+              onClick={() => (isSignedIn ? setIsInboxOpen(true) : openAuthModal("sign-in"))}
+              className="h-8 px-2.5 sm:px-3 rounded-xl border border-line bg-surface hover:bg-surface-2 text-fg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer relative"
+              title="Inbox Messages"
+              aria-label="Direct inbox messages"
+            >
+              <Send className="w-3.5 h-3.5 text-blue-600" />
+              <span className="hidden sm:inline">Inbox</span>
+              {unreadMessagesCount > 0 && (
+                <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+              )}
+            </button>
             <LocaleToggle />
             <ThemeToggle />
             {isClerkConfigured && (
